@@ -1,0 +1,23 @@
+{
+  "name": "sourdough",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test:recipe": "node --experimental-strip-types --test \"src/lib/recipe/*.test.ts\"",
+    "test:schedule": "node --experimental-strip-types --test \"src/lib/schedule/*.test.ts\""
+  },
+  "dependencies": {
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.13"
+  }
+}

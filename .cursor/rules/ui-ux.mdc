@@ -1,0 +1,27 @@
+---
+description: UI/UX baseline practices for building and changing app interfaces
+alwaysApply: true
+---
+
+# UI/UX Practices
+
+When designing, building, or changing UI (components, styles, copy in fields/info toggles, wizard flow):
+
+1. **Follow** [docs/product/ui-ux-practices.md](../../docs/product/ui-ux-practices.md).
+2. **Mobile-first** unless an override is documented.
+3. **Flag conflicts** — if the user's request breaks a practice and they did not say "override", stop and note the tradeoff before implementing.
+4. **Do not silently skip** baseline patterns: click-outside dismiss for popovers, viewport-clamped info bubbles, distinct delete vs stepper icons, accurate field-level copy, accessible icon buttons.
+
+## Quick defaults
+
+- Info `i` toggles: anchor under trigger, clamp to margins, close on outside click.
+- Edit = pen; delete = bin; `+`/`−` = numeric steppers only.
+- Wizard: sticky header + footer; welcome excluded from progress count.
+- Related pair fields: stack on mobile, two columns from ~640px (`field-grid--pair`).
+- Multi-field steps and summary cards: responsive columns on desktop (`field-grid--responsive`, `summary-groups` grid).
+- Calculated previews: labeled block inside the step, below inputs — not header chips.
+- Onboarding context on welcome: visible body copy, not a hidden info toggle.
+
+## Overrides
+
+User may break any practice by stating it explicitly (e.g. "override: no click-outside dismiss"). Implement the override; optionally note it in the practices doc changelog if it becomes a lasting product rule.

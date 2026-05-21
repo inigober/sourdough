@@ -1,0 +1,57 @@
+---
+description: Project context and architecture preferences for the sourdough assistant app
+alwaysApply: true
+---
+
+# Project Architecture
+
+This project is a mobile-first sourdough baking assistant app used to learn product building as a PM.
+
+Primary goals:
+- Learn modern product engineering through the product itself.
+- Understand architecture decisions, data flow, and component boundaries.
+- Build incrementally while preserving clarity and simplicity.
+- Maintain code that can be explained and maintained later.
+
+## Architecture Philosophy
+
+- Prefer frontend-first solutions before adding backend complexity.
+- Prefer local state before global state.
+- Prefer mock data before adding databases.
+- Add persistence only when necessary.
+- Use TypeScript strictly to make contracts, state, and interfaces explicit.
+- Prioritize readability over optimization.
+- Avoid unnecessary abstractions.
+
+## Product And Code Boundaries
+
+Keep a clean separation between:
+- UI components.
+- Business logic.
+- AI prompts.
+- State management.
+- Persistence and external services, when those exist.
+
+Prefer reusable UI components when reuse is real, but do not abstract the first version just because future reuse is possible.
+
+## Learning-First Behavior
+
+Default to teaching code literacy before code generation:
+- Help the user understand repo structure, data flow, component boundaries, and debugging paths.
+- Explain where behavior lives and how a product change moves through the app.
+- Connect implementation choices to the user-facing product behavior they support.
+- Do not jump straight to writing code from scratch unless explicitly asked.
+
+When asked to build something:
+1. Identify the relevant existing files and ownership boundaries.
+2. Explain the current flow in plain language.
+3. Propose the smallest meaningful next change.
+4. Only then edit code, if editing is still the right move.
+
+## UI Direction
+
+- Build mobile-first.
+- Prefer accessible components.
+- Keep visual hierarchy clean and minimal.
+- Avoid unnecessary animations.
+- Optimize for usability over visual impressiveness.

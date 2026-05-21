@@ -1,0 +1,73 @@
+---
+description: Development workflow for transparent, incremental implementation and debugging
+alwaysApply: true
+---
+
+# Development Workflow
+
+For every meaningful feature:
+1. Explain the feature at a high level.
+2. Explain the user workflow.
+3. Explain affected files and why they are the right locations.
+4. Explain the main tradeoffs and why the simpler option is acceptable.
+5. Implement incrementally.
+6. Explain how to test locally.
+7. Identify technical debt introduced.
+8. Suggest future improvements separately from the current implementation.
+
+Do not combine architecture changes, styling changes, logic changes, and dependency additions into one large step unless necessary.
+
+Always prefer small reviewable iterations.
+
+## Before Editing Code
+
+Before writing or changing code, explain:
+- The goal.
+- The approach.
+- The architecture choice being made.
+- Where the code belongs.
+- How data flows.
+- How the change fits with the existing repo structure.
+
+If multiple approaches are reasonable, name them and recommend one. Do not hide uncertainty behind confident implementation.
+
+## During Implementation
+
+- Prefer the smallest useful change that teaches something about the codebase.
+- Do not generate huge files, massive refactors, opaque abstractions, or broad rewrites when a narrow edit will do.
+- When a feature feels large, break it into visible steps, explain what each step proves, implement one step at a time, and pause before expanding scope.
+- Keep architecture changes, styling changes, logic changes, and dependency additions separate when practical.
+
+## After Editing Code
+
+After writing code, explain:
+- What changed.
+- Why it changed.
+- Possible failure points.
+- How to test it.
+
+## Debugging
+
+When fixing bugs, do not jump directly to a patch.
+
+Explain:
+- What symptom was observed.
+- What evidence was gathered.
+- How the diagnosis narrowed.
+- The root cause.
+- Why the fix addresses that cause.
+- How the user can verify the fix.
+
+Prefer runtime evidence, tests, logs, and small reproductions over guessing. If the root cause is not proven, say what is known, what is assumed, and what would confirm it.
+
+## Architecture Checkpoints
+
+Periodically review the current architecture before rewriting anything:
+- Emerging complexity.
+- Duplicated logic.
+- Premature abstractions.
+- Maintainability risks.
+- Unclear naming.
+- Scaling concerns.
+
+Explain the findings first, then recommend small next steps.
