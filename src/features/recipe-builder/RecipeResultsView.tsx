@@ -1,10 +1,22 @@
+import type { ReactNode } from 'react';
+
+import { PageShell } from '../../components/PageShell.tsx';
+import { StickyFooter } from '../../components/StickyFooter.tsx';
+import { SaveIcon } from '../../components/icons.tsx';
 import { InfoToggle } from '../../components/InfoToggle.tsx';
-import { PenIcon } from '../../components/icons.tsx';
+import {
+  ClockIcon,
+  PenIcon,
+  ScaleIcon,
+  WaterIcon,
+  WheatIcon,
+} from '../../components/icons.tsx';
 import { RecipeAssessment } from '../../components/RecipeAssessment.tsx';
 import { RecipeCard } from '../../components/RecipeCard.tsx';
 import { assessmentInfo, summarySectionInfo } from './fieldInfo.ts';
 import { formatGrams, formatGramsToNearest } from '../../app/format.ts';
-import { getFlourGrams, getFlourIngredientRows } from '../../lib/recipe/flourBlend.ts';
+import { getFlourGrams } from '../../lib/recipe/flourBlend.ts';
+import { buildIngredientRows } from '../../lib/recipe/formatIngredients.ts';
 import { flourProfiles } from '../../lib/recipe/flourProfiles.ts';
 import type { AssessmentSection, FlourBlendEntry, RecipeFormula, RecipeInput } from '../../lib/recipe/types.ts';
 import { levainActivityOptions } from './recipeOptions.ts';
@@ -16,6 +28,8 @@ type RecipeResultsViewProps = {
   assessmentSections: AssessmentSection[];
   onEditStep: (step: RecipeBuilderStep) => void;
   onBuildSchedule: () => void;
+  onSave: () => void;
+  isSavedRecipe: boolean;
 };
 
 export function RecipeResultsView({
@@ -24,6 +38,8 @@ export function RecipeResultsView({
   assessmentSections,
   onEditStep,
   onBuildSchedule,
+  onSave,
+  isSavedRecipe,
 }: RecipeResultsViewProps) {
   const levainActivityLabel =
     levainActivityOptions.find((option) => option.value === recipeInput.levainActivity)?.label ??
@@ -45,7 +61,35 @@ export function RecipeResultsView({
     : [];
 
   return (
-    <div className="recipe-results">
+    <PageShell
+      className="recipe-results"
+      footer={
+        <StickyFooter
+          secondaryAction={
+            <button
+              type="button"
+              className="page-shell__secondary-link"
+              onClick={onSave}
+              disabled={!formula}
+            >
+              <SaveIcon />
+              {isSavedRecipe ? 'Update recipe' : 'Save recipe'}
+            </button>
+          }
+        >
+          <nav className="wizard-nav" aria-label="Ingredient summary navigation">
+            <button
+              type="button"
+              className="wizard-button wizard-button--primary wizard-button--block"
+              onClick={onBuildSchedule}
+              disabled={!formula}
+            >
+              Build schedule
+            </button>
+          </nav>
+        </StickyFooter>
+      }
+    >
       <section className="hero recipe-results__hero">
         <h1>Ingredient summary</h1>
         <p className="hero-copy">
@@ -55,25 +99,25 @@ export function RecipeResultsView({
 
       <section className="summary-groups" aria-label="Recipe inputs summary">
         <SummaryGroup
-          icon="⚖️"
+          icon={<ScaleIcon />}
           title="Dough size"
           value={`${recipeInput.finalDoughWeightGrams}g · ${recipeInput.numberOfLoaves} loaf${recipeInput.numberOfLoaves === 1 ? '' : 'es'}`}
           onEdit={() => onEditStep('doughSize')}
         />
         <SummaryGroup
-          icon="🌾"
+          icon={<WheatIcon />}
           title="Flour blend"
           onEdit={() => onEditStep('flour')}
           stackedLines={getFlourSummaryLines(recipeInput.doughFlours, formula?.totalFlourGrams ?? null)}
         />
         <SummaryGroup
-          icon="💧"
+          icon={<WaterIcon />}
           title="Hydration & salt"
           value={`${recipeInput.hydrationPercent}% hydration · ${recipeInput.saltPercent}% salt`}
           onEdit={() => onEditStep('recipeTargets')}
         />
         <SummaryGroup
-          icon="🕐"
+          icon={<ClockIcon />}
           title="Fermentation & levain"
           info={summarySectionInfo.fermentation}
           value={`${recipeInput.targetBulkHours}h bulk · ${recipeInput.roomTemperatureCelsius}°C · ${levainActivityLabel}`}
@@ -86,7 +130,7 @@ export function RecipeResultsView({
           {formula ? (
             <>
               <RecipeCard title="Ingredient list" rows={ingredientRows} />
-              <RecipeCard title="Formula detail" rows={formulaRows} />
+              <RecipeCard title="Formula breakdown" rows={formulaRows} />
             </>
           ) : (
             <section className="card card--notice">
@@ -102,43 +146,8 @@ export function RecipeResultsView({
           info={assessmentInfo}
         />
       </div>
-
-      <nav className="recipe-results__footer wizard-nav" aria-label="Ingredient summary navigation">
-        <span />
-        <button
-          type="button"
-          className="wizard-button wizard-button--primary"
-          onClick={onBuildSchedule}
-          disabled={!formula}
-        >
-          Build schedule
-        </button>
-      </nav>
-    </div>
+    </PageShell>
   );
-}
-
-function buildIngredientRows(
-  recipeInput: RecipeInput,
-  formula: RecipeFormula,
-): readonly (readonly [string, number | string])[] {
-  const flourRows = getFlourIngredientRows(recipeInput.doughFlours, formula.totalFlourGrams);
-
-  if (flourRows.length > 1) {
-    return [
-      ...flourRows,
-      ['Added water', formula.addedWaterGrams],
-      ['Salt', formula.saltGrams],
-      ['Levain', formula.levainGrams],
-    ];
-  }
-
-  return [
-    ['Added flour', formula.addedFlourGrams],
-    ['Added water', formula.addedWaterGrams],
-    ['Salt', formula.saltGrams],
-    ['Levain', formula.levainGrams],
-  ];
 }
 
 function getFlourSummaryLines(
@@ -158,7 +167,7 @@ function getFlourSummaryLines(
 }
 
 type SummaryGroupProps = {
-  icon: string;
+  icon: ReactNode;
   title: string;
   info?: string;
   value?: string;

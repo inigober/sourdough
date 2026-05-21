@@ -1,7 +1,14 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createFlourBlendEntry, formatFlourBlendSummary, getFlourGrams, stepFlourGrams } from './flourBlend.ts';
+import {
+  createFlourBlendEntry,
+  formatFlourBlendSummary,
+  getFlourGrams,
+  stepFlourGrams,
+  stepFlourPercent,
+  updateFlourPercent,
+} from './flourBlend.ts';
 
 test('two-flour blend summary uses plus separator', () => {
   const summary = formatFlourBlendSummary([
@@ -58,4 +65,42 @@ test('stepping grams up takes one gram from the other flour', () => {
   assert.equal(beforeOther, 99);
   assert.equal(afterWheat, beforeWheat + 1);
   assert.equal(afterOther, beforeOther - 1);
+});
+
+test('stepping percent up adjusts shares by one point and recalculates grams', () => {
+  const total = 500;
+  const doughFlours = [
+    createFlourBlendEntry('wheatType1050', 80),
+    createFlourBlendEntry('wholeWheat', 20),
+  ];
+
+  const wheatId = doughFlours[0].id;
+  const otherId = doughFlours[1].id;
+
+  const steppedOnce = stepFlourPercent(doughFlours, wheatId, 1);
+  assert.equal(steppedOnce.find((entry) => entry.id === wheatId)?.percent, 81);
+  assert.equal(steppedOnce.find((entry) => entry.id === otherId)?.percent, 19);
+  assert.equal(getFlourGrams(81, total), 405);
+  assert.equal(getFlourGrams(19, total), 95);
+
+  const steppedTwice = stepFlourPercent(steppedOnce, wheatId, 1);
+  assert.equal(steppedTwice.find((entry) => entry.id === wheatId)?.percent, 82);
+  assert.equal(steppedTwice.find((entry) => entry.id === otherId)?.percent, 18);
+});
+
+test('sequential percent commits redistribute without swapping flour ids', () => {
+  const doughFlours = [
+    createFlourBlendEntry('wheatType1050', 50),
+    createFlourBlendEntry('wholeWheat', 50),
+  ];
+  const wheatId = doughFlours[0].id;
+  const otherId = doughFlours[1].id;
+
+  const at51 = updateFlourPercent(doughFlours, wheatId, 51);
+  assert.equal(at51.find((entry) => entry.id === wheatId)?.percent, 51);
+  assert.equal(at51.find((entry) => entry.id === otherId)?.percent, 49);
+
+  const at52 = updateFlourPercent(at51, wheatId, 52);
+  assert.equal(at52.find((entry) => entry.id === wheatId)?.percent, 52);
+  assert.equal(at52.find((entry) => entry.id === otherId)?.percent, 48);
 });

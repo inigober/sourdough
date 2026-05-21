@@ -1,20 +1,41 @@
 import type { RecipeInput } from '../recipe/types.ts';
+import { getTomorrowIsoDate } from './dates.ts';
+import { getDefaultLevainBuildHours } from './levainPrep.ts';
 import type { FoldDefaults, ScheduleInput } from './types.ts';
+
+export function getDefaultSlapAndFolds(hydrationPercent: number): number {
+  return hydrationPercent >= 83 ? 50 : 0;
+}
 
 export function getDefaultFoldSets(hydrationPercent: number): FoldDefaults {
   if (hydrationPercent <= 72) {
-    return { stretchAndFoldSets: 2, coilFoldSets: 0, slapAndFoldSlaps: 0, foldRestMinutes: 30 };
+    return { stretchAndFoldSets: 2, coilFoldSets: 0, slapAndFolds: 0, foldRestMinutes: 30 };
   }
 
   if (hydrationPercent <= 82) {
-    return { stretchAndFoldSets: 3, coilFoldSets: 0, slapAndFoldSlaps: 0, foldRestMinutes: 30 };
+    return {
+      stretchAndFoldSets: 3,
+      coilFoldSets: 0,
+      slapAndFolds: getDefaultSlapAndFolds(hydrationPercent),
+      foldRestMinutes: 30,
+    };
   }
 
   if (hydrationPercent <= 88) {
-    return { stretchAndFoldSets: 4, coilFoldSets: 2, slapAndFoldSlaps: 0, foldRestMinutes: 30 };
+    return {
+      stretchAndFoldSets: 4,
+      coilFoldSets: 2,
+      slapAndFolds: getDefaultSlapAndFolds(hydrationPercent),
+      foldRestMinutes: 30,
+    };
   }
 
-  return { stretchAndFoldSets: 4, coilFoldSets: 3, slapAndFoldSlaps: 0, foldRestMinutes: 25 };
+  return {
+    stretchAndFoldSets: 4,
+    coilFoldSets: 3,
+    slapAndFolds: getDefaultSlapAndFolds(hydrationPercent),
+    foldRestMinutes: 25,
+  };
 }
 
 export function getDefaultRoomProofHours(roomTemperatureCelsius: number): number {
@@ -63,27 +84,26 @@ export function createDefaultScheduleInput(recipeInput: RecipeInput): ScheduleIn
   const bakeTemps = getBakeTempsForPerLoafGrams(perLoafGrams);
   const dutchOvenPhases = getDutchOvenPhaseMinutes(recipeInput.finalDoughWeightGrams);
   const openBakeTotal = dutchOvenPhases.closed + dutchOvenPhases.lidOff + dutchOvenPhases.outOfPot;
+  const autolyseRecommendation = recipeInput.hydrationPercent >= 72;
 
   return {
+    mixDate: getTomorrowIsoDate(),
     startTime: '09:00',
-    autolyseEnabled: true,
+    autolyseEnabled: autolyseRecommendation,
     autolyseMinutes: 45,
-    restAfterAutolyseMinutes: 30,
-    mixMinutes: 10,
     saltAfterLevain: true,
-    saltMixMinutes: 5,
-    restAfterMixMinutes: 30,
-    slapAndFoldSlaps: foldDefaults.slapAndFoldSlaps,
+    restAfterLevainMinutes: 30,
+    restAfterSaltMinutes: 30,
+    slapAndFolds: foldDefaults.slapAndFolds,
+    restAfterSlapAndFoldMinutes: 30,
     stretchAndFoldSets: foldDefaults.stretchAndFoldSets,
     stretchAndFoldRestMinutes: foldDefaults.foldRestMinutes,
     coilFoldSets: foldDefaults.coilFoldSets,
     coilFoldRestMinutes: foldDefaults.foldRestMinutes,
     preShapeMinutesBeforeBulkEnd: 30,
-    shapeMinutes: 10,
     proofingStyle: 'cold',
-    coldRetardHours: 14,
+    desiredBakeTime: '08:00',
     roomProofHours: getDefaultRoomProofHours(recipeInput.roomTemperatureCelsius),
-    roomFinishAfterColdHours: 1.5,
     bakeMethod: 'dutchOven',
     dutchOvenClosedMinutes: dutchOvenPhases.closed,
     dutchOvenLidOffMinutes: dutchOvenPhases.lidOff,
@@ -92,6 +112,10 @@ export function createDefaultScheduleInput(recipeInput: RecipeInput): ScheduleIn
     finishMinutes: Math.round(openBakeTotal * 0.3),
     openBakeTempCelsius: bakeTemps.openBakeTempCelsius,
     finishTempCelsius: bakeTemps.finishTempCelsius,
+    includeStarterPrep: true,
+    starterFromFridge: true,
+    levainBuildHours: getDefaultLevainBuildHours(),
+    levainBufferPercent: 15,
   };
 }
 

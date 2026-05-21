@@ -1,6 +1,9 @@
 import type { ReactNode } from 'react';
 
 import type { InputWizardStep } from '../features/recipe-builder/recipeBuilderSteps.ts';
+import { PageShell } from './PageShell.tsx';
+import { SaveIcon } from './icons.tsx';
+import { WizardIconButton } from './WizardIconButton.tsx';
 import { WizardProgress } from './WizardProgress.tsx';
 
 type StepLayoutProps = {
@@ -9,10 +12,10 @@ type StepLayoutProps = {
   canGoBack: boolean;
   canContinue: boolean;
   continueLabel?: string;
-  returnToSummaryLabel?: string;
+  showSaveToSummary?: boolean;
   onBack: () => void;
   onContinue: () => void;
-  onReturnToSummary?: () => void;
+  onSaveToSummary?: () => void;
 };
 
 export function StepLayout({
@@ -21,45 +24,50 @@ export function StepLayout({
   canGoBack,
   canContinue,
   continueLabel = 'Continue',
-  returnToSummaryLabel,
+  showSaveToSummary = false,
   onBack,
   onContinue,
-  onReturnToSummary,
+  onSaveToSummary,
 }: StepLayoutProps) {
   return (
-    <div className="wizard-shell">
-      <header className="wizard-shell__header">
-        <WizardProgress currentStep={currentStep} />
-        {returnToSummaryLabel && onReturnToSummary ? (
-          <button type="button" className="return-to-summary" onClick={onReturnToSummary}>
-            ← {returnToSummaryLabel}
-          </button>
-        ) : null}
-      </header>
-
-      <div className="wizard-shell__content">{children}</div>
-
-      <nav className="wizard-shell__footer wizard-nav" aria-label="Recipe builder navigation">
-        {canGoBack ? (
-          <button type="button" className="wizard-button wizard-button--secondary" onClick={onBack}>
-            Back
-          </button>
-        ) : (
-          <span />
-        )}
-        {continueLabel ? (
-          <button
-            type="button"
-            className="wizard-button wizard-button--primary"
-            onClick={onContinue}
+    <PageShell
+      className="wizard-shell"
+      topBar={
+        <header className="wizard-shell__header">
+          <WizardProgress currentStep={currentStep} />
+        </header>
+      }
+      footer={
+        <nav className="page-shell__footer wizard-nav wizard-nav--icons" aria-label="Recipe builder navigation">
+          {canGoBack ? (
+            <WizardIconButton label="Previous step" direction="back" onClick={onBack} />
+          ) : (
+            <span className="wizard-nav__spacer" />
+          )}
+          {showSaveToSummary && onSaveToSummary ? (
+            <button
+              type="button"
+              className="wizard-button wizard-button--primary wizard-nav__save"
+              onClick={onSaveToSummary}
+            >
+              <SaveIcon className="wizard-nav__save-icon" />
+              <span className="wizard-nav__save-label wizard-nav__save-label--long">Update ingredient list</span>
+              <span className="wizard-nav__save-label wizard-nav__save-label--short">Save</span>
+            </button>
+          ) : (
+            <span className="wizard-nav__spacer" />
+          )}
+          <WizardIconButton
+            label={continueLabel}
+            direction="forward"
+            variant="primary"
             disabled={!canContinue}
-          >
-            {continueLabel}
-          </button>
-        ) : (
-          <span />
-        )}
-      </nav>
-    </div>
+            onClick={onContinue}
+          />
+        </nav>
+      }
+    >
+      {children}
+    </PageShell>
   );
 }

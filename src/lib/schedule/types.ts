@@ -1,27 +1,25 @@
-export type ProofingStyle = 'roomTemperature' | 'cold' | 'both';
+export type ProofingStyle = 'roomTemperature' | 'cold';
 
 export type BakeMethod = 'dutchOven' | 'open';
 
 export type ScheduleInput = {
+  mixDate: string;
   startTime: string;
   autolyseEnabled: boolean;
   autolyseMinutes: number;
-  restAfterAutolyseMinutes: number;
-  mixMinutes: number;
   saltAfterLevain: boolean;
-  saltMixMinutes: number;
-  restAfterMixMinutes: number;
-  slapAndFoldSlaps: number;
+  restAfterLevainMinutes: number;
+  restAfterSaltMinutes: number;
+  slapAndFolds: number;
+  restAfterSlapAndFoldMinutes: number;
   stretchAndFoldSets: number;
   stretchAndFoldRestMinutes: number;
   coilFoldSets: number;
   coilFoldRestMinutes: number;
   preShapeMinutesBeforeBulkEnd: number;
-  shapeMinutes: number;
   proofingStyle: ProofingStyle;
-  coldRetardHours: number;
+  desiredBakeTime: string;
   roomProofHours: number;
-  roomFinishAfterColdHours: number;
   bakeMethod: BakeMethod;
   dutchOvenClosedMinutes: number;
   dutchOvenLidOffMinutes: number;
@@ -30,6 +28,10 @@ export type ScheduleInput = {
   finishMinutes: number;
   openBakeTempCelsius: number;
   finishTempCelsius: number;
+  includeStarterPrep: boolean;
+  starterFromFridge: boolean;
+  levainBuildHours: number;
+  levainBufferPercent: number;
 };
 
 export type TimelineStep = {
@@ -38,12 +40,14 @@ export type TimelineStep = {
   startTime: string;
   endTime: string;
   durationMinutes: number;
+  startOffsetMinutes: number;
+  dateLabel?: string;
   detail?: string;
 };
 
 export type FoldDefaults = {
   stretchAndFoldSets: number;
   coilFoldSets: number;
-  slapAndFoldSlaps: number;
+  slapAndFolds: number;
   foldRestMinutes: number;
 };

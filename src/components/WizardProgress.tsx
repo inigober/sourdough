@@ -30,10 +30,15 @@ export function WizardProgress({ currentStep }: WizardProgressProps) {
         ))}
       </div>
       <div className="wizard-progress-bar__meta">
-        <span className="wizard-progress-bar__count">
-          {currentIndex + 1} of {totalSteps}
+        <span className="wizard-progress-bar__meta-line">
+          <span className="wizard-progress-bar__count">
+            {currentIndex + 1} of {totalSteps}
+          </span>
+          <span className="wizard-progress-bar__separator" aria-hidden="true">
+            ·
+          </span>
+          <span className="wizard-progress-bar__label">{WIZARD_STEP_LABELS[currentStep]}</span>
         </span>
-        <span className="wizard-progress-bar__label">{WIZARD_STEP_LABELS[currentStep]}</span>
       </div>
     </div>
   );

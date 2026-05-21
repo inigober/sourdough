@@ -1,7 +1,9 @@
+import { useEffect, useState, type FocusEvent } from 'react';
+
 import { InfoToggle } from '../../components/InfoToggle.tsx';
 import { PenEditButton } from '../../components/PenEditButton.tsx';
 import { SectionHeading } from '../../components/SectionHeading.tsx';
-import { BinIcon } from '../../components/icons.tsx';
+import { BinIcon, ChevronDownIcon, ChevronUpIcon, PlusIcon } from '../../components/icons.tsx';
 import {
   formatFlourBlendSummary,
   getFlourGrams,
@@ -18,8 +20,7 @@ type FlourSectionProps = {
   validationIssues: RecipeValidationIssue[];
   onFlourTypeChange: (entryId: string, flourType: FlourType) => void;
   onFlourPercentChange: (entryId: string, percent: number) => void;
-  onFlourGramsChange: (entryId: string, grams: number, totalFlourGrams: number) => void;
-  onFlourGramsStep: (entryId: string, delta: number, totalFlourGrams: number) => void;
+  onFlourPercentStep: (entryId: string, delta: number) => void;
   onAddFlour: () => void;
   onRemoveFlour: (entryId: string) => void;
   onEditDoughWeight: () => void;
@@ -30,8 +31,7 @@ export function FlourSection({
   validationIssues,
   onFlourTypeChange,
   onFlourPercentChange,
-  onFlourGramsChange,
-  onFlourGramsStep,
+  onFlourPercentStep,
   onAddFlour,
   onRemoveFlour,
   onEditDoughWeight,
@@ -46,7 +46,7 @@ export function FlourSection({
         title={formatFlourBlendSummary(recipeInput.doughFlours)}
         copy={
           isMultiFlour
-            ? 'These flours share 100% of the total flour in your dough. Adjust % or grams on each row.'
+            ? 'These flours share 100% of the total flour in your dough. Use the steppers to adjust each share.'
             : 'Choose the flour in your dough. Hydration and salt come on the next step.'
         }
       />
@@ -78,8 +78,7 @@ export function FlourSection({
               isMultiFlour={isMultiFlour}
               onFlourTypeChange={onFlourTypeChange}
               onFlourPercentChange={onFlourPercentChange}
-              onFlourGramsChange={onFlourGramsChange}
-              onFlourGramsStep={onFlourGramsStep}
+              onFlourPercentStep={onFlourPercentStep}
               onRemoveFlour={onRemoveFlour}
             />
           ))}
@@ -90,10 +89,8 @@ export function FlourSection({
         ) : null}
 
         <button type="button" className="wizard-button wizard-button--secondary flour-add-button" onClick={onAddFlour}>
-          <span className="button-icon" aria-hidden="true">
-            +
-          </span>
-          Add flour
+          <PlusIcon />
+          Add another flour
         </button>
       </form>
     </section>
@@ -106,8 +103,7 @@ type FlourBlendRowProps = {
   isMultiFlour: boolean;
   onFlourTypeChange: (entryId: string, flourType: FlourType) => void;
   onFlourPercentChange: (entryId: string, percent: number) => void;
-  onFlourGramsChange: (entryId: string, grams: number, totalFlourGrams: number) => void;
-  onFlourGramsStep: (entryId: string, delta: number, totalFlourGrams: number) => void;
+  onFlourPercentStep: (entryId: string, delta: number) => void;
   onRemoveFlour: (entryId: string) => void;
 };
 
@@ -117,22 +113,13 @@ function FlourBlendRow({
   isMultiFlour,
   onFlourTypeChange,
   onFlourPercentChange,
-  onFlourGramsChange,
-  onFlourGramsStep,
+  onFlourPercentStep,
   onRemoveFlour,
 }: FlourBlendRowProps) {
   const grams = getFlourGrams(entry.percent, totalFlourGrams);
 
-  function handleGramsChange(rawValue: number): void {
-    if (!Number.isFinite(rawValue)) {
-      return;
-    }
-
-    onFlourGramsChange(entry.id, Math.round(rawValue), totalFlourGrams);
-  }
-
   return (
-    <li className="flour-blend-row">
+    <li className={isMultiFlour ? 'flour-blend-row flour-blend-row--multi' : 'flour-blend-row'}>
       <label className="flour-blend-row__select">
         <span className="visually-hidden">Flour type</span>
         <select
@@ -148,57 +135,13 @@ function FlourBlendRow({
       </label>
 
       {isMultiFlour ? (
-        <div className="flour-blend-row__allocation">
-          <label className="flour-alloc-field">
-            <span className="visually-hidden">Share of total flour</span>
-            <input
-              type="number"
-              className="flour-alloc-input number-input--no-spinner"
-              value={entry.percent}
-              min={1}
-              max={99}
-              step={1}
-              onChange={(event) => {
-                const nextValue = event.currentTarget.valueAsNumber;
-                if (Number.isFinite(nextValue)) {
-                  onFlourPercentChange(entry.id, nextValue);
-                }
-              }}
-            />
-            <span className="flour-alloc-suffix">%</span>
-          </label>
-          <div className="flour-gram-stepper">
-            <button
-              type="button"
-              className="icon-button icon-button--step"
-              aria-label="Decrease flour grams"
-              onClick={() => onFlourGramsStep(entry.id, -1, totalFlourGrams)}
-            >
-              −
-            </button>
-            <button
-              type="button"
-              className="icon-button icon-button--step"
-              aria-label="Increase flour grams"
-              onClick={() => onFlourGramsStep(entry.id, 1, totalFlourGrams)}
-            >
-              +
-            </button>
-            <label className="flour-alloc-field">
-              <span className="visually-hidden">Flour weight</span>
-              <input
-                type="number"
-                className="flour-alloc-input number-input--no-spinner"
-                value={grams}
-                min={1}
-                max={totalFlourGrams}
-                step={1}
-                inputMode="numeric"
-                onChange={(event) => handleGramsChange(event.currentTarget.valueAsNumber)}
-              />
-              <span className="flour-alloc-suffix">g</span>
-            </label>
-          </div>
+        <div className="flour-blend-row__meta">
+          <FlourPercentStepper
+            value={entry.percent}
+            grams={grams}
+            onCommitPercent={(value) => onFlourPercentChange(entry.id, value)}
+            onStepPercent={(delta) => onFlourPercentStep(entry.id, delta)}
+          />
           <button
             type="button"
             className="icon-button icon-button--delete"
@@ -214,5 +157,106 @@ function FlourBlendRow({
         </p>
       )}
     </li>
+  );
+}
+
+type FlourPercentStepperProps = {
+  value: number;
+  grams: number;
+  onCommitPercent: (value: number) => void;
+  onStepPercent: (delta: number) => void;
+};
+
+function FlourPercentStepper({
+  value,
+  grams,
+  onCommitPercent,
+  onStepPercent,
+}: FlourPercentStepperProps) {
+  const [draft, setDraft] = useState(String(value));
+  const [isFocused, setIsFocused] = useState(false);
+  const decrementDisabled = value <= 1;
+  const incrementDisabled = value >= 99;
+
+  useEffect(() => {
+    if (!isFocused) {
+      setDraft(String(value));
+    }
+  }, [isFocused, value]);
+
+  function commitDraft(raw: string): void {
+    const parsed = Number(raw);
+    if (!Number.isFinite(parsed)) {
+      setDraft(String(value));
+      return;
+    }
+
+    const clamped = Math.min(99, Math.max(1, Math.round(parsed)));
+    setDraft(String(clamped));
+    onCommitPercent(clamped);
+  }
+
+  function stepPercent(delta: number): void {
+    const nextValue = Math.min(99, Math.max(1, value + delta));
+    setDraft(String(nextValue));
+    onStepPercent(delta);
+  }
+
+  function handleFocus(event: FocusEvent<HTMLInputElement>): void {
+    setIsFocused(true);
+    event.currentTarget.select();
+  }
+
+  return (
+    <div className="flour-blend-row__allocation">
+      <span className="flour-percent-stepper">
+        <span className="visually-hidden">Share of total flour</span>
+        <span className="number-field__control flour-percent-stepper__control">
+          <input
+            type="text"
+            inputMode="numeric"
+            className="number-input--no-spinner flour-percent-stepper__input"
+            value={draft}
+            onChange={(event) => {
+              const raw = event.currentTarget.value;
+              if (raw === '' || /^\d*$/.test(raw)) {
+                setDraft(raw);
+              }
+            }}
+            onFocus={handleFocus}
+            onBlur={() => {
+              setIsFocused(false);
+              commitDraft(draft);
+            }}
+          />
+          <span className="flour-percent-stepper__suffix" aria-hidden="true">
+            %
+          </span>
+          <span className="number-field__steppers" aria-hidden="true">
+            <button
+              type="button"
+              className="number-field__stepper"
+              aria-label="Increase flour percentage"
+              disabled={incrementDisabled}
+              tabIndex={-1}
+              onClick={() => stepPercent(1)}
+            >
+              <ChevronUpIcon />
+            </button>
+            <button
+              type="button"
+              className="number-field__stepper"
+              aria-label="Decrease flour percentage"
+              disabled={decrementDisabled}
+              tabIndex={-1}
+              onClick={() => stepPercent(-1)}
+            >
+              <ChevronDownIcon />
+            </button>
+          </span>
+        </span>
+      </span>
+      <span className="flour-blend-row__grams">{formatGrams(grams)}</span>
+    </div>
   );
 }

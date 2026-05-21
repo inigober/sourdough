@@ -1,6 +1,17 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 
-const PAGE_MARGIN_PX = 20;
+import { InfoIcon } from './icons.tsx';
+
+const PAGE_MARGIN_DESKTOP_PX = 20;
+const PAGE_MARGIN_MOBILE_PX = 14;
+
+function getPageMarginPx(): number {
+  if (typeof window === 'undefined') {
+    return PAGE_MARGIN_DESKTOP_PX;
+  }
+
+  return window.matchMedia('(max-width: 640px)').matches ? PAGE_MARGIN_MOBILE_PX : PAGE_MARGIN_DESKTOP_PX;
+}
 
 type InfoToggleProps = {
   label: string;
@@ -22,8 +33,9 @@ export function InfoToggle({ label, children }: InfoToggleProps) {
 
     const buttonRect = buttonRef.current.getBoundingClientRect();
     const bubbleWidth = bubbleRef.current.offsetWidth;
-    const maxLeft = window.innerWidth - PAGE_MARGIN_PX - bubbleWidth;
-    const left = Math.min(Math.max(buttonRect.left, PAGE_MARGIN_PX), Math.max(PAGE_MARGIN_PX, maxLeft));
+    const pageMarginPx = getPageMarginPx();
+    const maxLeft = window.innerWidth - pageMarginPx - bubbleWidth;
+    const left = Math.min(Math.max(buttonRect.left, pageMarginPx), Math.max(pageMarginPx, maxLeft));
     const top = buttonRect.bottom + 8;
 
     setBubbleStyle({ top, left });
@@ -75,8 +87,9 @@ export function InfoToggle({ label, children }: InfoToggleProps) {
 
       const buttonRect = buttonRef.current.getBoundingClientRect();
       const bubbleWidth = bubbleRef.current.offsetWidth;
-      const maxLeft = window.innerWidth - PAGE_MARGIN_PX - bubbleWidth;
-      const left = Math.min(Math.max(buttonRect.left, PAGE_MARGIN_PX), Math.max(PAGE_MARGIN_PX, maxLeft));
+      const pageMarginPx = getPageMarginPx();
+      const maxLeft = window.innerWidth - pageMarginPx - bubbleWidth;
+      const left = Math.min(Math.max(buttonRect.left, pageMarginPx), Math.max(pageMarginPx, maxLeft));
 
       setBubbleStyle({ top: buttonRect.bottom + 8, left });
     }
@@ -95,13 +108,13 @@ export function InfoToggle({ label, children }: InfoToggleProps) {
       <button
         ref={buttonRef}
         type="button"
-        className="info-toggle__button"
+        className="wizard-icon-button wizard-icon-button--help info-toggle__button"
         aria-expanded={isOpen}
         aria-controls={panelId}
         onClick={() => setIsOpen((current) => !current)}
       >
         <span className="visually-hidden">Info about {label}</span>
-        <span aria-hidden="true">i</span>
+        <InfoIcon />
       </button>
       {isOpen ? (
         <div

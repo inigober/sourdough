@@ -1,0 +1,36 @@
+import { DialogCard } from './DialogCard.tsx';
+
+type UnsavedChangesDialogProps = {
+  onCancel: () => void;
+  onDiscard: () => void;
+  onSave: () => void;
+};
+
+export function UnsavedChangesDialog({ onCancel, onDiscard, onSave }: UnsavedChangesDialogProps) {
+  return (
+    <DialogCard
+      title="Save changes?"
+      titleId="unsaved-dialog-title"
+      messageId="unsaved-dialog-message"
+      role="alertdialog"
+      onClose={onCancel}
+      actions={
+        <div className="dialog-card__actions dialog-card__actions--stack">
+          <button type="button" className="wizard-button wizard-button--primary" onClick={onSave}>
+            Save recipe
+          </button>
+          <button type="button" className="wizard-button wizard-button--secondary" onClick={onDiscard}>
+            Discard changes
+          </button>
+          <button type="button" className="wizard-button wizard-button--secondary" onClick={onCancel}>
+            Keep editing
+          </button>
+        </div>
+      }
+    >
+      <p id="unsaved-dialog-message" className="dialog-card__message">
+        You have unsaved changes. Save before leaving, or discard them.
+      </p>
+    </DialogCard>
+  );
+}

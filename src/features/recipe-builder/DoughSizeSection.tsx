@@ -29,8 +29,9 @@ export function DoughSizeSection({
           label="Final dough weight"
           suffix="g"
           value={recipeInput.finalDoughWeightGrams}
-          min={1}
+          min={50}
           step={50}
+          showSteppers
           info={fieldInfo.finalDoughWeightGrams}
           onChange={(value) => onNumberChange('finalDoughWeightGrams', value)}
           {...getFieldValidationProps(validationIssues, 'finalDoughWeightGrams')}

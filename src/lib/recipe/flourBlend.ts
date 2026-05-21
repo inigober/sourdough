@@ -119,6 +119,28 @@ export function updateFlourPercent(
   ];
 }
 
+export function stepFlourPercent(
+  doughFlours: FlourBlendEntry[],
+  entryId: string,
+  deltaPercent: number,
+): FlourBlendEntry[] {
+  if (deltaPercent === 0) {
+    return doughFlours;
+  }
+
+  const target = doughFlours.find((entry) => entry.id === entryId);
+  if (!target) {
+    return doughFlours;
+  }
+
+  const nextPercent = clamp(Math.round(target.percent + deltaPercent), 1, 99);
+  if (nextPercent === target.percent) {
+    return doughFlours;
+  }
+
+  return updateFlourPercent(doughFlours, entryId, nextPercent);
+}
+
 function buildGramMap(doughFlours: FlourBlendEntry[], total: number): Map<string, number> {
   return new Map(doughFlours.map((entry) => [entry.id, getFlourGrams(entry.percent, total)]));
 }

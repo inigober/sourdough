@@ -7,13 +7,12 @@ type PenEditButtonProps = {
 };
 
 export function PenEditButton({ label, onClick, className }: PenEditButtonProps) {
+  const classes = ['wizard-icon-button', 'wizard-icon-button--accent', className]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <button
-      type="button"
-      className={className ? `pen-edit-button ${className}` : 'pen-edit-button'}
-      aria-label={label}
-      onClick={onClick}
-    >
+    <button type="button" className={classes} aria-label={label} onClick={onClick}>
       <PenIcon />
     </button>
   );

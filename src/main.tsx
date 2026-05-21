@@ -1,8 +1,12 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { registerSW } from 'virtual:pwa-register';
 
+import { AuthProvider } from './lib/auth/AuthProvider.tsx';
 import { App } from './app/App.tsx';
 import './styles.css';
+
+registerSW({ immediate: true });
 
 const rootElement = document.getElementById('root');
 
@@ -12,6 +16,8 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <App />
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   </StrictMode>,
 );

@@ -1,5 +1,7 @@
 import { useId, useState, type ReactNode } from 'react';
 
+import { ChevronDownIcon } from './icons.tsx';
+
 type CollapsibleSectionProps = {
   title: string;
   children: ReactNode;
@@ -20,8 +22,15 @@ export function CollapsibleSection({ title, children, defaultOpen = false }: Col
         onClick={() => setIsOpen((current) => !current)}
       >
         <span>{title}</span>
-        <span className="collapsible-section__chevron" aria-hidden="true">
-          {isOpen ? '−' : '+'}
+        <span
+          className={
+            isOpen
+              ? 'collapsible-section__chevron collapsible-section__chevron--open'
+              : 'collapsible-section__chevron'
+          }
+          aria-hidden="true"
+        >
+          <ChevronDownIcon />
         </span>
       </button>
       {isOpen ? (

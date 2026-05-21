@@ -1,0 +1,5 @@
+# Minimal Supabase project config for Edge Functions deployment.
+# Link this folder to your remote project with: supabase link --project-ref YOUR_PROJECT_REF
+
+[functions.coach]
+verify_jwt = false

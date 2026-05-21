@@ -1,6 +1,18 @@
 import type { RecipeInput } from '../recipe/types.ts';
+import { calculateRecipe } from '../recipe/calculateRecipe.ts';
 import { getSlapAndFoldDurationMinutes } from './defaults.ts';
-import { formatMinutesAsTime } from './time.ts';
+import {
+  calculateLevainBuildFeeding,
+  calculateStarterRefreshFeeding,
+  formatFeedingDetail,
+  formatLevainBuildHoursLabel,
+  formatRatioLabel,
+  getDefaultLevainBuildHours,
+  planStarterPrep,
+  STARTER_REFRESH_MIN_HOURS,
+} from './levainPrep.ts';
+import { formatOffsetDateTime } from './mixDateTime.ts';
+import { getColdRetardHours, getBulkStartOffset, roundColdRetardHoursUp } from './scheduleTiming.ts';
 import type { ScheduleInput, TimelineStep } from './types.ts';
 
 type MutableStep = {
@@ -14,6 +26,10 @@ type MutableStep = {
 export function buildTimeline(schedule: ScheduleInput, recipeInput: RecipeInput): TimelineStep[] {
   const steps: MutableStep[] = [];
   let offset = 0;
+
+  function appendMarker(id: string, label: string): void {
+    steps.push({ id, label, startOffsetMinutes: offset, durationMinutes: 0 });
+  }
 
   function appendStep(id: string, label: string, durationMinutes: number, detail?: string): void {
     if (durationMinutes <= 0) {
@@ -31,78 +47,144 @@ export function buildTimeline(schedule: ScheduleInput, recipeInput: RecipeInput)
     durationMinutes: number,
     detail?: string,
   ): void {
-    if (durationMinutes <= 0) {
-      return;
+    steps.push({ id, label, startOffsetMinutes, durationMinutes, detail });
+  }
+
+  function appendInstantAt(startOffsetMinutes: number, id: string, label: string, detail?: string): void {
+    steps.push({ id, label, startOffsetMinutes, durationMinutes: 0, detail });
+  }
+
+  if (schedule.includeStarterPrep) {
+    const levainBuildHours = schedule.levainBuildHours ?? getDefaultLevainBuildHours();
+    const levainBufferPercent = schedule.levainBufferPercent ?? 15;
+    const prepPlan = planStarterPrep({
+      buildHours: levainBuildHours,
+      roomTemperatureCelsius: recipeInput.roomTemperatureCelsius,
+      levainActivity: recipeInput.levainActivity,
+      starterFromFridge: schedule.starterFromFridge,
+    });
+    const levainBuildMinutes = Math.round(prepPlan.levainBuildHours * 60);
+    const levainBuildStartOffset = -levainBuildMinutes;
+    const levainBuildHoursLabel = formatLevainBuildHoursLabel(prepPlan.levainBuildHours);
+    const levainRatioLabel = formatRatioLabel(prepPlan.levainBuildRatio);
+    const buildLabel = prepPlan.refreshSkippedBecause
+      ? `Build levain from fridge starter (${levainBuildHoursLabel})`
+      : `Build levain (${levainBuildHoursLabel})`;
+    let levainDetail = `Ready for mix at ${schedule.startTime}`;
+
+    try {
+      const formula = calculateRecipe(recipeInput);
+      const levainFeeding = calculateLevainBuildFeeding(
+        formula,
+        prepPlan.levainBuildRatio,
+        levainBufferPercent,
+      );
+      levainDetail = `${formatFeedingDetail(levainFeeding, levainRatioLabel)} · ready for mix at ${schedule.startTime}`;
+    } catch {
+      levainDetail = `${levainRatioLabel} · build levain before mix at ${schedule.startTime}`;
     }
 
-    steps.push({ id, label, startOffsetMinutes, durationMinutes, detail });
+    if (prepPlan.refreshSkippedBecause) {
+      levainDetail = `${levainDetail} · fridge refresh folded into this feeding`;
+    }
+
+    if (prepPlan.includeRefreshStep) {
+      const refreshMinutes = STARTER_REFRESH_MIN_HOURS * 60;
+      const refreshFeeding = calculateStarterRefreshFeeding();
+      appendAtOffset(
+        levainBuildStartOffset - refreshMinutes,
+        'refresh-starter',
+        'Refresh starter (>6 h!)',
+        refreshMinutes,
+        formatFeedingDetail(refreshFeeding, '1:3:3'),
+      );
+    }
+
+    appendAtOffset(
+      levainBuildStartOffset,
+      'build-levain',
+      buildLabel,
+      levainBuildMinutes,
+      levainDetail,
+    );
   }
 
   if (schedule.autolyseEnabled) {
     appendStep('autolyse', 'Autolyse', schedule.autolyseMinutes, 'Flour and water only');
-    appendStep('rest-after-autolyse', 'Rest after autolyse', schedule.restAfterAutolyseMinutes);
   }
 
-  appendStep('mix-levain', 'Mix in levain', schedule.mixMinutes);
-
-  if (schedule.slapAndFoldSlaps > 0) {
-    appendStep(
-      'slap-and-fold',
-      'Slap and fold',
-      getSlapAndFoldDurationMinutes(schedule.slapAndFoldSlaps),
-      `${schedule.slapAndFoldSlaps} slaps`,
-    );
-  }
+  const bulkStartOffset = getBulkStartOffset(schedule);
+  let foldCursor = bulkStartOffset;
 
   if (schedule.saltAfterLevain) {
-    appendStep('mix-salt', 'Mix in salt', schedule.saltMixMinutes);
-    appendStep('rest-after-mix', 'Rest after mixing', schedule.restAfterMixMinutes);
+    appendMarker('mix-levain', 'Mix in levain');
+    appendStep('rest-after-levain', 'Rest after mixing in levain', schedule.restAfterLevainMinutes);
+    appendMarker('mix-salt', 'Mix in salt');
+    appendStep('rest-after-salt', 'Rest after mixing in salt', schedule.restAfterSaltMinutes);
+    foldCursor = offset;
   } else {
-    appendStep('rest-before-salt', 'Rest before salt', schedule.restAfterMixMinutes);
-    appendStep('mix-salt', 'Mix in salt', schedule.saltMixMinutes);
+    appendMarker('mix-salt', 'Mix in salt');
+    appendStep('rest-after-salt', 'Rest after mixing in salt', schedule.restAfterSaltMinutes);
+    foldCursor = offset;
+    appendMarker('mix-levain', 'Mix in levain');
+    appendStep('rest-after-levain', 'Rest after mixing in levain', schedule.restAfterLevainMinutes);
   }
 
-  const bulkStartOffset = offset;
   const bulkTotalMinutes = Math.round(recipeInput.targetBulkHours * 60);
   const bulkEndOffset = bulkStartOffset + bulkTotalMinutes;
   const preShapeStartOffset = bulkEndOffset - schedule.preShapeMinutesBeforeBulkEnd;
-  const shapeStartOffset = bulkEndOffset - schedule.shapeMinutes;
+
+  if (schedule.slapAndFolds > 0) {
+    const slapDuration = getSlapAndFoldDurationMinutes(schedule.slapAndFolds);
+    appendAtOffset(
+      foldCursor,
+      'slap-and-fold',
+      'Slap and folds',
+      slapDuration,
+      `${schedule.slapAndFolds} slaps`,
+    );
+    foldCursor += slapDuration;
+    appendAtOffset(
+      foldCursor,
+      'rest-after-slap',
+      'Rest after slap and folds',
+      schedule.restAfterSlapAndFoldMinutes,
+      `${schedule.restAfterSlapAndFoldMinutes} min rest`,
+    );
+    foldCursor += schedule.restAfterSlapAndFoldMinutes;
+  }
 
   for (let index = 0; index < schedule.stretchAndFoldSets; index += 1) {
-    const foldStart =
-      bulkStartOffset + schedule.stretchAndFoldRestMinutes * (index + 1) + index * 2;
+    const restStart = foldCursor;
+    foldCursor += schedule.stretchAndFoldRestMinutes;
 
-    if (foldStart + 2 > preShapeStartOffset) {
+    if (foldCursor > preShapeStartOffset) {
       break;
     }
 
     appendAtOffset(
-      foldStart,
+      restStart,
       `stretch-fold-${index + 1}`,
       `Stretch and fold ${index + 1}`,
-      2,
-      `Set ${index + 1} of ${schedule.stretchAndFoldSets}`,
+      schedule.stretchAndFoldRestMinutes,
+      `${schedule.stretchAndFoldRestMinutes} min rest · Set ${index + 1} of ${schedule.stretchAndFoldSets}`,
     );
   }
 
-  const coilStartBase =
-    schedule.stretchAndFoldSets > 0
-      ? bulkStartOffset + schedule.stretchAndFoldRestMinutes * (schedule.stretchAndFoldSets + 1)
-      : bulkStartOffset + schedule.coilFoldRestMinutes;
-
   for (let index = 0; index < schedule.coilFoldSets; index += 1) {
-    const foldStart = coilStartBase + index * (schedule.coilFoldRestMinutes + 2);
+    const restStart = foldCursor;
+    foldCursor += schedule.coilFoldRestMinutes;
 
-    if (foldStart + 2 > preShapeStartOffset) {
+    if (foldCursor > preShapeStartOffset) {
       break;
     }
 
     appendAtOffset(
-      foldStart,
+      restStart,
       `coil-fold-${index + 1}`,
       `Coil fold ${index + 1}`,
-      2,
-      `Set ${index + 1} of ${schedule.coilFoldSets}`,
+      schedule.coilFoldRestMinutes,
+      `${schedule.coilFoldRestMinutes} min rest · Set ${index + 1} of ${schedule.coilFoldSets}`,
     );
   }
 
@@ -110,29 +192,23 @@ export function buildTimeline(schedule: ScheduleInput, recipeInput: RecipeInput)
     preShapeStartOffset,
     'pre-shape',
     'Pre-shape',
-    Math.max(1, shapeStartOffset - preShapeStartOffset),
-    `${schedule.preShapeMinutesBeforeBulkEnd} min before bulk ends`,
+    Math.max(1, bulkEndOffset - preShapeStartOffset),
+    'Pre-shape when the dough looks domed, smooth, and aerated — edges pulling from the bowl — not just because the clock says so.',
   );
-  appendAtOffset(
-    shapeStartOffset,
-    'shape',
-    'Shape',
-    schedule.shapeMinutes,
-    'End of bulk fermentation',
-  );
+  appendInstantAt(bulkEndOffset, 'shape', 'Shape', 'End of bulk fermentation');
 
   offset = bulkEndOffset;
 
-  if (schedule.proofingStyle === 'cold' || schedule.proofingStyle === 'both') {
+  if (schedule.proofingStyle === 'cold') {
+    const coldRetardHours = getColdRetardHours(schedule, recipeInput);
+    const coldRetardHoursRounded = roundColdRetardHoursUp(coldRetardHours);
     appendStep(
       'cold-retard',
       'Cold retard',
-      Math.round(schedule.coldRetardHours * 60),
-      `${schedule.coldRetardHours}h in the fridge`,
+      Math.round(coldRetardHours * 60),
+      `~${coldRetardHoursRounded}h in the fridge`,
     );
-  }
-
-  if (schedule.proofingStyle === 'roomTemperature') {
+  } else {
     appendStep(
       'room-proof',
       'Room-temperature proof',
@@ -141,68 +217,95 @@ export function buildTimeline(schedule: ScheduleInput, recipeInput: RecipeInput)
     );
   }
 
-  if (schedule.proofingStyle === 'both') {
-    appendStep(
-      'room-finish-proof',
-      'Room-temperature finish proof',
-      Math.round(schedule.roomFinishAfterColdHours * 60),
-      `After cold retard, at ${recipeInput.roomTemperatureCelsius}°C`,
-    );
-  }
-
   if (schedule.bakeMethod === 'dutchOven') {
     appendStep(
       'bake-closed',
-      'Bake (Dutch oven, lid on)',
+      'Bake with lid on',
       schedule.dutchOvenClosedMinutes,
-      `${schedule.openBakeTempCelsius}°C`,
+      `${schedule.dutchOvenClosedMinutes} min · ${schedule.openBakeTempCelsius}°C`,
     );
     appendStep(
       'bake-lid-off',
-      'Bake (Dutch oven, lid off)',
+      'Bake with lid off',
       schedule.dutchOvenLidOffMinutes,
-      `${schedule.finishTempCelsius}°C`,
+      `${schedule.dutchOvenLidOffMinutes} min · ${schedule.finishTempCelsius}°C`,
     );
     appendStep(
       'bake-out-of-pot',
-      'Bake (out of Dutch oven)',
+      'Bake out of Dutch oven',
       schedule.dutchOvenOutOfPotMinutes,
-      `${schedule.finishTempCelsius}°C`,
+      `${schedule.dutchOvenOutOfPotMinutes} min · ${schedule.finishTempCelsius}°C`,
     );
   } else {
     appendStep(
       'bake-open',
-      'Bake (open oven)',
+      'Bake at start temperature',
       schedule.openBakeMinutes,
-      `${schedule.openBakeTempCelsius}°C`,
+      `${schedule.openBakeMinutes} min · ${schedule.openBakeTempCelsius}°C`,
     );
     appendStep(
       'bake-finish',
       'Finish bake',
       schedule.finishMinutes,
-      `${schedule.finishTempCelsius}°C`,
+      `${schedule.finishMinutes} min · ${schedule.finishTempCelsius}°C`,
     );
   }
 
-  const startMinutes = parseStartMinutes(schedule.startTime);
-
   return steps
     .sort((left, right) => left.startOffsetMinutes - right.startOffsetMinutes)
-    .map((step) => ({
-      id: step.id,
-      label: step.label,
-      detail: step.detail,
-      durationMinutes: step.durationMinutes,
-      startTime: formatMinutesAsTime(startMinutes + step.startOffsetMinutes),
-      endTime: formatMinutesAsTime(startMinutes + step.startOffsetMinutes + step.durationMinutes),
-    }));
+    .map((step) => {
+      const start = formatOffsetDateTime(schedule, step.startOffsetMinutes);
+      const end = formatOffsetDateTime(
+        schedule,
+        step.startOffsetMinutes + step.durationMinutes,
+      );
+
+      return {
+        id: step.id,
+        label: step.label,
+        detail: step.detail,
+        durationMinutes: step.durationMinutes,
+        startOffsetMinutes: step.startOffsetMinutes,
+        startTime: start.timeLabel,
+        endTime: end.timeLabel,
+        dateLabel: start.dateLabel ?? end.dateLabel ?? undefined,
+      };
+    });
 }
 
-function parseStartMinutes(startTime: string): number {
-  const match = /^(\d{1,2}):(\d{2})$/.exec(startTime.trim());
-  if (!match) {
-    return 9 * 60;
+export function formatTimelineForDisplay(steps: TimelineStep[]): TimelineStep[] {
+  const displaySteps: TimelineStep[] = [];
+
+  for (let index = 0; index < steps.length; index += 1) {
+    const step = steps[index];
+    const nextStep = steps[index + 1];
+
+    if (step.id === 'mix-levain' && nextStep?.id === 'rest-after-levain') {
+      displaySteps.push(mergeSteps(step, nextStep, 'Mix in levain and rest'));
+      index += 1;
+      continue;
+    }
+
+    if (step.id === 'mix-salt' && nextStep?.id === 'rest-after-salt') {
+      displaySteps.push(mergeSteps(step, nextStep, 'Mix in salt and rest'));
+      index += 1;
+      continue;
+    }
+
+    displaySteps.push(step);
   }
 
-  return Number(match[1]) * 60 + Number(match[2]);
+  return displaySteps;
+}
+
+function mergeSteps(first: TimelineStep, second: TimelineStep, label: string): TimelineStep {
+  return {
+    id: `${first.id}-${second.id}`,
+    label,
+    startTime: first.startTime,
+    endTime: second.endTime,
+    durationMinutes: first.durationMinutes + second.durationMinutes,
+    startOffsetMinutes: first.startOffsetMinutes,
+    dateLabel: first.dateLabel ?? second.dateLabel,
+  };
 }
