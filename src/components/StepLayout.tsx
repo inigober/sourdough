@@ -13,6 +13,7 @@ type StepLayoutProps = {
   canContinue: boolean;
   continueLabel?: string;
   showSaveToSummary?: boolean;
+  headerAction?: ReactNode;
   onBack: () => void;
   onContinue: () => void;
   onSaveToSummary?: () => void;
@@ -25,6 +26,7 @@ export function StepLayout({
   canContinue,
   continueLabel = 'Continue',
   showSaveToSummary = false,
+  headerAction,
   onBack,
   onContinue,
   onSaveToSummary,
@@ -34,7 +36,10 @@ export function StepLayout({
       className="wizard-shell"
       topBar={
         <header className="wizard-shell__header">
-          <WizardProgress currentStep={currentStep} />
+          <div className="wizard-shell__header-bar">
+            <WizardProgress currentStep={currentStep} />
+            {headerAction ? <div className="wizard-shell__header-action">{headerAction}</div> : null}
+          </div>
         </header>
       }
       footer={
@@ -48,11 +53,11 @@ export function StepLayout({
             <button
               type="button"
               className="wizard-button wizard-button--primary wizard-nav__save"
+              aria-label="Update ingredient list"
               onClick={onSaveToSummary}
             >
               <SaveIcon className="wizard-nav__save-icon" />
-              <span className="wizard-nav__save-label wizard-nav__save-label--long">Update ingredient list</span>
-              <span className="wizard-nav__save-label wizard-nav__save-label--short">Save</span>
+              Save
             </button>
           ) : (
             <span className="wizard-nav__spacer" />

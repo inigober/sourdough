@@ -196,14 +196,14 @@ export function ScheduleBuilderView({
       <section className="hero schedule-builder__hero">
         <h1>Schedule builder</h1>
         <p className="hero-copy">
-          Mix on {mixDateLabel}. Bake on {bakeDateLabel}. Times below follow your start time on mix day.
+          Mix the dough on {mixDateLabel}. Oven-bake on {bakeDateLabel}. Times below follow your start time on mix day.
         </p>
       </section>
 
       <section className="card">
         <SectionHeading
           title="Starter prep"
-          copy="Steps before mix day. Levain build is timed back from your mix start. Feeding ratio adjusts for room temperature so the levain peaks at mix time."
+          copy="Steps before mix day. The levain build is timed backward from mix start, and the feeding ratio adjusts for your room temperature."
           toggle={{
             checked: scheduleInput.includeStarterPrep,
             label: 'Show starter prep settings',
@@ -227,10 +227,8 @@ export function ScheduleBuilderView({
               onChange={(value) => onScheduleChange({ levainBuildHours: value })}
             />
             <p className="schedule-starter-prep__ratio" role="status">
-              Suggested levain feeding: <strong>{levainBuildRatioLabel}</strong> for{' '}
-              {scheduleInput.levainBuildHours}h at {recipeInput.roomTemperatureCelsius}°C.
-              {' '}
-              {starterPrepPlanDescription}
+              Suggested feeding for a {scheduleInput.levainBuildHours}h build at {recipeInput.roomTemperatureCelsius}°C:{' '}
+              <strong>{levainBuildRatioLabel}</strong>. {starterPrepPlanDescription}
             </p>
           </form>
         ) : null}

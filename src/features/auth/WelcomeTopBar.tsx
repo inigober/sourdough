@@ -5,9 +5,10 @@ import { useAuth } from '../../lib/auth/useAuth.ts';
 
 type WelcomeTopBarProps = {
   onOpenAuth: () => void;
+  variant?: 'inline' | 'header';
 };
 
-export function WelcomeTopBar({ onOpenAuth }: WelcomeTopBarProps) {
+export function WelcomeTopBar({ onOpenAuth, variant = 'header' }: WelcomeTopBarProps) {
   const { isConfigured, isLoading, user, signOut } = useAuth();
   const [showAccountMenu, setShowAccountMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -36,7 +37,7 @@ export function WelcomeTopBar({ onOpenAuth }: WelcomeTopBarProps) {
 
   if (user) {
     return (
-      <header className="app-header welcome-top-bar">
+      <div className={variant === 'inline' ? 'welcome-top-bar welcome-top-bar--inline' : 'app-header welcome-top-bar'}>
         <div className="welcome-top-bar__account" ref={menuRef}>
           <button
             type="button"
@@ -62,7 +63,17 @@ export function WelcomeTopBar({ onOpenAuth }: WelcomeTopBarProps) {
             </div>
           ) : null}
         </div>
-      </header>
+      </div>
+    );
+  }
+
+  if (variant === 'inline') {
+    return (
+      <div className="welcome-top-bar welcome-top-bar--inline">
+        <button type="button" className="wizard-button wizard-button--secondary welcome-top-bar__sign-in" onClick={onOpenAuth}>
+          Sign in
+        </button>
+      </div>
     );
   }
 

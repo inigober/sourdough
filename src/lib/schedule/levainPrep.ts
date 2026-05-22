@@ -132,13 +132,13 @@ export function planStarterPrep(input: {
 export function describeStarterPrepPlan(plan: StarterPrepPlan): string {
   if (!plan.refreshSkippedBecause) {
     if (plan.includeRefreshStep) {
-      return `Includes a separate ${STARTER_REFRESH_MIN_HOURS}h fridge refresh before the levain build.`;
+      return `Starts with a ${STARTER_REFRESH_MIN_HOURS} h fridge refresh, then the levain build.`;
     }
 
-    return 'Levain build only.';
+    return 'Levain build only — no separate refresh step.';
   }
 
-  return `Fridge refresh skipped — wake-up folded into the ${formatRatioLabel(plan.levainBuildRatio)} levain build.`;
+  return `Fridge refresh is built into the ${formatRatioLabel(plan.levainBuildRatio)} levain feeding.`;
 }
 
 export function formatRatioLabel(ratio: FeedingRatio): string {
@@ -171,6 +171,18 @@ export function calculateLevainBuildFeeding(
 ): FeedingAmounts {
   const targetLevainGrams = formula.levainGrams * (1 + bufferPercent / 100);
   return calculateRatioFeeding(targetLevainGrams, ratio);
+}
+
+export function formatLevainBuildDetail(
+  ratioLabel: string,
+  mixStartTime: string,
+  refreshSkippedBecause?: 'max_ratio' | 'high_ratio',
+): string {
+  if (refreshSkippedBecause) {
+    return `${ratioLabel} · includes fridge refresh · ready at ${mixStartTime}`;
+  }
+
+  return `${ratioLabel} · ready for mix at ${mixStartTime}`;
 }
 
 export function formatFeedingDetail(amounts: FeedingAmounts, ratioLabel: string): string {

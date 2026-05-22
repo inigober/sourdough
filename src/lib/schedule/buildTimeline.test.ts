@@ -53,6 +53,31 @@ test('display timeline groups mix and rest pairs', () => {
   assert.ok(timeline.some((step) => step.label === 'Mix in salt and rest'));
 });
 
+test('build levain detail stays concise in the schedule timeline', () => {
+  const schedule = createDefaultScheduleInput(defaultRecipeInput);
+  schedule.startTime = '09:00';
+  const timeline = buildTimeline(schedule, defaultRecipeInput);
+  const buildLevain = timeline.find((step) => step.id === 'build-levain');
+
+  assert.ok(buildLevain?.detail);
+  assert.match(buildLevain.detail ?? '', /ready at 09:00/);
+  assert.doesNotMatch(buildLevain.detail ?? '', /starter \+/);
+});
+
+test('display timeline shows rest minutes on merged mix steps', () => {
+  const schedule = createDefaultScheduleInput(defaultRecipeInput);
+  schedule.includeStarterPrep = false;
+  schedule.restAfterLevainMinutes = 25;
+  schedule.restAfterSaltMinutes = 35;
+  const timeline = formatTimelineForDisplay(buildTimeline(schedule, defaultRecipeInput));
+
+  const mixLevain = timeline.find((step) => step.label === 'Mix in levain and rest');
+  const mixSalt = timeline.find((step) => step.label === 'Mix in salt and rest');
+
+  assert.equal(mixLevain?.detail, '25 min rest');
+  assert.equal(mixSalt?.detail, '35 min rest');
+});
+
 test('slap and folds start after salt is mixed in', () => {
   const schedule = createDefaultScheduleInput({ ...defaultRecipeInput, hydrationPercent: 85 });
   schedule.includeStarterPrep = false;

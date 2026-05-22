@@ -13,7 +13,7 @@ import {
 } from '../../components/icons.tsx';
 import { RecipeAssessment } from '../../components/RecipeAssessment.tsx';
 import { RecipeCard } from '../../components/RecipeCard.tsx';
-import { assessmentInfo, summarySectionInfo } from './fieldInfo.ts';
+import { assessmentInfo } from './fieldInfo.ts';
 import { formatGrams, formatGramsToNearest } from '../../app/format.ts';
 import { getFlourGrams } from '../../lib/recipe/flourBlend.ts';
 import { buildIngredientRows } from '../../lib/recipe/formatIngredients.ts';
@@ -119,7 +119,6 @@ export function RecipeResultsView({
         <SummaryGroup
           icon={<ClockIcon />}
           title="Fermentation & levain"
-          info={summarySectionInfo.fermentation}
           value={`${recipeInput.targetBulkHours}h bulk · ${recipeInput.roomTemperatureCelsius}°C · ${levainActivityLabel}`}
           onEdit={() => onEditStep('fermentation')}
         />

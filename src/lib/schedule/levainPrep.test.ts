@@ -10,6 +10,7 @@ import {
   calculateStarterRefreshFeeding,
   DEFAULT_LEVAIN_BUILD_HOURS,
   describeStarterPrepPlan,
+  formatLevainBuildDetail,
   formatRatioLabel,
   getDefaultLevainBuildHours,
   getLevainBuildRatio,
@@ -58,7 +59,15 @@ test('high-ratio builds skip the separate fridge refresh step', () => {
   assert.equal(plan.includeRefreshStep, false);
   assert.ok(plan.refreshSkippedBecause);
   assert.ok(plan.levainBuildRatio.flour > SKIP_REFRESH_RATIO_THRESHOLD);
-  assert.match(describeStarterPrepPlan(plan), /folded into/);
+  assert.match(describeStarterPrepPlan(plan), /built into/);
+});
+
+test('formatLevainBuildDetail keeps copy short', () => {
+  assert.equal(formatLevainBuildDetail('1:3:3', '09:00'), '1:3:3 · ready for mix at 09:00');
+  assert.equal(
+    formatLevainBuildDetail('1:4:4', '09:00', 'high_ratio'),
+    '1:4:4 · includes fridge refresh · ready at 09:00',
+  );
 });
 
 test('moderate-ratio builds keep a separate fridge refresh step', () => {

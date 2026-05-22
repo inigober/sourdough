@@ -52,15 +52,19 @@ export function FlourSection({
       />
 
       <div className="flour-context-strip">
-        <div className="reference-chip reference-chip--static reference-chip--with-action">
-          <span>Total dough weight</span>
-          <span className="reference-chip__value-row">
-            <strong>{recipeInput.finalDoughWeightGrams}g</strong>
-            <PenEditButton label="Edit dough weight" onClick={onEditDoughWeight} />
+        <div className="reference-chip reference-chip--static">
+          <span className="reference-chip__label">
+            <span>Total dough weight</span>
+            <PenEditButton
+              className="reference-chip__action"
+              label="Edit dough weight"
+              onClick={onEditDoughWeight}
+            />
           </span>
+          <strong>{recipeInput.finalDoughWeightGrams}g</strong>
         </div>
         <div className="reference-chip reference-chip--static">
-          <span className="reference-chip__label-row">
+          <span className="reference-chip__label">
             <span>Total flour in recipe</span>
             <InfoToggle label="Total flour in recipe">{fieldInfo.totalFlourInRecipe}</InfoToggle>
           </span>
@@ -229,9 +233,6 @@ function FlourPercentStepper({
               commitDraft(draft);
             }}
           />
-          <span className="flour-percent-stepper__suffix" aria-hidden="true">
-            %
-          </span>
           <span className="number-field__steppers" aria-hidden="true">
             <button
               type="button"
@@ -255,6 +256,7 @@ function FlourPercentStepper({
             </button>
           </span>
         </span>
+        <span className="input-suffix flour-percent-stepper__suffix">%</span>
       </span>
       <span className="flour-blend-row__grams">{formatGrams(grams)}</span>
     </div>

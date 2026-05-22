@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { AppHeader } from '../../components/AppHeader.tsx';
+import { HomeIcon } from '../../components/icons.tsx';
 import { ConfirmDialog } from '../../components/ConfirmDialog.tsx';
 import { SaveRecipeDialog } from '../../components/SaveRecipeDialog.tsx';
 import { StepLayout } from '../../components/StepLayout.tsx';
@@ -113,6 +114,7 @@ export function RecipeBuilder() {
   const [isStartingBake, setIsStartingBake] = useState(false);
   const [isUnsavedDialogOpen, setIsUnsavedDialogOpen] = useState(false);
   const [pendingGoHomeAfterSave, setPendingGoHomeAfterSave] = useState(false);
+  const [pendingStartBakeAfterSave, setPendingStartBakeAfterSave] = useState(false);
 
   const validationIssues = useMemo(() => validateRecipeInput(recipeInput), [recipeInput]);
   const hasBlockingIssues = hasBlockingValidationIssue(validationIssues);
@@ -481,6 +483,28 @@ export function RecipeBuilder() {
 
     if (pendingGoHomeAfterSave) {
       performGoHome();
+      return;
+    }
+
+    if (pendingStartBakeAfterSave) {
+      setPendingStartBakeAfterSave(false);
+      await proceedWithStartBake();
+    }
+  }
+
+  async function proceedWithStartBake(): Promise<void> {
+    setIsStartingBake(true);
+
+    try {
+      const saved = await ensureRecipeSaved();
+      beginBakeSession({
+        savedRecipeId: saved.id,
+        recipeName: saved.name,
+        recipe: saved.recipeInput,
+        schedule: saved.scheduleInput ?? scheduleInput,
+      });
+    } finally {
+      setIsStartingBake(false);
     }
   }
 
@@ -524,19 +548,14 @@ export function RecipeBuilder() {
   }
 
   async function startBakeFromSchedule(): Promise<void> {
-    setIsStartingBake(true);
-
-    try {
-      const saved = await ensureRecipeSaved();
-      beginBakeSession({
-        savedRecipeId: saved.id,
-        recipeName: saved.name,
-        recipe: saved.recipeInput,
-        schedule: saved.scheduleInput ?? scheduleInput,
-      });
-    } finally {
-      setIsStartingBake(false);
+    if (!activeSavedRecipeId) {
+      setPendingStartBakeAfterSave(true);
+      setSaveDialogSource('schedule');
+      setIsSaveDialogOpen(true);
+      return;
     }
+
+    await proceedWithStartBake();
   }
 
   async function startBakeFromSavedRecipe(id: string): Promise<void> {
@@ -617,6 +636,7 @@ export function RecipeBuilder() {
       onCancel={() => {
         setIsSaveDialogOpen(false);
         setPendingGoHomeAfterSave(false);
+        setPendingStartBakeAfterSave(false);
       }}
       onSave={(name) => void confirmSaveRecipe(name)}
     />
@@ -633,6 +653,12 @@ export function RecipeBuilder() {
   ) : null;
 
   const homeHeader = showHomeButton ? <AppHeader onHome={goHome} /> : null;
+  const wizardHomeAction = showHomeButton ? (
+    <button type="button" className="app-header__home wizard-icon-button" onClick={goHome}>
+      <HomeIcon />
+      <span className="visually-hidden">Home</span>
+    </button>
+  ) : null;
 
   if (phase === 'companion' && bakeSession) {
     return (
@@ -830,13 +856,13 @@ export function RecipeBuilder() {
 
   return (
     <>
-      {homeHeader}
       <StepLayout
         currentStep={currentStep}
         canGoBack={canGoBack}
         canContinue={canContinue}
         continueLabel={isLastWizardStep ? 'View ingredient summary' : 'Continue'}
         showSaveToSummary={showReturnToSummary}
+        headerAction={wizardHomeAction}
         onBack={goBack}
         onContinue={goContinue}
         onSaveToSummary={showReturnToSummary ? returnToSummary : undefined}

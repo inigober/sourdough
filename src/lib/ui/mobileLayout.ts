@@ -1,7 +1,7 @@
 /** Layout tokens mirrored in styles.css — keep in sync when changing mobile form layout. */
 export const MOBILE_LAYOUT = {
-  /** Total width of the % control: stepper column + room for two digits. */
-  flourPercentControlWidth: '6.25rem',
+  /** Input column width inside the flour % control (stepper sits inside). */
+  flourPercentControlWidth: '5.5rem',
   flourPercentStepperWidth: '2.25rem',
   mixDayFormClass: 'schedule-mix-form',
   mixDayDateTimeInputSelector: '.field-card input[type="date"],\n.field-card input[type="time"]',
@@ -18,5 +18,5 @@ export function flourPercentControlFitsTwoDigits(controlWidth: string, stepperWi
   const stepperRem = Number(stepperMatch[1]);
   const digitAreaRem = totalRem - stepperRem;
 
-  return totalRem >= 6 && totalRem <= 6.5 && digitAreaRem >= 2.25;
+  return totalRem >= 5.25 && totalRem <= 5.75 && digitAreaRem >= 2.75;
 }

@@ -32,10 +32,10 @@ export function PenIcon({ className }: IconProps) {
   return (
     <Icon className={className}>
       <path
-        d="M13.5 3.5 16.5 6.5 6.8 16.2l-3.3.8.8-3.3 9.2-9.2Z"
+        d="M13.25 4.75 15.25 6.75 7.25 14.75 4.75 15.25 5.25 12.75 13.25 4.75"
         {...stroke}
+        strokeWidth={1.35}
       />
-      <path d="M12.5 4.5 15.5 7.5" {...stroke} />
     </Icon>
   );
 }
@@ -43,10 +43,10 @@ export function PenIcon({ className }: IconProps) {
 export function BinIcon({ className }: IconProps) {
   return (
     <Icon className={className}>
-      <path
-        d="M4.5 5.5h11M7.5 5.5V4.5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1M8 8.5v5M12 8.5v5M5.5 5.5l.6 9a1 1 0 0 0 1 .9h5.8a1 1 0 0 0 1-.9l.6-9"
-        {...stroke}
-      />
+      <path d="M6 6.5h8" {...stroke} strokeWidth={1.35} />
+      <path d="M8 6.5V5.75a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V6.5" {...stroke} strokeWidth={1.35} />
+      <path d="M7 6.5v8.25a.75.75 0 0 0 .75.75h4.5a.75.75 0 0 0 .75-.75V6.5" {...stroke} strokeWidth={1.35} />
+      <path d="M9 9v4M11 9v4" {...stroke} strokeWidth={1.35} />
     </Icon>
   );
 }
@@ -189,6 +189,20 @@ export function HelpIcon({ className }: IconProps) {
       <circle cx="10" cy="10" r="6.5" {...stroke} />
       <path d="M8 8.2c.2-1.2 1.1-2 2.2-2 1.3 0 2.2.8 2.2 2 0 1.5-2.2 1.6-2.2 3.2" {...stroke} />
       <circle cx="10" cy="14.2" r="0.75" fill="currentColor" stroke="none" />
+    </Icon>
+  );
+}
+
+export function SparklesIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <path
+        d="M10 5.25 10.6 7.8 13.15 8.4 10.6 9 10 11.55 9.4 9 6.85 8.4 9.4 7.8Z"
+        {...stroke}
+        strokeWidth={1.35}
+      />
+      <path d="M14.75 6.25h.9M15.2 5.8v.9" {...stroke} strokeWidth={1.5} />
+      <path d="M5.05 14.1h.9M5.5 13.65v.9" {...stroke} strokeWidth={1.5} />
     </Icon>
   );
 }

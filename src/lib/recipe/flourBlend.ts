@@ -107,16 +107,19 @@ export function updateFlourPercent(
   const remainingPercent = 100 - clampedPercent;
   const othersTotal = others.reduce((sum, entry) => sum + entry.percent, 0);
 
-  return [
-    { ...target, percent: clampedPercent },
-    ...others.map((entry) => ({
+  return doughFlours.map((entry) => {
+    if (entry.id === entryId) {
+      return { ...entry, percent: clampedPercent };
+    }
+
+    return {
       ...entry,
       percent:
         othersTotal === 0
           ? remainingPercent / others.length
           : roundTo((entry.percent / othersTotal) * remainingPercent, 1),
-    })),
-  ];
+    };
+  });
 }
 
 export function stepFlourPercent(

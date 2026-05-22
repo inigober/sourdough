@@ -26,8 +26,9 @@ import {
 } from '../../lib/companion/liveSchedule.ts';
 import { getStepScheduleEdit } from '../../lib/companion/stepScheduleEdits.ts';
 import type { BakeSession } from '../../lib/companion/types.ts';
+import { shouldShowTimelineDateLabel } from '../../lib/schedule/timelineDisplay.ts';
 import { PenEditButton } from '../../components/PenEditButton.tsx';
-import { ArrowRightIcon, HelpIcon, RestartIcon } from '../../components/icons.tsx';
+import { SparklesIcon, RestartIcon } from '../../components/icons.tsx';
 import { getCoachTopicForStepId } from '../../lib/companion/coachTopics.ts';
 import type { ScheduleInput } from '../../lib/schedule/types.ts';
 import { BakeCompleteDialog } from './BakeCompleteDialog.tsx';
@@ -163,10 +164,13 @@ export function CompanionView({ session, onSessionChange, onExit }: CompanionVie
       <section className="hero companion__hero">
         <h1>{session.recipeName}</h1>
         <p className="hero-copy">
-          Mix on {mixDateLabel}. Bake on {bakeDateLabel}.
+          Mix the dough on {mixDateLabel}. Oven-bake on {bakeDateLabel}.
         </p>
         <p className="companion__progress">
           Step {session.currentStepIndex + 1} of {timeline.length}
+        </p>
+        <p className="companion__coach-hint">
+          Stuck on a step? Tap the sparkles button to ask the AI baking coach for help.
         </p>
         {session.scheduleDriftMinutes !== 0 ? (
           <p className="companion__drift" role="status">
@@ -189,26 +193,25 @@ export function CompanionView({ session, onSessionChange, onExit }: CompanionVie
         <span className="companion__section-label companion__section-label--current">Current step</span>
         {currentStepTimes ? (
           <div className="companion__times">
-            <span>{formatStepTimeLabel(currentStepTimes.startTime, currentStepTimes.dateLabel)}</span>
             {currentStep.durationMinutes > 0 ? (
-              <>
-                <span aria-hidden="true" className="companion__time-separator">
-                  <ArrowRightIcon />
-                </span>
-                <span>{currentStepTimes.endTime}</span>
-              </>
-            ) : null}
+              <span>
+                {formatStepTimeLabel(currentStepTimes.startTime, currentStepTimes.dateLabel)} –{' '}
+                {currentStepTimes.endTime}
+              </span>
+            ) : (
+              <span>{formatStepTimeLabel(currentStepTimes.startTime, currentStepTimes.dateLabel)}</span>
+            )}
           </div>
         ) : null}
         <div className="companion__step-header">
           <h2 className="companion__step-label">{currentStep.label}</h2>
           <button
             type="button"
-            className="wizard-icon-button wizard-icon-button--help"
-            aria-label="Open baking coach"
+            className="wizard-icon-button wizard-icon-button--help companion__coach-button"
+            aria-label="Open AI baking coach"
             onClick={() => setIsCoachOpen(true)}
           >
-            <HelpIcon />
+            <SparklesIcon />
           </button>
         </div>
         {currentStep.detail ? <p className="companion__step-detail">{currentStep.detail}</p> : null}
@@ -271,6 +274,7 @@ export function CompanionView({ session, onSessionChange, onExit }: CompanionVie
                 : index < session.currentStepIndex
                   ? 'done'
                   : 'default';
+            const showDateLabel = shouldShowTimelineDateLabel(timeline, index);
 
             return (
               <li key={step.id} className="companion__overview-item">
@@ -279,8 +283,11 @@ export function CompanionView({ session, onSessionChange, onExit }: CompanionVie
                   className={`timeline-row timeline-row--interactive timeline-row--${variant}`}
                   onClick={() => handleJumpToStep(index)}
                 >
-                  <span className="timeline-row__time-compact">
-                    {formatStepTimeLabel(stepTimes.startTime, stepTimes.dateLabel)}
+                  <span className="companion-overview__time-col">
+                    {showDateLabel && stepTimes.dateLabel ? (
+                      <span className="timeline-row__date">{stepTimes.dateLabel}</span>
+                    ) : null}
+                    <span className="timeline-row__time-compact">{stepTimes.startTime}</span>
                   </span>
                   <span className="timeline-row__label-compact">{step.label}</span>
                 </button>

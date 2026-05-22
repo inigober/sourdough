@@ -2,6 +2,11 @@ import { useEffect, useState, type ChangeEvent, type FocusEvent } from 'react';
 
 import { FieldLabel } from './FieldLabel.tsx';
 import { ChevronDownIcon, ChevronUpIcon } from './icons.tsx';
+import {
+  formatNumberDraft,
+  getStepDecimalPlaces,
+  stepNumberValue,
+} from '../lib/ui/numberFieldStep.ts';
 
 type NumberFieldProps = {
   label: string;
@@ -32,11 +37,11 @@ function clampValue(value: number, min?: number, max?: number): number {
   return nextValue;
 }
 
-function formatDraft(value: number): string {
-  return Number.isFinite(value) ? String(value) : '0';
+function formatDraft(value: number, stepSize: number): string {
+  return formatNumberDraft(value, stepSize);
 }
 
-function normalizeDraft(raw: string): string {
+function normalizeDraft(raw: string, stepSize: number): string {
   if (raw === '' || raw === '-' || raw === '.') {
     return raw;
   }
@@ -50,7 +55,12 @@ function normalizeDraft(raw: string): string {
     return raw;
   }
 
-  return String(parsed);
+  const decimals = getStepDecimalPlaces(stepSize);
+  if (decimals === 0) {
+    return String(Math.round(parsed));
+  }
+
+  return parsed.toFixed(decimals);
 }
 
 export function NumberField({
@@ -70,39 +80,43 @@ export function NumberField({
   const stepSize = step ?? 1;
 
   function adjustValue(delta: number): void {
-    const nextValue = clampValue(value + delta, min, max);
-    setDraft(formatDraft(nextValue));
+    const nextValue = clampValue(stepNumberValue(value, delta, stepSize), min, max);
+    setDraft(formatDraft(nextValue, stepSize));
     onChange(nextValue);
   }
 
   const decrementDisabled = min !== undefined && value <= min;
   const incrementDisabled = max !== undefined && value >= max;
-  const [draft, setDraft] = useState(() => formatDraft(value));
+  const [draft, setDraft] = useState(() => formatDraft(value, stepSize));
   const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     if (!isFocused) {
-      setDraft(formatDraft(value));
+      setDraft(formatDraft(value, stepSize));
     }
-  }, [isFocused, value]);
+  }, [isFocused, stepSize, value]);
 
   function commitDraft(nextDraft: string): void {
     if (nextDraft === '' || nextDraft === '-' || nextDraft === '.') {
       const fallback = min ?? 0;
-      setDraft(formatDraft(fallback));
+      setDraft(formatDraft(fallback, stepSize));
       onChange(fallback);
       return;
     }
 
     const parsed = Number(nextDraft);
     if (!Number.isFinite(parsed)) {
-      setDraft(formatDraft(value));
+      setDraft(formatDraft(value, stepSize));
       return;
     }
 
     const clamped = clampValue(parsed, min, max);
-    setDraft(formatDraft(clamped));
-    onChange(clamped);
+    const normalizedValue =
+      getStepDecimalPlaces(stepSize) === 0
+        ? Math.round(clamped)
+        : stepNumberValue(clamped, 0, stepSize);
+    setDraft(formatDraft(normalizedValue, stepSize));
+    onChange(normalizedValue);
   }
 
   function handleChange(event: ChangeEvent<HTMLInputElement>): void {
@@ -117,7 +131,7 @@ export function NumberField({
       return;
     }
 
-    const normalized = normalizeDraft(raw);
+    const normalized = normalizeDraft(raw, stepSize);
     setDraft(normalized);
 
     const parsed = Number(normalized);

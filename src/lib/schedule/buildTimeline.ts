@@ -5,6 +5,7 @@ import {
   calculateLevainBuildFeeding,
   calculateStarterRefreshFeeding,
   formatFeedingDetail,
+  formatLevainBuildDetail,
   formatLevainBuildHoursLabel,
   formatRatioLabel,
   getDefaultLevainBuildHours,
@@ -70,22 +71,17 @@ export function buildTimeline(schedule: ScheduleInput, recipeInput: RecipeInput)
     const buildLabel = prepPlan.refreshSkippedBecause
       ? `Build levain from fridge starter (${levainBuildHoursLabel})`
       : `Build levain (${levainBuildHoursLabel})`;
-    let levainDetail = `Ready for mix at ${schedule.startTime}`;
+    let levainDetail = formatLevainBuildDetail(levainRatioLabel, schedule.startTime);
 
     try {
-      const formula = calculateRecipe(recipeInput);
-      const levainFeeding = calculateLevainBuildFeeding(
-        formula,
-        prepPlan.levainBuildRatio,
-        levainBufferPercent,
+      calculateRecipe(recipeInput);
+      levainDetail = formatLevainBuildDetail(
+        levainRatioLabel,
+        schedule.startTime,
+        prepPlan.refreshSkippedBecause,
       );
-      levainDetail = `${formatFeedingDetail(levainFeeding, levainRatioLabel)} · ready for mix at ${schedule.startTime}`;
     } catch {
-      levainDetail = `${levainRatioLabel} · build levain before mix at ${schedule.startTime}`;
-    }
-
-    if (prepPlan.refreshSkippedBecause) {
-      levainDetail = `${levainDetail} · fridge refresh folded into this feeding`;
+      levainDetail = `${levainRatioLabel} · ready for mix at ${schedule.startTime}`;
     }
 
     if (prepPlan.includeRefreshStep) {
@@ -299,9 +295,13 @@ export function formatTimelineForDisplay(steps: TimelineStep[]): TimelineStep[] 
 }
 
 function mergeSteps(first: TimelineStep, second: TimelineStep, label: string): TimelineStep {
+  const restDetail =
+    second.durationMinutes > 0 ? `${second.durationMinutes} min rest` : undefined;
+
   return {
     id: `${first.id}-${second.id}`,
     label,
+    detail: restDetail,
     startTime: first.startTime,
     endTime: second.endTime,
     durationMinutes: first.durationMinutes + second.durationMinutes,

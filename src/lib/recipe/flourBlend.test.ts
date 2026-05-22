@@ -88,6 +88,21 @@ test('stepping percent up adjusts shares by one point and recalculates grams', (
   assert.equal(steppedTwice.find((entry) => entry.id === otherId)?.percent, 18);
 });
 
+test('stepping percent preserves flour entry order in the blend list', () => {
+  const doughFlours = [
+    createFlourBlendEntry('wheatType1050', 50),
+    createFlourBlendEntry('wholeWheat', 50),
+  ];
+  const [firstId, secondId] = doughFlours.map((entry) => entry.id);
+
+  const stepped = stepFlourPercent(doughFlours, secondId, 1);
+
+  assert.equal(stepped[0]?.id, firstId);
+  assert.equal(stepped[1]?.id, secondId);
+  assert.equal(stepped[1]?.percent, 51);
+  assert.equal(stepped[0]?.percent, 49);
+});
+
 test('sequential percent commits redistribute without swapping flour ids', () => {
   const doughFlours = [
     createFlourBlendEntry('wheatType1050', 50),

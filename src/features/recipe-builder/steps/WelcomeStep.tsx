@@ -39,8 +39,6 @@ export function WelcomeStep({
 }: WelcomeStepProps) {
   return (
     <div className="welcome-screen">
-      <WelcomeTopBar onOpenAuth={onOpenAuth} />
-
       {importMessage ? (
         <p className="welcome-import-message" role="status" aria-live="polite">
           {importMessage}
@@ -48,7 +46,10 @@ export function WelcomeStep({
       ) : null}
 
       <section className="hero welcome-screen__hero">
-        <h1>Sourdough recipe builder</h1>
+        <div className="welcome-screen__title-row">
+          <h1>Sourdough recipe builder</h1>
+          <WelcomeTopBar onOpenAuth={onOpenAuth} variant="inline" />
+        </div>
         <p className="hero-copy">
           Build a recipe, review ingredients, plan your bake schedule, and save loaves to come back to.
           Start from scratch, a template, or where you left off.
