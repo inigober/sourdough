@@ -26,3 +26,8 @@ test('integer steps stay whole numbers', () => {
   assert.equal(stepNumberValue(3, 1, 1), 4);
   assert.equal(formatNumberDraft(4, 1), '4');
 });
+
+test('half-hour steps show integers without a decimal suffix', () => {
+  assert.equal(formatNumberDraft(12, 0.5), '12');
+  assert.equal(formatNumberDraft(3.5, 0.5), '3.5');
+});

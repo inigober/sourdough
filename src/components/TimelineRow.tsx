@@ -25,7 +25,7 @@ export function TimelineRow({
           {isDated ? <span className="timeline-row__date">{dateLabel}</span> : null}
           <span className="timeline-row__time">{timeLabel}</span>
         </div>
-        <div className="timeline-row__content-col">
+        <div className={`timeline-row__content-col${isDated ? ' timeline-row__content-col--dated' : ''}`}>
           <strong className="timeline-row__label">{label}</strong>
           {detail ? <p className="timeline-row__detail">{detail}</p> : null}
         </div>

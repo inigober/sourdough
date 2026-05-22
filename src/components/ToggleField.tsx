@@ -1,3 +1,5 @@
+import { useId } from 'react';
+
 import { FieldLabel } from './FieldLabel.tsx';
 
 type ToggleFieldProps = {
@@ -9,17 +11,24 @@ type ToggleFieldProps = {
 };
 
 export function ToggleField({ label, checked, onChange, description, info }: ToggleFieldProps) {
+  const inputId = useId();
+
   return (
-    <label className="field-card field-card--toggle">
-      <span>
-        <FieldLabel label={label} info={info} />
-        {description ? <span className="field-description">{description}</span> : null}
-      </span>
+    <div className="field-card field-card--toggle">
+      <div>
+        <FieldLabel label={label} info={info} htmlFor={inputId} />
+        {description ? (
+          <label htmlFor={inputId} className="field-description">
+            {description}
+          </label>
+        ) : null}
+      </div>
       <input
+        id={inputId}
         type="checkbox"
         checked={checked}
         onChange={(event) => onChange(event.currentTarget.checked)}
       />
-    </label>
+    </div>
   );
 }

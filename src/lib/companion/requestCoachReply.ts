@@ -1,3 +1,5 @@
+import { FunctionsHttpError } from '@supabase/supabase-js';
+
 import { getSupabaseClient } from '../auth/supabaseClient.ts';
 import type { CoachPromptParts } from './buildCoachPrompt.ts';
 import {
@@ -18,6 +20,25 @@ export type CoachReplyResult =
   | { ok: true; reply: string }
   | { ok: false; message: string };
 
+async function readCoachInvokeError(error: unknown): Promise<string> {
+  if (error instanceof FunctionsHttpError && error.context instanceof Response) {
+    try {
+      const payload = (await error.context.json()) as { error?: string };
+      if (payload.error?.trim()) {
+        return payload.error.trim();
+      }
+    } catch {
+      // Fall back to the generic invoke error below.
+    }
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return 'Unknown coach error';
+}
+
 export async function requestCoachReply(request: CoachReplyRequest): Promise<CoachReplyResult> {
   if (!canAskCoachQuestion(request.coachQuestionsAsked)) {
     return { ok: false, message: coachQuestionLimitMessage() };
@@ -36,10 +57,11 @@ export async function requestCoachReply(request: CoachReplyRequest): Promise<Coa
   });
 
   if (error) {
-    const limitReached = /limit reached/i.test(error.message);
+    const detail = await readCoachInvokeError(error);
+    const limitReached = /limit reached/i.test(detail);
     return {
       ok: false,
-      message: limitReached ? coachQuestionLimitMessage() : `Coach is temporarily unavailable. (${error.message})`,
+      message: limitReached ? coachQuestionLimitMessage() : `Coach is temporarily unavailable. (${detail})`,
     };
   }
 

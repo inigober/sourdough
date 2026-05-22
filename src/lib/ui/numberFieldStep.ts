@@ -20,7 +20,7 @@ export function formatNumberDraft(value: number, step: number): string {
   }
 
   const decimals = getStepDecimalPlaces(step);
-  if (decimals === 0) {
+  if (decimals === 0 || Number.isInteger(value)) {
     return String(Math.round(value));
   }
 

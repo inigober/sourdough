@@ -138,6 +138,10 @@ test('cold retard hours are derived from desired bake time on day plus one', () 
   assert.ok(coldRetard);
   assert.equal(coldRetard.startTime, '15:00');
   assert.equal(coldRetard.endTime, '08:00');
+  assert.equal(coldRetard.dateLabel, undefined);
+
+  const bakeClosed = timeline.find((step) => step.id === 'bake-closed');
+  assert.ok(bakeClosed?.dateLabel);
 });
 
 test('cold retard assessment reflects calculated duration', () => {

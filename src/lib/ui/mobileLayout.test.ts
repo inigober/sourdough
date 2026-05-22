@@ -68,3 +68,7 @@ test('mix day date and time inputs stay constrained inside field cards', () => {
   assert.match(stylesCss, /\.field-card input\[type='time'\][^{]*\{[^}]*max-width:\s*100%/s);
   assert.match(stylesCss, /\.field-grid--pair > \.field-card\s*\{[^}]*min-width:\s*0/s);
 });
+
+test('dated timeline rows align step labels with the time row', () => {
+  assert.match(stylesCss, /\.timeline-row__content-col--dated\s*\{[^}]*align-self:\s*end/s);
+});

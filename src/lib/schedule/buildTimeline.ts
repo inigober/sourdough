@@ -8,6 +8,7 @@ import {
   formatLevainBuildDetail,
   formatLevainBuildHoursLabel,
   formatRatioLabel,
+  formatStarterRefreshLabel,
   getDefaultLevainBuildHours,
   planStarterPrep,
   STARTER_REFRESH_MIN_HOURS,
@@ -81,16 +82,17 @@ export function buildTimeline(schedule: ScheduleInput, recipeInput: RecipeInput)
         prepPlan.refreshSkippedBecause,
       );
     } catch {
-      levainDetail = `${levainRatioLabel} · ready for mix at ${schedule.startTime}`;
+      levainDetail = `${levainRatioLabel} feeding · ready for mix at ${schedule.startTime}`;
     }
 
     if (prepPlan.includeRefreshStep) {
-      const refreshMinutes = STARTER_REFRESH_MIN_HOURS * 60;
+      const refreshHours = prepPlan.starterRefreshHours ?? STARTER_REFRESH_MIN_HOURS;
+      const refreshMinutes = Math.round(refreshHours * 60);
       const refreshFeeding = calculateStarterRefreshFeeding();
       appendAtOffset(
         levainBuildStartOffset - refreshMinutes,
         'refresh-starter',
-        'Refresh starter (>6 h!)',
+        formatStarterRefreshLabel(refreshHours),
         refreshMinutes,
         formatFeedingDetail(refreshFeeding, '1:3:3'),
       );
@@ -264,7 +266,7 @@ export function buildTimeline(schedule: ScheduleInput, recipeInput: RecipeInput)
         startOffsetMinutes: step.startOffsetMinutes,
         startTime: start.timeLabel,
         endTime: end.timeLabel,
-        dateLabel: start.dateLabel ?? end.dateLabel ?? undefined,
+        dateLabel: start.dateLabel ?? undefined,
       };
     });
 }
@@ -306,6 +308,6 @@ function mergeSteps(first: TimelineStep, second: TimelineStep, label: string): T
     endTime: second.endTime,
     durationMinutes: first.durationMinutes + second.durationMinutes,
     startOffsetMinutes: first.startOffsetMinutes,
-    dateLabel: first.dateLabel ?? second.dateLabel,
+    dateLabel: first.dateLabel,
   };
 }

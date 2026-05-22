@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent, type FocusEvent } from 'react';
+import { useEffect, useId, useState, type ChangeEvent, type FocusEvent } from 'react';
 
 import { FieldLabel } from './FieldLabel.tsx';
 import { ChevronDownIcon, ChevronUpIcon } from './icons.tsx';
@@ -85,6 +85,7 @@ export function NumberField({
     onChange(nextValue);
   }
 
+  const inputId = useId();
   const decrementDisabled = min !== undefined && value <= min;
   const incrementDisabled = max !== undefined && value >= max;
   const [draft, setDraft] = useState(() => formatDraft(value, stepSize));
@@ -151,11 +152,12 @@ export function NumberField({
   }
 
   return (
-    <label className={status ? `field-card field-card--${status}` : 'field-card'}>
-      <FieldLabel label={label} info={info} />
+    <div className={status ? `field-card field-card--${status}` : 'field-card'}>
+      <FieldLabel label={label} info={info} htmlFor={inputId} />
       <span className={showSteppers ? 'input-row input-row--stepper' : 'input-row'}>
         <span className={showSteppers ? 'number-field__control' : undefined}>
           <input
+            id={inputId}
             type="text"
             inputMode="decimal"
             className={hideSpinner || showSteppers ? 'number-input--no-spinner' : undefined}
@@ -193,6 +195,6 @@ export function NumberField({
         {suffix ? <span className="input-suffix">{suffix}</span> : null}
       </span>
       {message ? <span className={`field-message field-message--${status}`}>{message}</span> : null}
-    </label>
+    </div>
   );
 }

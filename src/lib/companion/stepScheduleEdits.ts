@@ -16,7 +16,7 @@ const STEP_EDITS: Record<string, StepScheduleEdit> = {
     suffix: 'h',
     min: 3,
     max: 12,
-    step: 0.25,
+    step: 0.5,
   },
   autolyse: {
     scheduleField: 'autolyseMinutes',

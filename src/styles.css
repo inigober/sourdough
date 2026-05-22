@@ -179,6 +179,10 @@ p {
   min-width: 0;
 }
 
+.timeline-row__content-col--dated {
+  align-self: end;
+}
+
 .timeline-row__date {
   color: var(--color-primary);
   font-size: 0.76rem;
@@ -229,6 +233,10 @@ p {
 .timeline-row--interactive:hover,
 .timeline-row--interactive:focus-visible {
   background: rgb(255 244 232 / 55%);
+}
+
+.timeline-row--interactive:has(.timeline-row__date) .timeline-row__label-compact {
+  align-self: end;
 }
 
 .timeline-row--interactive:focus-visible {
@@ -1242,6 +1250,15 @@ p {
   width: 100%;
   max-width: 100%;
   min-width: 0;
+  box-sizing: border-box;
+  line-height: 1.35;
+  min-height: 2.75rem;
+}
+
+.field-card input[type='date']::-webkit-date-and-time-value,
+.field-card input[type='time']::-webkit-date-and-time-value {
+  line-height: 1.35;
+  min-height: 1.2em;
 }
 
 @media (min-width: 640px) {
@@ -2899,6 +2916,12 @@ dd {
     width: 2.25rem;
     height: 2.25rem;
     font-size: 0.82rem;
+  }
+
+  .field-card input[type='date'],
+  .field-card input[type='time'] {
+    padding: 11px 14px;
+    font-size: 1rem;
   }
 
   .reference-chip__label .info-toggle__button,

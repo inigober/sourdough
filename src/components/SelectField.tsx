@@ -1,3 +1,5 @@
+import { useId } from 'react';
+
 import { FieldLabel } from './FieldLabel.tsx';
 
 type SelectFieldProps<TValue extends string> = {
@@ -24,14 +26,19 @@ export function SelectField<TValue extends string>({
   message,
   status,
 }: SelectFieldProps<TValue>) {
+  const selectId = useId();
   const classNames = ['field-card', className, status ? `field-card--${status}` : undefined]
     .filter(Boolean)
     .join(' ');
 
   return (
-    <label className={classNames}>
-      <FieldLabel label={label} info={info} />
-      <select value={value} onChange={(event) => onChange(event.currentTarget.value as TValue)}>
+    <div className={classNames}>
+      <FieldLabel label={label} info={info} htmlFor={selectId} />
+      <select
+        id={selectId}
+        value={value}
+        onChange={(event) => onChange(event.currentTarget.value as TValue)}
+      >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
@@ -39,6 +46,6 @@ export function SelectField<TValue extends string>({
         ))}
       </select>
       {message ? <span className={`field-message field-message--${status}`}>{message}</span> : null}
-    </label>
+    </div>
   );
 }

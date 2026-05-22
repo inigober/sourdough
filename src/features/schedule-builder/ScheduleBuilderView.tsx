@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 
 import { PageShell } from '../../components/PageShell.tsx';
 import { StickyFooter } from '../../components/StickyFooter.tsx';
@@ -31,6 +31,7 @@ import { scheduleFieldInfo } from './scheduleFieldInfo.ts';
 import {
   describeStarterPrepPlan,
   formatRatioLabel,
+  FRIDGE_STARTER_TEMP_C,
   planStarterPrep,
 } from '../../lib/schedule/levainPrep.ts';
 import { bakeMethodOptions, proofingStyleOptions } from './scheduleOptions.ts';
@@ -57,6 +58,9 @@ export function ScheduleBuilderView({
   isStartingBake = false,
 }: ScheduleBuilderViewProps) {
   const [exportMessage, setExportMessage] = useState<string | null>(null);
+  const mixDateInputId = useId();
+  const startTimeInputId = useId();
+  const desiredBakeTimeInputId = useId();
   const autolyseAdvice = useMemo(() => getAutolyseRecommendation(recipeInput), [recipeInput]);
   const autolyseTimeAdvice = useMemo(() => getAutolyseTimeAdvice(recipeInput), [recipeInput]);
   const proofingAdvice = useMemo(
@@ -223,11 +227,12 @@ export function ScheduleBuilderView({
               value={scheduleInput.levainBuildHours}
               min={3}
               max={18}
-              step={0.25}
+              step={0.5}
               onChange={(value) => onScheduleChange({ levainBuildHours: value })}
             />
             <p className="schedule-starter-prep__ratio" role="status">
-              Suggested feeding for a {scheduleInput.levainBuildHours}h build at {recipeInput.roomTemperatureCelsius}°C:{' '}
+              Suggested feeding for a {scheduleInput.levainBuildHours}h build at {recipeInput.roomTemperatureCelsius}°C
+              {scheduleInput.starterFromFridge ? ` (fridge starter ~${FRIDGE_STARTER_TEMP_C}°C)` : ''}:{' '}
               <strong>{levainBuildRatioLabel}</strong>. {starterPrepPlanDescription}
             </p>
           </form>
@@ -240,22 +245,26 @@ export function ScheduleBuilderView({
           copy="Choose when mixing begins and which calendar day that falls on."
         />
         <form className="field-grid field-grid--pair schedule-mix-form">
-          <label className="field-card">
-            <FieldLabel label="Mix date" info={scheduleFieldInfo.mixDate} />
+          <div className="field-card">
+            <FieldLabel label="Mix date" info={scheduleFieldInfo.mixDate} htmlFor={mixDateInputId} />
             <input
+              id={mixDateInputId}
               type="date"
               value={scheduleInput.mixDate}
               onChange={(event) => onScheduleChange({ mixDate: event.currentTarget.value })}
             />
-          </label>
-          <label className="field-card">
-            <span className="field-label-row">Start time</span>
+          </div>
+          <div className="field-card">
+            <label htmlFor={startTimeInputId} className="field-label-row">
+              Start time
+            </label>
             <input
+              id={startTimeInputId}
               type="time"
               value={scheduleInput.startTime}
               onChange={(event) => onScheduleChange({ startTime: event.currentTarget.value })}
             />
-          </label>
+          </div>
         </form>
       </section>
 
@@ -411,17 +420,19 @@ export function ScheduleBuilderView({
           />
           {scheduleInput.proofingStyle === 'cold' ? (
             <>
-              <label className="field-card">
+              <div className="field-card">
                 <FieldLabel
                   label="Desired bake time (day + 1)"
                   info={scheduleFieldInfo.desiredBakeTime}
+                  htmlFor={desiredBakeTimeInputId}
                 />
                 <input
+                  id={desiredBakeTimeInputId}
                   type="time"
                   value={scheduleInput.desiredBakeTime}
                   onChange={(event) => onScheduleChange({ desiredBakeTime: event.currentTarget.value })}
                 />
-              </label>
+              </div>
               <div
                 className={`calculated-result calculated-result--${coldRetardAssessmentLevel}`}
                 role="status"
