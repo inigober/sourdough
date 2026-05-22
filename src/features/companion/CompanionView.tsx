@@ -164,13 +164,11 @@ export function CompanionView({ session, onSessionChange, onExit }: CompanionVie
       <section className="hero companion__hero">
         <h1>{session.recipeName}</h1>
         <p className="hero-copy">
-          Mix the dough on {mixDateLabel}. Oven-bake on {bakeDateLabel}.
+          Mix the dough on {mixDateLabel}. Oven-bake on {bakeDateLabel}. Stuck on a step? Tap the
+          sparkles button to ask the AI baking coach for help.
         </p>
         <p className="companion__progress">
           Step {session.currentStepIndex + 1} of {timeline.length}
-        </p>
-        <p className="companion__coach-hint">
-          Stuck on a step? Tap the sparkles button to ask the AI baking coach for help.
         </p>
         {session.scheduleDriftMinutes !== 0 ? (
           <p className="companion__drift" role="status">
