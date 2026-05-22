@@ -17,7 +17,6 @@ export type FeedingRatio = {
 export const STARTER_REFRESH_RATIO: FeedingRatio = { starter: 1, flour: 3, water: 3 };
 export const BASE_LEVAIN_BUILD_RATIO: FeedingRatio = { starter: 1, flour: 5, water: 5 };
 export const STARTER_REFRESH_MIN_HOURS = 6;
-export const FRIDGE_STARTER_TEMP_C = 4;
 export const DEFAULT_LEVAIN_BUFFER_PERCENT = 15;
 export const DEFAULT_LEVAIN_BUILD_HOURS = 12;
 export const MAX_LEVAIN_RATIO_PARTS = 15;
@@ -26,46 +25,29 @@ export const MIN_LEVAIN_RATIO_PARTS = 3;
 /**
  * Starter prep rules:
  * 1. Levain ratio scales with build hours, room temp, and levain activity so the build peaks at mix.
- * 2. Fridge starter (~4°C) normally gets a separate refresh step (1:3:3) before the levain build.
- *    Refresh duration scales with room temp — colder rooms warm the jar more slowly.
+ * 2. Fridge starter is inactive when taken out and needs a refresh before the levain build.
+ *    A separate 1:3:3 refresh step is scheduled when the build ratio is moderate.
  * 3. Skip the refresh step when the base levain ratio is already high (> threshold) or at the max cap.
  *    A large single feeding can wake and ripen fridge starter in one step.
- * 4. When refresh is skipped, fold fridge wake-up into the levain ratio by adding equivalent hours
- *    derived from the gap between room temp and fridge starter temp (timeline still uses chosen build hours).
+ * 4. Fridge inactive state always increases the levain ratio via equivalent build hours:
+ *    - separate refresh: smaller bump (refresh handles wake-up; build still from recovering culture)
+ *    - folded refresh: full refresh equivalent added to the ratio calculation
  */
 export const SKIP_REFRESH_RATIO_THRESHOLD = 10;
+/** Extra build hours folded into levain ratio after a separate fridge refresh step. */
+export const FRIDGE_LEVAIN_EXTRA_HOURS_AFTER_REFRESH = 2;
+/** Refresh time folded into levain ratio when no separate refresh step is scheduled. */
+export const FRIDGE_REFRESH_EQUIVALENT_HOURS_FOLDED = STARTER_REFRESH_MIN_HOURS;
 
 export type StarterPrepPlan = {
   includeRefreshStep: boolean;
   levainBuildRatio: FeedingRatio;
   levainBuildHours: number;
-  starterRefreshHours?: number;
-  fridgeWakeEquivalentHours?: number;
   refreshSkippedBecause?: 'high_ratio' | 'max_ratio';
 };
 
 export function getDefaultLevainBuildHours(): number {
   return DEFAULT_LEVAIN_BUILD_HOURS;
-}
-
-/**
- * Cold fridge starter needs extra time before it behaves like room-temp culture.
- * Scales with the gap between room temp and typical fridge starter temp (~4°C).
- */
-export function getFridgeWakeEquivalentHours(roomTemperatureCelsius: number): number {
-  const roomAboveFridge = roomTemperatureCelsius - FRIDGE_STARTER_TEMP_C;
-  const referenceRoomAboveFridge = 22 - FRIDGE_STARTER_TEMP_C;
-  const referenceHours = 3;
-  const scaled = referenceHours * (referenceRoomAboveFridge / roomAboveFridge);
-
-  return clamp(roundToHalfHour(scaled), 2, 5);
-}
-
-/** Separate refresh step duration when fridge wake-up is not folded into the levain build. */
-export function getStarterRefreshHours(roomTemperatureCelsius: number): number {
-  const extraHours = getFridgeWakeEquivalentHours(roomTemperatureCelsius) - 3;
-
-  return clamp(roundToHalfHour(STARTER_REFRESH_MIN_HOURS + extraHours), 5, 8);
 }
 
 export function getReferencePeakHoursForRatio(
@@ -111,7 +93,7 @@ export function planStarterPrep(input: {
   levainActivity: LevainActivity;
   starterFromFridge: boolean;
 }): StarterPrepPlan {
-  const baseRatio = getLevainBuildRatio(
+  const roomTempRatio = getLevainBuildRatio(
     input.buildHours,
     input.roomTemperatureCelsius,
     input.levainActivity,
@@ -120,46 +102,44 @@ export function planStarterPrep(input: {
   if (!input.starterFromFridge) {
     return {
       includeRefreshStep: false,
-      levainBuildRatio: baseRatio,
+      levainBuildRatio: roomTempRatio,
       levainBuildHours: input.buildHours,
     };
   }
 
   const shouldSkipRefresh =
-    baseRatio.flour > SKIP_REFRESH_RATIO_THRESHOLD ||
-    baseRatio.flour >= MAX_LEVAIN_RATIO_PARTS;
+    roomTempRatio.flour > SKIP_REFRESH_RATIO_THRESHOLD ||
+    roomTempRatio.flour >= MAX_LEVAIN_RATIO_PARTS;
 
   if (!shouldSkipRefresh) {
     return {
       includeRefreshStep: true,
-      levainBuildRatio: baseRatio,
+      levainBuildRatio: getLevainBuildRatio(
+        input.buildHours + FRIDGE_LEVAIN_EXTRA_HOURS_AFTER_REFRESH,
+        input.roomTemperatureCelsius,
+        input.levainActivity,
+      ),
       levainBuildHours: input.buildHours,
-      starterRefreshHours: getStarterRefreshHours(input.roomTemperatureCelsius),
     };
   }
 
-  const fridgeWakeHours = getFridgeWakeEquivalentHours(input.roomTemperatureCelsius);
-  const foldedRatio = getLevainBuildRatio(
-    input.buildHours + fridgeWakeHours,
-    input.roomTemperatureCelsius,
-    input.levainActivity,
-  );
-
   return {
     includeRefreshStep: false,
-    levainBuildRatio: foldedRatio,
+    levainBuildRatio: getLevainBuildRatio(
+      input.buildHours + FRIDGE_REFRESH_EQUIVALENT_HOURS_FOLDED,
+      input.roomTemperatureCelsius,
+      input.levainActivity,
+    ),
     levainBuildHours: input.buildHours,
-    fridgeWakeEquivalentHours: fridgeWakeHours,
     refreshSkippedBecause:
-      baseRatio.flour >= MAX_LEVAIN_RATIO_PARTS ? 'max_ratio' : 'high_ratio',
+      roomTempRatio.flour >= MAX_LEVAIN_RATIO_PARTS ? 'max_ratio' : 'high_ratio',
   };
 }
 
 export function describeStarterPrepPlan(plan: StarterPrepPlan): string {
   if (!plan.refreshSkippedBecause) {
     if (plan.includeRefreshStep) {
-      const refreshHours = plan.starterRefreshHours ?? STARTER_REFRESH_MIN_HOURS;
-      return `Starts with a ~${refreshHours} h refresh from ~${FRIDGE_STARTER_TEMP_C}°C fridge starter, then the levain build.`;
+      return `Starts with a ${STARTER_REFRESH_MIN_HOURS} h refresh — fridge starter is inactive until fed — then the levain build.`;
     }
 
     return 'Levain build only — no separate refresh step.';
@@ -168,8 +148,8 @@ export function describeStarterPrepPlan(plan: StarterPrepPlan): string {
   return `Fridge refresh is built into the ${formatRatioLabel(plan.levainBuildRatio)} levain feeding.`;
 }
 
-export function formatStarterRefreshLabel(refreshHours: number): string {
-  return `Refresh starter (~${refreshHours} h)`;
+export function formatStarterRefreshLabel(): string {
+  return `Refresh starter (~${STARTER_REFRESH_MIN_HOURS} h)`;
 }
 
 export function formatRatioLabel(ratio: FeedingRatio): string {
@@ -236,8 +216,4 @@ function roundGrams(value: number): number {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
-}
-
-function roundToHalfHour(value: number): number {
-  return Math.round(value * 2) / 2;
 }

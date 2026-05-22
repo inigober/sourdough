@@ -31,7 +31,6 @@ import { scheduleFieldInfo } from './scheduleFieldInfo.ts';
 import {
   describeStarterPrepPlan,
   formatRatioLabel,
-  FRIDGE_STARTER_TEMP_C,
   planStarterPrep,
 } from '../../lib/schedule/levainPrep.ts';
 import { bakeMethodOptions, proofingStyleOptions } from './scheduleOptions.ts';
@@ -232,7 +231,7 @@ export function ScheduleBuilderView({
             />
             <p className="schedule-starter-prep__ratio" role="status">
               Suggested feeding for a {scheduleInput.levainBuildHours}h build at {recipeInput.roomTemperatureCelsius}°C
-              {scheduleInput.starterFromFridge ? ` (fridge starter ~${FRIDGE_STARTER_TEMP_C}°C)` : ''}:{' '}
+              {scheduleInput.starterFromFridge ? ' (fridge starter — inactive until refreshed)' : ''}:{' '}
               <strong>{levainBuildRatioLabel}</strong>. {starterPrepPlanDescription}
             </p>
           </form>

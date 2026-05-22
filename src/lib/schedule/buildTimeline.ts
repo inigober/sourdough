@@ -86,13 +86,12 @@ export function buildTimeline(schedule: ScheduleInput, recipeInput: RecipeInput)
     }
 
     if (prepPlan.includeRefreshStep) {
-      const refreshHours = prepPlan.starterRefreshHours ?? STARTER_REFRESH_MIN_HOURS;
-      const refreshMinutes = Math.round(refreshHours * 60);
+      const refreshMinutes = STARTER_REFRESH_MIN_HOURS * 60;
       const refreshFeeding = calculateStarterRefreshFeeding();
       appendAtOffset(
         levainBuildStartOffset - refreshMinutes,
         'refresh-starter',
-        formatStarterRefreshLabel(refreshHours),
+        formatStarterRefreshLabel(),
         refreshMinutes,
         formatFeedingDetail(refreshFeeding, '1:3:3'),
       );

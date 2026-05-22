@@ -13,9 +13,7 @@ import {
   formatLevainBuildDetail,
   formatRatioLabel,
   getDefaultLevainBuildHours,
-  getFridgeWakeEquivalentHours,
   getLevainBuildRatio,
-  getStarterRefreshHours,
   planStarterPrep,
   SKIP_REFRESH_RATIO_THRESHOLD,
   STARTER_REFRESH_MIN_HOURS,
@@ -44,36 +42,42 @@ test('warmer room temperature increases feeding ratio for the same build time', 
   assert.ok(warmRatio.flour > coolRatio.flour);
 });
 
-test('fridge wake equivalent hours shrink as room temperature rises', () => {
-  assert.equal(getFridgeWakeEquivalentHours(22), 3);
-  assert.ok(getFridgeWakeEquivalentHours(18) > getFridgeWakeEquivalentHours(22));
-  assert.ok(getFridgeWakeEquivalentHours(26) < getFridgeWakeEquivalentHours(22));
-});
-
-test('starter refresh hours account for fridge starter temperature', () => {
-  assert.equal(getStarterRefreshHours(22), STARTER_REFRESH_MIN_HOURS);
-  assert.ok(getStarterRefreshHours(18) > getStarterRefreshHours(22));
-  assert.ok(getStarterRefreshHours(26) < getStarterRefreshHours(22));
-});
-
-test('folded fridge builds use a higher ratio in cooler rooms', () => {
-  const coolPlan = planStarterPrep({
-    buildHours: 14,
-    roomTemperatureCelsius: 18,
+test('fridge starter increases levain ratio even when a separate refresh step is scheduled', () => {
+  const roomPlan = planStarterPrep({
+    buildHours: 7,
+    roomTemperatureCelsius: 22,
     levainActivity: 'active',
-    starterFromFridge: true,
+    starterFromFridge: false,
   });
-  const warmPlan = planStarterPrep({
-    buildHours: 14,
-    roomTemperatureCelsius: 26,
+  const fridgePlan = planStarterPrep({
+    buildHours: 7,
+    roomTemperatureCelsius: 22,
     levainActivity: 'active',
     starterFromFridge: true,
   });
 
-  assert.ok(!coolPlan.includeRefreshStep);
-  assert.ok(!warmPlan.includeRefreshStep);
-  assert.ok(coolPlan.levainBuildRatio.flour >= warmPlan.levainBuildRatio.flour);
-  assert.ok((coolPlan.fridgeWakeEquivalentHours ?? 0) > (warmPlan.fridgeWakeEquivalentHours ?? 0));
+  assert.equal(roomPlan.includeRefreshStep, false);
+  assert.equal(fridgePlan.includeRefreshStep, true);
+  assert.ok(fridgePlan.levainBuildRatio.flour > roomPlan.levainBuildRatio.flour);
+});
+
+test('folded fridge builds use a higher ratio than room-temp starter', () => {
+  const roomPlan = planStarterPrep({
+    buildHours: 12,
+    roomTemperatureCelsius: 22,
+    levainActivity: 'active',
+    starterFromFridge: false,
+  });
+  const fridgePlan = planStarterPrep({
+    buildHours: 12,
+    roomTemperatureCelsius: 22,
+    levainActivity: 'active',
+    starterFromFridge: true,
+  });
+
+  assert.ok(!fridgePlan.includeRefreshStep);
+  assert.ok(fridgePlan.refreshSkippedBecause);
+  assert.ok(fridgePlan.levainBuildRatio.flour > roomPlan.levainBuildRatio.flour);
 });
 
 test('starter refresh feeding uses a 1:3:3 ratio', () => {
@@ -115,6 +119,7 @@ test('moderate-ratio builds keep a separate fridge refresh step', () => {
 
   assert.equal(plan.includeRefreshStep, true);
   assert.equal(plan.refreshSkippedBecause, undefined);
+  assert.match(describeStarterPrepPlan(plan), /inactive until fed/);
 });
 
 test('timeline includes refresh only when the prep plan calls for it', () => {
@@ -131,8 +136,8 @@ test('timeline includes refresh only when the prep plan calls for it', () => {
   });
   const refreshTimeline = buildTimeline(withRefresh, defaultRecipeInput);
   assert.equal(refreshTimeline[0]?.id, 'refresh-starter');
-  assert.match(refreshTimeline[0]?.label ?? '', new RegExp(`Refresh starter \\(~${refreshPlan.starterRefreshHours} h\\)`));
-  assert.match(describeStarterPrepPlan(refreshPlan), /~4°C fridge starter/);
+  assert.match(refreshTimeline[0]?.label ?? '', new RegExp(`Refresh starter \\(~${STARTER_REFRESH_MIN_HOURS} h\\)`));
+  assert.match(describeStarterPrepPlan(refreshPlan), /inactive until fed/);
 
   const foldedTimeline = buildTimeline(createDefaultScheduleInput(defaultRecipeInput), defaultRecipeInput);
   assert.notEqual(foldedTimeline[0]?.id, 'refresh-starter');
