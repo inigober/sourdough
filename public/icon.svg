@@ -1,7 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Sourdough loaf">
   <rect width="512" height="512" rx="112" fill="#f8f1e8"/>
-  <ellipse cx="256" cy="286" rx="176" ry="118" fill="#d89533"/>
-  <ellipse cx="256" cy="250" rx="156" ry="96" fill="#e8b35a"/>
-  <path d="M126 250c36-72 92-108 130-108s94 36 130 108" fill="none" stroke="#a15b2a" stroke-width="14" stroke-linecap="round"/>
-  <path d="M150 220c24-34 58-52 106-52s82 18 106 52" fill="none" stroke="#c8884d" stroke-width="10" stroke-linecap="round" opacity="0.8"/>
+  <g transform="rotate(-16 256 272)">
+    <ellipse cx="256" cy="278" rx="170" ry="106" fill="#d89533"/>
+    <ellipse cx="244" cy="252" rx="118" ry="48" fill="#e8b35a"/>
+    <path
+      d="M142 246c34-62 92-94 114-94s80 32 114 94"
+      fill="none"
+      stroke="#a15b2a"
+      stroke-width="13"
+      stroke-linecap="round"
+    />
+    <path
+      d="M164 228c24-32 58-48 92-48s68 16 92 48"
+      fill="none"
+      stroke="#a15b2a"
+      stroke-width="10"
+      stroke-linecap="round"
+      opacity="0.85"
+    />
+  </g>
 </svg>

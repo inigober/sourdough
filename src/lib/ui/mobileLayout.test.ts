@@ -31,10 +31,10 @@ test('wizard save control stays compact with icon and label', () => {
   assert.match(stylesCss, /\.wizard-nav__save\s*\{[^}]*padding:\s*10px 14px/s);
 });
 
-test('timeline rows stack date above time in the left column', () => {
-  assert.match(stylesCss, /\.timeline-row__layout\s*\{[^}]*align-items:\s*start/s);
-  assert.match(stylesCss, /\.timeline-row__time-col\s*\{[^}]*display:\s*grid/s);
-  assert.match(stylesCss, /\.companion-overview__time-col\s*\{[^}]*display:\s*grid/s);
+test('timeline rows use a fixed-width time column so step names align across days', () => {
+  assert.match(stylesCss, /--timeline-time-width:\s*7\.75rem/s);
+  assert.match(stylesCss, /\.timeline-row__layout--dated \.timeline-row__time\s*\{[^}]*grid-row:\s*2/s);
+  assert.match(stylesCss, /\.timeline-row__layout--dated \.timeline-row__content-col\s*\{[^}]*grid-row:\s*2/s);
 });
 
 test('summary groups stay in a two-column grid on desktop', () => {
@@ -69,6 +69,13 @@ test('mix day date and time inputs stay constrained inside field cards', () => {
   assert.match(stylesCss, /\.field-grid--pair > \.field-card\s*\{[^}]*min-width:\s*0/s);
 });
 
-test('dated timeline rows align step labels with the time row', () => {
-  assert.match(stylesCss, /\.timeline-row__content-col--dated\s*\{[^}]*align-self:\s*end/s);
+test('ingredient summary cards keep full-width columns on wide desktop', () => {
+  assert.match(
+    stylesCss,
+    /@media \(min-width: 960px\)\s*\{\s*\.recipe-results__calculated\s*\{[^}]*grid-template-columns:\s*1fr/s,
+  );
+  assert.match(
+    stylesCss,
+    /\.recipe-results__calculated \.summary-grid\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s,
+  );
 });

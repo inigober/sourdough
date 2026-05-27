@@ -3,7 +3,7 @@ import { useEffect, useState, type FocusEvent } from 'react';
 import { InfoToggle } from '../../components/InfoToggle.tsx';
 import { PenEditButton } from '../../components/PenEditButton.tsx';
 import { SectionHeading } from '../../components/SectionHeading.tsx';
-import { BinIcon, ChevronDownIcon, ChevronUpIcon, PlusIcon } from '../../components/icons.tsx';
+import { BinIcon, MinusIcon, PlusIcon } from '../../components/icons.tsx';
 import {
   formatFlourBlendSummary,
   getFlourGrams,
@@ -123,7 +123,7 @@ function FlourBlendRow({
   const grams = getFlourGrams(entry.percent, totalFlourGrams);
 
   return (
-    <li className={isMultiFlour ? 'flour-blend-row flour-blend-row--multi' : 'flour-blend-row'}>
+    <li className={isMultiFlour ? 'flour-blend-row flour-blend-row--multi' : 'flour-blend-row flour-blend-row--single'}>
       <label className="flour-blend-row__select">
         <span className="visually-hidden">Flour type</span>
         <select
@@ -213,9 +213,19 @@ function FlourPercentStepper({
 
   return (
     <div className="flour-blend-row__allocation">
-      <span className="flour-percent-stepper">
+      <div className="flour-percent-stepper">
         <span className="visually-hidden">Share of total flour</span>
-        <span className="number-field__control flour-percent-stepper__control">
+        <button
+          type="button"
+          className="icon-button icon-button--step flour-percent-stepper__button"
+          aria-label="Decrease flour percentage"
+          disabled={decrementDisabled}
+          onClick={() => stepPercent(-1)}
+        >
+          <MinusIcon />
+        </button>
+        <label className="flour-percent-stepper__value">
+          <span className="visually-hidden">Flour percentage</span>
           <input
             type="text"
             inputMode="numeric"
@@ -233,31 +243,18 @@ function FlourPercentStepper({
               commitDraft(draft);
             }}
           />
-          <span className="number-field__steppers" aria-hidden="true">
-            <button
-              type="button"
-              className="number-field__stepper"
-              aria-label="Increase flour percentage"
-              disabled={incrementDisabled}
-              tabIndex={-1}
-              onClick={() => stepPercent(1)}
-            >
-              <ChevronUpIcon />
-            </button>
-            <button
-              type="button"
-              className="number-field__stepper"
-              aria-label="Decrease flour percentage"
-              disabled={decrementDisabled}
-              tabIndex={-1}
-              onClick={() => stepPercent(-1)}
-            >
-              <ChevronDownIcon />
-            </button>
-          </span>
-        </span>
-        <span className="input-suffix flour-percent-stepper__suffix">%</span>
-      </span>
+          <span className="flour-percent-stepper__suffix">%</span>
+        </label>
+        <button
+          type="button"
+          className="icon-button icon-button--step flour-percent-stepper__button"
+          aria-label="Increase flour percentage"
+          disabled={incrementDisabled}
+          onClick={() => stepPercent(1)}
+        >
+          <PlusIcon />
+        </button>
+      </div>
       <span className="flour-blend-row__grams">{formatGrams(grams)}</span>
     </div>
   );

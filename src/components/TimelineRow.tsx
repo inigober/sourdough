@@ -20,12 +20,14 @@ export function TimelineRow({
 
   return (
     <li className={isDated ? 'timeline-row timeline-row--dated' : 'timeline-row'}>
-      <div className="timeline-row__layout">
-        <div className="timeline-row__time-col">
-          {isDated ? <span className="timeline-row__date">{dateLabel}</span> : null}
-          <span className="timeline-row__time">{timeLabel}</span>
-        </div>
-        <div className={`timeline-row__content-col${isDated ? ' timeline-row__content-col--dated' : ''}`}>
+      <div
+        className={
+          isDated ? 'timeline-row__layout timeline-row__layout--dated' : 'timeline-row__layout'
+        }
+      >
+        {isDated ? <span className="timeline-row__date">{dateLabel}</span> : null}
+        <span className="timeline-row__time">{timeLabel}</span>
+        <div className="timeline-row__content-col">
           <strong className="timeline-row__label">{label}</strong>
           {detail ? <p className="timeline-row__detail">{detail}</p> : null}
         </div>

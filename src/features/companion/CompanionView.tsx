@@ -278,15 +278,15 @@ export function CompanionView({ session, onSessionChange, onExit }: CompanionVie
               <li key={step.id} className="companion__overview-item">
                 <button
                   type="button"
-                  className={`timeline-row timeline-row--interactive timeline-row--${variant}`}
+                  className={`timeline-row timeline-row--interactive timeline-row--${variant}${
+                    showDateLabel && stepTimes.dateLabel ? ' timeline-row--dated-interactive' : ''
+                  }`}
                   onClick={() => handleJumpToStep(index)}
                 >
-                  <span className="companion-overview__time-col">
-                    {showDateLabel && stepTimes.dateLabel ? (
-                      <span className="timeline-row__date">{stepTimes.dateLabel}</span>
-                    ) : null}
-                    <span className="timeline-row__time-compact">{stepTimes.startTime}</span>
-                  </span>
+                  {showDateLabel && stepTimes.dateLabel ? (
+                    <span className="timeline-row__date">{stepTimes.dateLabel}</span>
+                  ) : null}
+                  <span className="timeline-row__time-compact">{stepTimes.startTime}</span>
                   <span className="timeline-row__label-compact">{step.label}</span>
                 </button>
               </li>
