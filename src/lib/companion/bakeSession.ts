@@ -156,12 +156,15 @@ export function isBakeSessionComplete(session: BakeSession, stepCount: number): 
   return stepCount > 0 && session.currentStepIndex >= stepCount - 1;
 }
 
-export function restartStepTimer(session: BakeSession, step: TimelineStep): BakeSession {
+export function restartStepTimer(
+  session: BakeSession,
+  step: TimelineStep,
+  now = Date.now(),
+): BakeSession {
   if (step.durationMinutes <= 0) {
     return session;
   }
 
-  const now = Date.now();
   return {
     ...session,
     currentStepStartedAt: new Date(now).toISOString(),

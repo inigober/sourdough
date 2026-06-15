@@ -9,8 +9,11 @@ import {
   createBakeSession,
   isBakeSessionComplete,
   jumpToBakeStep,
+  restartStepTimer,
   retreatBakeSession,
   startTimedStep,
+  toBakeSessionSummary,
+  updateBakeSessionSchedule,
 } from './bakeSession.ts';
 
 function buildTestTimeline(session: ReturnType<typeof createBakeSession>) {
@@ -97,4 +100,92 @@ test('timed steps start only when the baker presses start', () => {
   const started = startTimedStep(session, autolyse);
   assert.ok(started.activeTimerEndsAt);
   assert.ok(started.currentStepStartedAt);
+});
+
+test('updateBakeSessionSchedule replaces schedule and clears active timers', () => {
+  const schedule = createDefaultScheduleInput(defaultRecipeInput);
+  const session = {
+    ...createBakeSession({
+      savedRecipeId: null,
+      recipeName: 'Edited schedule',
+      recipeInput: defaultRecipeInput,
+      scheduleInput: schedule,
+    }),
+    currentStepStartedAt: '2026-05-20T09:00:00.000Z',
+    activeTimerEndsAt: '2026-05-20T09:30:00.000Z',
+  };
+
+  const updated = updateBakeSessionSchedule(session, {
+    ...schedule,
+    autolyseMinutes: 45,
+  });
+
+  assert.equal(updated.scheduleInput.autolyseMinutes, 45);
+  assert.equal(updated.currentStepStartedAt, null);
+  assert.equal(updated.activeTimerEndsAt, null);
+});
+
+test('restartStepTimer resets the current timed step from now', () => {
+  const schedule = {
+    ...createDefaultScheduleInput(defaultRecipeInput),
+    includeStarterPrep: false,
+    autolyseEnabled: true,
+    autolyseMinutes: 30,
+  };
+  const timeline = buildTestTimeline(
+    createBakeSession({
+      savedRecipeId: null,
+      recipeName: 'Restart timer',
+      recipeInput: defaultRecipeInput,
+      scheduleInput: schedule,
+    }),
+  );
+  const autolyse = timeline.find((step) => step.id === 'autolyse');
+  assert.ok(autolyse);
+
+  const now = Date.parse('2026-05-20T10:00:00.000Z');
+  const restarted = restartStepTimer(
+    createBakeSession({
+      savedRecipeId: null,
+      recipeName: 'Restart timer',
+      recipeInput: defaultRecipeInput,
+      scheduleInput: schedule,
+    }),
+    autolyse,
+    now,
+  );
+
+  assert.equal(restarted.currentStepStartedAt, '2026-05-20T10:00:00.000Z');
+  assert.equal(restarted.activeTimerEndsAt, '2026-05-20T10:30:00.000Z');
+});
+
+test('restartStepTimer is a no-op for untimed steps', () => {
+  const schedule = createDefaultScheduleInput(defaultRecipeInput);
+  const session = createBakeSession({
+    savedRecipeId: null,
+    recipeName: 'Untimed',
+    recipeInput: defaultRecipeInput,
+    scheduleInput: schedule,
+  });
+  const timeline = buildTestTimeline(session);
+  const untimed = timeline.find((step) => step.durationMinutes === 0);
+
+  assert.ok(untimed);
+  assert.deepEqual(restartStepTimer(session, untimed), session);
+});
+
+test('toBakeSessionSummary exposes resume card fields', () => {
+  const schedule = createDefaultScheduleInput(defaultRecipeInput);
+  const session = createBakeSession({
+    savedRecipeId: 'recipe-1',
+    recipeName: 'Resume me',
+    recipeInput: defaultRecipeInput,
+    scheduleInput: schedule,
+  });
+
+  assert.deepEqual(toBakeSessionSummary(session), {
+    recipeName: 'Resume me',
+    currentStepIndex: 0,
+    updatedAt: session.updatedAt,
+  });
 });

@@ -1,10 +1,16 @@
 import { useCallback } from 'react';
 
 import type { BakeCompleteSaveInput } from '../../lib/companion/types.ts';
-import { generateDefaultRecipeName } from '../../lib/storage/recipeStorage.ts';
 import type { SavedRecipe } from '../../lib/storage/types.ts';
 import type { ScheduleInput } from '../../lib/schedule/types.ts';
 import type { RecipeInput } from '../../lib/recipe/types.ts';
+import {
+  canStartBakeFromSavedRecipe,
+  getCompanionExitSessionAction,
+  resolvePostSaveBakeFlowAction,
+  resolveRecipeSaveName,
+  shouldPromptSaveBeforeBake,
+} from './bakeFlow.ts';
 
 type BeginBakeSessionOptions = {
   savedRecipeId: string | null;
@@ -58,11 +64,8 @@ export function useBakeFlow({
   );
 
   const ensureRecipeSaved = useCallback(async (): Promise<SavedRecipe> => {
-    return saveActiveRecipe(
-      activeSavedRecipe?.name ?? generateDefaultRecipeName(recipeInput, scheduleInput),
-      true,
-    );
-  }, [activeSavedRecipe?.name, recipeInput, saveActiveRecipe, scheduleInput]);
+    return saveActiveRecipe(resolveRecipeSaveName(activeSavedRecipe, recipeInput, scheduleInput), true);
+  }, [activeSavedRecipe, recipeInput, saveActiveRecipe, scheduleInput]);
 
   const proceedWithStartBake = useCallback(async (): Promise<void> => {
     await bakeSession.runStartBake(async () => {
@@ -82,7 +85,7 @@ export function useBakeFlow({
   }, [bakeSession, enterCompanion]);
 
   const startBakeFromSchedule = useCallback(async (): Promise<void> => {
-    if (!activeSavedRecipeId) {
+    if (shouldPromptSaveBeforeBake(activeSavedRecipeId)) {
       setPendingStartBakeAfterSave(true);
       openSaveDialog('schedule');
       return;
@@ -94,7 +97,7 @@ export function useBakeFlow({
   const startBakeFromSavedRecipe = useCallback(
     async (id: string): Promise<void> => {
       const saved = await fetchSavedRecipe(id);
-      if (!saved?.scheduleInput) {
+      if (!canStartBakeFromSavedRecipe(saved)) {
         return;
       }
 
@@ -120,7 +123,7 @@ export function useBakeFlow({
 
   const exitCompanion = useCallback(
     (options: { finished: boolean }): void => {
-      if (options.finished) {
+      if (getCompanionExitSessionAction(options.finished) === 'clear') {
         bakeSession.clearSessionAfterFinish();
       } else {
         bakeSession.stashSessionOnLeaveCompanion();
@@ -133,12 +136,14 @@ export function useBakeFlow({
 
   const continueAfterSaveRecipe = useCallback(
     async (options: { pendingGoHomeAfterSave: boolean; pendingStartBakeAfterSave: boolean }): Promise<void> => {
-      if (options.pendingGoHomeAfterSave) {
+      const action = resolvePostSaveBakeFlowAction(options);
+
+      if (action === 'goHome') {
         performGoHome();
         return;
       }
 
-      if (options.pendingStartBakeAfterSave) {
+      if (action === 'startBake') {
         setPendingStartBakeAfterSave(false);
         await proceedWithStartBake();
       }
