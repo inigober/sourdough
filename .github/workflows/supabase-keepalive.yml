@@ -1,0 +1,28 @@
+name: Supabase keepalive
+
+on:
+  schedule:
+    # Every 5 days at 09:00 UTC — keeps the free-tier project from pausing between bakes.
+    - cron: '0 9 */5 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        env:
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_PUBLISHABLE_KEY" ]; then
+            echo "VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY secret is missing. Add them in GitHub repo settings."
+            exit 1
+          fi
+
+          curl -fsS -X GET \
+            "${SUPABASE_URL%/}/rest/v1/saved_recipes?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_PUBLISHABLE_KEY}"
+
+          echo "Supabase keepalive ping succeeded."
