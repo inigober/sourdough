@@ -12,11 +12,14 @@ jobs:
     steps:
       - name: Ping Supabase REST API
         env:
-          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          # Accept repository Secrets or Variables (Settings → Secrets and variables → Actions).
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || vars.VITE_SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
         run: |
           if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_PUBLISHABLE_KEY" ]; then
-            echo "VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY secret is missing. Add them in GitHub repo settings."
+            echo "Missing VITE_SUPABASE_URL and/or VITE_SUPABASE_PUBLISHABLE_KEY."
+            echo "Add them under Settings → Secrets and variables → Actions → Secrets (or Variables)."
+            echo "Names must match exactly, including the VITE_ prefix."
             exit 1
           fi
 
