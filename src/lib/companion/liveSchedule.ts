@@ -5,6 +5,32 @@ import { formatClockTime, formatOffsetDateTime } from '../schedule/mixDateTime.t
 import type { BakeSession } from './types.ts';
 import { createTimerEndsAt } from './bakeTimer.ts';
 
+function upsertStepLog(
+  session: BakeSession,
+  step: TimelineStep,
+  patch: {
+    stepIndex?: number;
+    actualStartedAt?: string;
+    actualCompletedAt?: string;
+  },
+): BakeSession['stepLogs'] {
+  const existingIndex = session.stepLogs.findIndex((entry) => entry.stepId === step.id);
+  const existing = existingIndex >= 0 ? session.stepLogs[existingIndex] : null;
+  const nextEntry = {
+    stepIndex: patch.stepIndex ?? session.currentStepIndex,
+    stepId: step.id,
+    stepLabel: step.label,
+    actualStartedAt: patch.actualStartedAt ?? existing?.actualStartedAt ?? new Date().toISOString(),
+    actualCompletedAt: patch.actualCompletedAt ?? existing?.actualCompletedAt ?? patch.actualStartedAt ?? new Date().toISOString(),
+  };
+
+  if (existingIndex < 0) {
+    return [...session.stepLogs, nextEntry];
+  }
+
+  return session.stepLogs.map((entry, index) => (index === existingIndex ? nextEntry : entry));
+}
+
 export function applyScheduleDriftToTimeline(
   schedule: ScheduleInput,
   steps: TimelineStep[],
@@ -45,12 +71,17 @@ export function startTimedStep(
   step: TimelineStep,
   now = Date.now(),
 ): BakeSession {
+  const nowIso = new Date(now).toISOString();
   if (step.durationMinutes <= 0) {
     return {
       ...session,
-      currentStepStartedAt: new Date(now).toISOString(),
+      currentStepStartedAt: nowIso,
       activeTimerEndsAt: null,
-      updatedAt: new Date(now).toISOString(),
+      updatedAt: nowIso,
+      stepLogs: upsertStepLog(session, step, {
+        actualStartedAt: nowIso,
+        actualCompletedAt: nowIso,
+      }),
     };
   }
 
@@ -61,9 +92,12 @@ export function startTimedStep(
   return {
     ...session,
     scheduleDriftMinutes: nextDrift,
-    currentStepStartedAt: new Date(now).toISOString(),
+    currentStepStartedAt: nowIso,
     activeTimerEndsAt: createTimerEndsAt(step.durationMinutes, now),
-    updatedAt: new Date(now).toISOString(),
+    updatedAt: nowIso,
+    stepLogs: upsertStepLog(session, step, {
+      actualStartedAt: nowIso,
+    }),
   };
 }
 
@@ -72,12 +106,17 @@ export function completeTimedStep(
   step: TimelineStep,
   now = Date.now(),
 ): BakeSession {
+  const nowIso = new Date(now).toISOString();
   if (step.durationMinutes <= 0 || !session.currentStepStartedAt) {
     return {
       ...session,
       currentStepStartedAt: null,
       activeTimerEndsAt: null,
-      updatedAt: new Date(now).toISOString(),
+      updatedAt: nowIso,
+      stepLogs: upsertStepLog(session, step, {
+        actualStartedAt: session.currentStepStartedAt ?? nowIso,
+        actualCompletedAt: nowIso,
+      }),
     };
   }
 
@@ -90,7 +129,11 @@ export function completeTimedStep(
     scheduleDriftMinutes: session.scheduleDriftMinutes + completionDriftMinutes,
     currentStepStartedAt: null,
     activeTimerEndsAt: null,
-    updatedAt: new Date(now).toISOString(),
+    updatedAt: nowIso,
+    stepLogs: upsertStepLog(session, step, {
+      actualStartedAt: session.currentStepStartedAt,
+      actualCompletedAt: nowIso,
+    }),
   };
 }
 
@@ -100,6 +143,26 @@ export function isTimedStepRunning(session: BakeSession): boolean {
 
 export function canStartTimedStep(session: BakeSession, step: TimelineStep): boolean {
   return step.durationMinutes > 0 && !isTimedStepRunning(session);
+}
+
+/** Records a step the baker jumped over without running its timer. */
+export function recordSkippedStep(
+  session: BakeSession,
+  step: TimelineStep,
+  stepIndex: number,
+  now = Date.now(),
+): BakeSession {
+  const nowIso = new Date(now).toISOString();
+
+  return {
+    ...session,
+    updatedAt: nowIso,
+    stepLogs: upsertStepLog(session, step, {
+      stepIndex,
+      actualStartedAt: nowIso,
+      actualCompletedAt: nowIso,
+    }),
+  };
 }
 
 export function getDisplayStepTimes(

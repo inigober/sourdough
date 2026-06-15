@@ -163,7 +163,7 @@ p {
   --timeline-time-width: 7.75rem;
   display: grid;
   grid-template-columns: var(--timeline-time-width) minmax(0, 1fr);
-  gap: 4px 12px;
+  gap: 4px 10px;
   align-items: start;
 }
 
@@ -217,7 +217,7 @@ p {
   --timeline-time-width: 7.75rem;
   display: grid;
   grid-template-columns: var(--timeline-time-width) minmax(0, 1fr);
-  gap: 4px 8px;
+  gap: 4px 7px;
   align-items: start;
   width: 100%;
   border: 0;
@@ -506,6 +506,267 @@ p {
   margin: 16px 0 0;
   color: #7a695b;
   font-size: 0.9rem;
+}
+
+.saved-recipes__error,
+.bake-history__error {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  margin-bottom: 16px;
+}
+
+.bake-history__signin {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+
+.main-screen {
+  display: grid;
+  gap: 0;
+}
+
+.main-screen--with-nav {
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.app-bottom-nav {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: min(960px, 100%);
+  padding: 10px 20px calc(10px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid #ead9c8;
+  background: rgb(255 250 244 / 96%);
+  backdrop-filter: blur(10px);
+  transform: translateX(-50%);
+}
+
+.app-bottom-nav__item {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 3rem;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  color: #7a695b;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 8px 10px;
+}
+
+.app-bottom-nav__item .icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.app-bottom-nav__item--active {
+  border-color: #e1c7ad;
+  background: #fff4e8;
+  color: #a15b2a;
+}
+
+.app-bottom-nav__item:focus-visible {
+  outline: 3px solid rgb(161 91 42 / 18%);
+  outline-offset: 2px;
+}
+
+.bake-history-screen .hero h1 {
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+}
+
+.bake-history-detail__back {
+  margin-bottom: 4px;
+}
+
+.bake-history-detail__hero {
+  margin-bottom: 0;
+}
+
+.bake-history-detail__section-title {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+}
+
+.bake-history-detail__note-text {
+  margin: 0;
+  color: #6f5d4e;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.bake-history-detail__step-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bake-history-detail__step {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid #f0dfce;
+  border-radius: 16px;
+  background: #fff4e8;
+}
+
+.bake-history-detail__step-label {
+  color: #2f241c;
+  font-size: 0.95rem;
+}
+
+.bake-history-detail__step-times {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.bake-history-detail__step-row {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: 8px;
+  align-items: baseline;
+}
+
+.bake-history-detail__step-row dt {
+  margin: 0;
+  color: #7a695b;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.bake-history-detail__step-row dd {
+  margin: 0;
+  color: #2f241c;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.bake-history__filters {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.bake-history__search,
+.bake-history__filter {
+  margin: 0;
+}
+
+.bake-history__note-preview {
+  display: block;
+  margin-top: 4px;
+  color: #7a695b;
+  font-size: 0.84rem;
+  line-height: 1.35;
+  text-align: left;
+}
+
+.bake-history__assessment-badge {
+  color: #2f241c;
+  font-weight: 700;
+}
+
+.loaf-assessment-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.loaf-assessment-picker__chip {
+  border: 1px solid #e1c7ad;
+  border-radius: 999px;
+  background: #fffaf4;
+  color: #6f5d4e;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  padding: 8px 12px;
+}
+
+.loaf-assessment-picker__chip--active {
+  border-color: #a15b2a;
+  background: #fff4e8;
+  color: #a15b2a;
+}
+
+.loaf-assessment-picker__chip:focus-visible {
+  outline: 3px solid rgb(161 91 42 / 18%);
+  outline-offset: 2px;
+}
+
+.bake-history-detail__hero-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bake-history-detail__assessment {
+  margin: 8px 0 0;
+  color: #2f241c;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.bake-history-detail__assessment-label {
+  color: #7a695b;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+.bake-history-detail__edit-form {
+  display: grid;
+  gap: 12px;
+}
+
+.bake-history-detail__edit-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.bake-history-detail__delete {
+  width: min(100%, 18rem);
+  border-color: #c96a5c;
+  background: #fff1ed;
+  color: #8d2e20;
+  font-weight: 800;
+}
+
+.bake-history-detail__delete:hover:not(:disabled) {
+  background: #ffe4de;
+  filter: none;
+}
+
+.bake-history-detail__delete:disabled {
+  opacity: 0.45;
+}
+
+.bake-history-detail__footer {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 8px;
 }
 
 .saved-recipes__list {
@@ -828,12 +1089,7 @@ p {
 }
 
 .schedule-export__actions .wizard-button {
-  border-color: #e1c7ad;
-  background: #fffaf4;
-  color: #6f5d4e;
-  font-size: 0.92rem;
-  font-weight: 700;
-  padding: 10px 14px;
+  width: 100%;
 }
 
 .schedule-export__copy {
@@ -1341,6 +1597,23 @@ p {
   width: 100%;
 }
 
+.field-label-row--with-icon {
+  justify-content: flex-start;
+  gap: 8px;
+  color: #7a695b;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.field-label-row--with-icon .icon {
+  width: 1rem;
+  height: 1rem;
+  color: #a15b2a;
+  flex-shrink: 0;
+}
+
 .section-copy {
   color: #6f5d4e;
   line-height: 1.5;
@@ -1563,6 +1836,7 @@ p {
 }
 
 .flour-percent-stepper {
+  --flour-percent-control-size: 2.35rem;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1570,8 +1844,8 @@ p {
 }
 
 .flour-percent-stepper__button {
-  width: 2.25rem;
-  height: 2.25rem;
+  width: var(--flour-percent-control-size);
+  height: var(--flour-percent-control-size);
 }
 
 .flour-percent-stepper__value {
@@ -1580,10 +1854,12 @@ p {
   justify-content: center;
   gap: 2px;
   min-width: 4.5rem;
-  padding: 7px 10px;
+  height: var(--flour-percent-control-size);
+  padding: 0 10px;
   border: 1px solid #e1c7ad;
   border-radius: 999px;
   background: #fffaf4;
+  box-sizing: border-box;
 }
 
 .flour-percent-stepper__value:focus-within {
@@ -1632,7 +1908,14 @@ p {
   color: #2f241c;
   font-size: 0.95rem;
   font-weight: 800;
+  text-align: center;
+  justify-self: center;
   white-space: nowrap;
+}
+
+.flour-blend-row--single {
+  grid-template-columns: 1fr;
+  gap: 8px;
 }
 
 .flour-alloc-field {
@@ -2194,6 +2477,16 @@ p {
   min-height: calc(100dvh - 48px);
 }
 
+.page-shell.bake-history-detail {
+  min-height: calc(100dvh - 48px);
+}
+
+.page-shell.bake-history-detail .page-shell__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
 .companion__hero {
   margin-bottom: 0;
 }
@@ -2695,8 +2988,40 @@ dd {
 }
 
 @media (max-width: 640px) {
+  .timeline-row__layout {
+    --timeline-time-width: 6.7rem;
+    gap: 4px 8px;
+  }
+
+  .timeline-row--interactive {
+    --timeline-time-width: 6.7rem;
+    gap: 4px 6px;
+  }
+
   .app-shell {
     padding: 16px 14px calc(40px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .app-bottom-nav {
+    width: 100%;
+    padding-inline: 14px;
+  }
+
+  .main-screen--with-nav {
+    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .bake-history-detail__step-row {
+    grid-template-columns: 4.75rem minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .bake-history__filters {
+    grid-template-columns: 1fr;
+  }
+
+  .bake-history-detail__edit-actions {
+    grid-template-columns: 1fr;
   }
 
   .dialog-backdrop {

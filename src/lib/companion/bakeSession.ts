@@ -1,7 +1,7 @@
 import type { ScheduleInput } from '../schedule/types.ts';
 import type { TimelineStep } from '../schedule/types.ts';
 import { createTimerEndsAt } from './bakeTimer.ts';
-import { completeTimedStep, startTimedStep } from './liveSchedule.ts';
+import { completeTimedStep, recordSkippedStep, startTimedStep } from './liveSchedule.ts';
 import type { BakeSession } from './types.ts';
 
 export function createBakeSession(options: {
@@ -22,6 +22,7 @@ export function createBakeSession(options: {
     scheduleDriftMinutes: 0,
     currentStepStartedAt: null,
     activeTimerEndsAt: null,
+    stepLogs: [],
     coachQuestionsAsked: 0,
     startedAt: now,
     updatedAt: now,
@@ -94,13 +95,35 @@ export function retreatBakeSession(session: BakeSession): BakeSession {
   };
 }
 
-export function jumpToBakeStep(session: BakeSession, index: number): BakeSession {
-  const now = new Date().toISOString();
+export function jumpToBakeStep(
+  session: BakeSession,
+  index: number,
+  timeline: TimelineStep[],
+  now = Date.now(),
+): BakeSession {
+  const nowIso = new Date(now).toISOString();
+  const clampedIndex = Math.max(0, Math.min(index, Math.max(timeline.length - 1, 0)));
+  let next = session;
+
+  if (clampedIndex > session.currentStepIndex) {
+    for (let stepIndex = session.currentStepIndex; stepIndex < clampedIndex; stepIndex += 1) {
+      const step = timeline[stepIndex];
+      if (!step || next.stepLogs.some((entry) => entry.stepId === step.id)) {
+        continue;
+      }
+
+      if (stepIndex === session.currentStepIndex) {
+        next = completeTimedStep(next, step, now);
+      } else {
+        next = recordSkippedStep(next, step, stepIndex, now);
+      }
+    }
+  }
 
   return {
-    ...session,
-    currentStepIndex: index,
-    updatedAt: now,
+    ...next,
+    currentStepIndex: clampedIndex,
+    updatedAt: nowIso,
     currentStepStartedAt: null,
     activeTimerEndsAt: null,
   };

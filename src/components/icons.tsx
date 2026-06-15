@@ -272,3 +272,20 @@ export function CameraIcon({ className }: IconProps) {
     </Icon>
   );
 }
+
+export function SearchIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <circle cx="9" cy="9" r="4.75" {...stroke} />
+      <path d="m12.75 12.75 3.5 3.5" {...stroke} strokeWidth={1.75} />
+    </Icon>
+  );
+}
+
+export function FilterIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <path d="M4 5.5h12M6.5 10h7M9 14.5h4" {...stroke} strokeWidth={1.75} />
+    </Icon>
+  );
+}

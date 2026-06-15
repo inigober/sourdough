@@ -8,6 +8,7 @@ import {
 } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 
+import { clearLocalRecipesOnSignOut } from '../storage/cloudRecipeDeviceStorage.ts';
 import { formatAuthError } from './formatAuthError.ts';
 import { isSupabaseConfigured } from './config.ts';
 import { getSupabaseClient } from './supabaseClient.ts';
@@ -128,10 +129,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return;
     }
 
+    const userId = session?.user?.id;
     setAuthError(null);
     setAuthMessage(null);
+    clearLocalRecipesOnSignOut(userId);
     await supabase.auth.signOut();
-  }, [supabase]);
+  }, [session?.user?.id, supabase]);
 
   const value = useMemo<AuthContextValue>(
     () => ({

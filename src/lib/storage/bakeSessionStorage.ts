@@ -30,6 +30,7 @@ export function loadBakeSession(storage: StorageLike = getDefaultStorage()): Bak
       scheduleInput: normalizeScheduleInput(parsed.scheduleInput, parsed.recipeInput),
       scheduleDriftMinutes: parsed.scheduleDriftMinutes ?? 0,
       currentStepStartedAt: parsed.currentStepStartedAt ?? null,
+      stepLogs: parsed.stepLogs ?? [],
       coachQuestionsAsked: parsed.coachQuestionsAsked ?? 0,
     };
   } catch {

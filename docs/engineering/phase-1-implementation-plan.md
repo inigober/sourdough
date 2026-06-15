@@ -25,7 +25,8 @@ Use a simple TypeScript web app stack:
 - React for UI components.
 - TypeScript for explicit recipe and calculation types.
 - Vite for local development and bundling.
-- Vitest for calculation and assessment tests.
+- Node’s built-in test runner (`node --test`) for calculation, storage, and domain logic tests.
+- Vitest for feature-level React component tests (TSX imports are not supported by `node --test`).
 
 Why this stack:
 

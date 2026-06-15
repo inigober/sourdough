@@ -5,9 +5,9 @@ import { recipeTemplates } from '../../../lib/recipe/templates.ts';
 import type { BuilderDraftSummary } from '../../../lib/storage/draftStorage.ts';
 import type { BakeSession } from '../../../lib/companion/types.ts';
 import type { SavedRecipeSummary } from '../../../lib/storage/types.ts';
-
 type WelcomeStepProps = {
   savedRecipes: SavedRecipeSummary[];
+  savedRecipesError: string | null;
   draftSummary: BuilderDraftSummary | null;
   resumableBakeSession: BakeSession | null;
   importMessage: string | null;
@@ -20,10 +20,12 @@ type WelcomeStepProps = {
   onDeleteRecipe: (id: string) => void;
   onOpenAuth: () => void;
   onStartBake: (id: string) => void;
+  onRetrySavedRecipes: () => void;
 };
 
 export function WelcomeStep({
   savedRecipes,
+  savedRecipesError,
   draftSummary,
   resumableBakeSession,
   importMessage,
@@ -36,6 +38,7 @@ export function WelcomeStep({
   onDeleteRecipe,
   onOpenAuth,
   onStartBake,
+  onRetrySavedRecipes,
 }: WelcomeStepProps) {
   return (
     <div className="welcome-screen">
@@ -94,6 +97,14 @@ export function WelcomeStep({
           <h2>Saved recipes</h2>
           <p className="section-copy">Open a saved recipe or duplicate it as a starting point.</p>
         </div>
+        {savedRecipesError ? (
+          <div className="saved-recipes__error" role="alert">
+            <p className="auth-modal__error">{savedRecipesError}</p>
+            <button type="button" className="wizard-button wizard-button--secondary" onClick={onRetrySavedRecipes}>
+              Try again
+            </button>
+          </div>
+        ) : null}
         {savedRecipes.length > 0 ? (
           <ul className="saved-recipes__list">
             {savedRecipes.map((recipe) => (

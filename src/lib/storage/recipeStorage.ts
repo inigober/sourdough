@@ -102,6 +102,10 @@ export function deleteSavedRecipe(id: string, storage: StorageLike = getDefaultS
   return true;
 }
 
+export function clearAllSavedRecipes(storage: StorageLike = getDefaultStorage()): void {
+  storage.removeItem(SAVED_RECIPES_STORAGE_KEY);
+}
+
 function normalizeScheduleInput(
   scheduleInput: ScheduleInput | undefined,
   recipeInput: RecipeInput,

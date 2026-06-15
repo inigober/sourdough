@@ -10,13 +10,17 @@
     "test:storage": "node --experimental-strip-types --test \"src/lib/storage/*.test.ts\"",
     "test:recipe": "node --experimental-strip-types --test \"src/lib/recipe/*.test.ts\"",
     "test:companion": "node --experimental-strip-types --test \"src/lib/companion/*.test.ts\"",
+    "test:history": "node --experimental-strip-types --test \"src/lib/history/*.test.ts\"",
     "test:ui": "node --experimental-strip-types --test \"src/lib/ui/*.test.ts\"",
-    "test": "npm run test:recipe && npm run test:schedule && npm run test:storage && npm run test:companion && npm run test:ui"
+    "test:auth": "node --experimental-strip-types --test \"src/lib/auth/*.test.ts\"",
+    "test:features": "node --experimental-strip-types --test src/features/recipe-builder/recipeBuilderWizard.test.ts src/features/recipe-builder/appLocation.test.ts src/features/recipe-builder/appRoutes.test.ts && vitest run",
+    "test": "npm run test:recipe && npm run test:schedule && npm run test:storage && npm run test:companion && npm run test:history && npm run test:ui && npm run test:auth && npm run test:features"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.1",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "react-router-dom": "^7.17.0"
   },
   "devDependencies": {
     "@types/node": "^25.9.0",
@@ -24,6 +28,7 @@
     "@types/react-dom": "^19.2.3",
     "typescript": "^6.0.3",
     "vite": "^8.0.13",
-    "vite-plugin-pwa": "^1.3.0"
+    "vite-plugin-pwa": "^1.3.0",
+    "vitest": "^3.2.6"
   }
 }

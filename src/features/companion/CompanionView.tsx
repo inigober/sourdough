@@ -25,23 +25,34 @@ import {
   isTimedStepRunning,
 } from '../../lib/companion/liveSchedule.ts';
 import { getStepScheduleEdit } from '../../lib/companion/stepScheduleEdits.ts';
+import { finalizeBakeSessionForHistory } from '../../lib/history/buildBakeHistorySteps.ts';
 import type { BakeSession } from '../../lib/companion/types.ts';
 import { shouldShowTimelineDateLabel } from '../../lib/schedule/timelineDisplay.ts';
 import { PenEditButton } from '../../components/PenEditButton.tsx';
 import { SparklesIcon, RestartIcon } from '../../components/icons.tsx';
 import { getCoachTopicForStepId } from '../../lib/companion/coachTopics.ts';
 import type { ScheduleInput } from '../../lib/schedule/types.ts';
-import { BakeCompleteDialog } from './BakeCompleteDialog.tsx';
+import { BakeCompleteDialog, type BakeCompleteSaveInput } from './BakeCompleteDialog.tsx';
 import { CompanionCoachPanel } from './CompanionCoachPanel.tsx';
 import { CompanionStepEditDialog } from './CompanionStepEditDialog.tsx';
 
 type CompanionViewProps = {
   session: BakeSession;
   onSessionChange: (session: BakeSession) => void;
+  onSaveBake: (input: BakeCompleteSaveInput) => Promise<void>;
+  isSavingBake: boolean;
+  saveBakeError: string | null;
   onExit: (finished: boolean) => void;
 };
 
-export function CompanionView({ session, onSessionChange, onExit }: CompanionViewProps) {
+export function CompanionView({
+  session,
+  onSessionChange,
+  onSaveBake,
+  isSavingBake,
+  saveBakeError,
+  onExit,
+}: CompanionViewProps) {
   const [isEditingStep, setIsEditingStep] = useState(false);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [isCoachOpen, setIsCoachOpen] = useState(false);
@@ -88,6 +99,7 @@ export function CompanionView({ session, onSessionChange, onExit }: CompanionVie
     }
 
     if (isComplete) {
+      onSessionChange(finalizeBakeSessionForHistory(session, timeline));
       setShowCompleteDialog(true);
       return;
     }
@@ -100,7 +112,7 @@ export function CompanionView({ session, onSessionChange, onExit }: CompanionVie
   }
 
   function handleJumpToStep(index: number): void {
-    onSessionChange(jumpToBakeStep(session, index));
+    onSessionChange(jumpToBakeStep(session, index, timeline));
   }
 
   function handleSaveStepEdit(scheduleInput: ScheduleInput): void {
@@ -312,7 +324,13 @@ export function CompanionView({ session, onSessionChange, onExit }: CompanionVie
       ) : null}
 
       {showCompleteDialog ? (
-        <BakeCompleteDialog recipeName={session.recipeName} onClose={() => onExit(true)} />
+        <BakeCompleteDialog
+          recipeName={session.recipeName}
+          isSaving={isSavingBake}
+          saveError={saveBakeError}
+          onSave={onSaveBake}
+          onClose={() => onExit(true)}
+        />
       ) : null}
 
       {isEditingStep && currentStep ? (

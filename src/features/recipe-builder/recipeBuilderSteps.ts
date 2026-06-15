@@ -66,3 +66,10 @@ export function hasBlockingIssuesForStep(
     (issue) => issue.level === 'error' && fields.includes(issue.field as keyof RecipeInput | 'doughFlours'),
   );
 }
+
+export function getWizardContinueEnabled(
+  issues: RecipeValidationIssue[],
+  step: RecipeBuilderStep,
+): boolean {
+  return !hasBlockingIssuesForStep(issues, step);
+}

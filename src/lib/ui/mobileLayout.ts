@@ -1,22 +1,22 @@
 /** Layout tokens mirrored in styles.css — keep in sync when changing mobile form layout. */
 export const MOBILE_LAYOUT = {
-  /** Input column width inside the flour % control (stepper sits inside). */
-  flourPercentControlWidth: '5.5rem',
-  flourPercentStepperWidth: '2.25rem',
+  /** Min width of the % pill between minus/plus controls. */
+  flourPercentPillMinWidth: '4.5rem',
+  /** Shared height of minus button, % pill, and plus button. */
+  flourPercentControlSize: '2.35rem',
   mixDayFormClass: 'schedule-mix-form',
   mixDayDateTimeInputSelector: '.field-card input[type="date"],\n.field-card input[type="time"]',
 } as const;
 
-export function flourPercentControlFitsTwoDigits(controlWidth: string, stepperWidth: string): boolean {
-  const widthMatch = controlWidth.match(/^([\d.]+)rem$/);
-  const stepperMatch = stepperWidth.match(/^([\d.]+)rem$/);
-  if (!widthMatch || !stepperMatch) {
+export function flourPercentControlFitsTwoDigits(pillMinWidth: string, controlSize: string): boolean {
+  const widthMatch = pillMinWidth.match(/^([\d.]+)rem$/);
+  const sizeMatch = controlSize.match(/^([\d.]+)rem$/);
+  if (!widthMatch || !sizeMatch) {
     return false;
   }
 
-  const totalRem = Number(widthMatch[1]);
-  const stepperRem = Number(stepperMatch[1]);
-  const digitAreaRem = totalRem - stepperRem;
+  const pillMinWidthRem = Number(widthMatch[1]);
+  const controlSizeRem = Number(sizeMatch[1]);
 
-  return totalRem >= 5.25 && totalRem <= 5.75 && digitAreaRem >= 2.75;
+  return pillMinWidthRem >= 4.25 && controlSizeRem >= 2.25;
 }

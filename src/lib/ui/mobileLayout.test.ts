@@ -14,14 +14,16 @@ const stylesCss = readFileSync(
 test('flour percent control keeps digits separate from the external suffix', () => {
   assert.equal(
     flourPercentControlFitsTwoDigits(
-      MOBILE_LAYOUT.flourPercentControlWidth,
-      MOBILE_LAYOUT.flourPercentStepperWidth,
+      MOBILE_LAYOUT.flourPercentPillMinWidth,
+      MOBILE_LAYOUT.flourPercentControlSize,
     ),
     true,
   );
-  assert.match(stylesCss, /\.flour-percent-stepper__control\s*\{[^}]*width:\s*5\.5rem/s);
+  assert.match(stylesCss, /\.flour-percent-stepper\s*\{[^}]*--flour-percent-control-size:\s*2\.35rem/s);
+  assert.match(stylesCss, /\.flour-percent-stepper__button\s*\{[^}]*height:\s*var\(--flour-percent-control-size\)/s);
+  assert.match(stylesCss, /\.flour-percent-stepper__value\s*\{[^}]*height:\s*var\(--flour-percent-control-size\)/s);
+  assert.match(stylesCss, /\.flour-percent-stepper__value\s*\{[^}]*min-width:\s*4\.5rem/s);
   assert.match(stylesCss, /\.flour-percent-stepper__suffix\s*\{/s);
-  assert.match(stylesCss, /\.flour-percent-stepper__input\s*\{[^}]*padding-right:\s*2\.25rem/s);
   assert.match(stylesCss, /\.flour-percent-stepper\s*\{[^}]*display:\s*flex/s);
 });
 

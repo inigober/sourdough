@@ -8,6 +8,7 @@ import {
   advanceBakeSession,
   createBakeSession,
   isBakeSessionComplete,
+  jumpToBakeStep,
   retreatBakeSession,
   startTimedStep,
 } from './bakeSession.ts';
@@ -45,6 +46,32 @@ test('bake session advances and retreats through steps', () => {
 
   const retreated = retreatBakeSession(current);
   assert.equal(retreated.currentStepIndex, timeline.length - 2);
+});
+
+test('jumpToBakeStep logs skipped steps when jumping forward', () => {
+  const schedule = {
+    ...createDefaultScheduleInput(defaultRecipeInput),
+    includeStarterPrep: false,
+  };
+  const session = createBakeSession({
+    savedRecipeId: null,
+    recipeName: 'Jump test',
+    recipeInput: defaultRecipeInput,
+    scheduleInput: schedule,
+  });
+  const timeline = buildTestTimeline(session);
+  const jumpTimeMs = Date.parse('2026-05-20T11:00:00.000Z');
+
+  const jumped = jumpToBakeStep(session, 2, timeline, jumpTimeMs);
+
+  assert.equal(jumped.currentStepIndex, 2);
+  assert.equal(jumped.stepLogs.length, 2);
+  assert.equal(jumped.stepLogs[0]?.stepId, timeline[0]?.id);
+  assert.equal(jumped.stepLogs[1]?.stepId, timeline[1]?.id);
+  assert.equal(jumped.stepLogs[0]?.actualStartedAt, '2026-05-20T11:00:00.000Z');
+  assert.equal(jumped.stepLogs[1]?.actualCompletedAt, '2026-05-20T11:00:00.000Z');
+  assert.equal(jumped.currentStepStartedAt, null);
+  assert.equal(jumped.activeTimerEndsAt, null);
 });
 
 test('timed steps start only when the baker presses start', () => {
