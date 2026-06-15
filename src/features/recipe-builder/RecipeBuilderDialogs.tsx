@@ -5,9 +5,13 @@ import type { SavedRecipeSummary } from '../../lib/storage/types.ts';
 
 type RecipeBuilderDialogsProps = {
   isUnsavedDialogOpen: boolean;
+  unsavedSaveError: string | null;
   onCancelUnsaved: () => void;
   onDiscardUnsaved: () => void;
   onSaveBeforeLeaving: () => void;
+  pendingOverwriteBakeName: string | null;
+  onCancelOverwriteBake: () => void;
+  onConfirmOverwriteBake: () => void;
   isSaveDialogOpen: boolean;
   saveDialogDefaultName: string;
   activeSavedRecipeId: string | null;
@@ -21,9 +25,13 @@ type RecipeBuilderDialogsProps = {
 
 export function RecipeBuilderDialogs({
   isUnsavedDialogOpen,
+  unsavedSaveError,
   onCancelUnsaved,
   onDiscardUnsaved,
   onSaveBeforeLeaving,
+  pendingOverwriteBakeName,
+  onCancelOverwriteBake,
+  onConfirmOverwriteBake,
   isSaveDialogOpen,
   saveDialogDefaultName,
   activeSavedRecipeId,
@@ -41,6 +49,16 @@ export function RecipeBuilderDialogs({
           onCancel={onCancelUnsaved}
           onDiscard={onDiscardUnsaved}
           onSave={onSaveBeforeLeaving}
+          saveError={unsavedSaveError}
+        />
+      ) : null}
+      {pendingOverwriteBakeName ? (
+        <ConfirmDialog
+          title="Replace in-progress bake?"
+          message={`You already have "${pendingOverwriteBakeName}" in progress. Starting a new bake will replace it.`}
+          confirmLabel="Start new bake"
+          onCancel={onCancelOverwriteBake}
+          onConfirm={onConfirmOverwriteBake}
         />
       ) : null}
       {isSaveDialogOpen ? (

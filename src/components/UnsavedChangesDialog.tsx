@@ -4,9 +4,15 @@ type UnsavedChangesDialogProps = {
   onCancel: () => void;
   onDiscard: () => void;
   onSave: () => void;
+  saveError?: string | null;
 };
 
-export function UnsavedChangesDialog({ onCancel, onDiscard, onSave }: UnsavedChangesDialogProps) {
+export function UnsavedChangesDialog({
+  onCancel,
+  onDiscard,
+  onSave,
+  saveError,
+}: UnsavedChangesDialogProps) {
   return (
     <DialogCard
       title="Save changes?"
@@ -31,6 +37,11 @@ export function UnsavedChangesDialog({ onCancel, onDiscard, onSave }: UnsavedCha
       <p id="unsaved-dialog-message" className="dialog-card__message">
         You have unsaved changes. Save before leaving, or discard them.
       </p>
+      {saveError ? (
+        <p className="auth-modal__error" role="alert">
+          {saveError}
+        </p>
+      ) : null}
     </DialogCard>
   );
 }

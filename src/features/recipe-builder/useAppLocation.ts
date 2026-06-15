@@ -8,7 +8,7 @@ import type { ScheduleInput } from '../../lib/schedule/types.ts';
 import type { SavedRecipe } from '../../lib/storage/types.ts';
 import type { AppLocation } from './appLocation.ts';
 import { showHomeButton as getShowHomeButton } from './appLocation.ts';
-import type { AppRouteNavigate } from './appRoutes.ts';
+import { APP_ROUTES, type AppRouteNavigate } from './appRoutes.ts';
 import type { RecipeBuilderStep } from './recipeBuilderSteps.ts';
 import type { SaveDialogSource } from './types.ts';
 
@@ -21,6 +21,7 @@ type WizardSnapshot = {
 };
 
 type UseAppNavigationOptions = {
+  pathname: string;
   location: AppLocation;
   routes: AppRouteNavigate;
   wizard: WizardSnapshot;
@@ -36,6 +37,7 @@ type UseAppNavigationOptions = {
 };
 
 export function useAppNavigation({
+  pathname,
   location,
   routes,
   wizard,
@@ -53,6 +55,7 @@ export function useAppNavigation({
   const [saveDialogSource, setSaveDialogSource] = useState<SaveDialogSource>('results');
   const [pendingDeleteRecipeId, setPendingDeleteRecipeId] = useState<string | null>(null);
   const [isUnsavedDialogOpen, setIsUnsavedDialogOpen] = useState(false);
+  const [unsavedSaveError, setUnsavedSaveError] = useState<string | null>(null);
   const [pendingGoHomeAfterSave, setPendingGoHomeAfterSave] = useState(false);
   const [pendingStartBakeAfterSave, setPendingStartBakeAfterSave] = useState(false);
   const pendingBlockedNavigation = useRef(false);
@@ -97,6 +100,7 @@ export function useAppNavigation({
     setIsSaveDialogOpen(false);
     setPendingDeleteRecipeId(null);
     setIsUnsavedDialogOpen(false);
+    setUnsavedSaveError(null);
     setPendingGoHomeAfterSave(false);
     refreshDraftSummary();
     refreshResumableBakeSession();
@@ -131,6 +135,7 @@ export function useAppNavigation({
 
     if (isDirty) {
       pendingBlockedNavigation.current = false;
+      setUnsavedSaveError(null);
       setIsUnsavedDialogOpen(true);
       return;
     }
@@ -140,6 +145,7 @@ export function useAppNavigation({
 
   const cancelUnsavedDialog = useCallback((): void => {
     setIsUnsavedDialogOpen(false);
+    setUnsavedSaveError(null);
 
     if (blocker.state === 'blocked') {
       blocker.reset();
@@ -158,18 +164,25 @@ export function useAppNavigation({
   }, [activeSavedRecipe, finishLeaving, restoreFromSavedRecipe, restoreToDefaults]);
 
   const saveBeforeLeavingHome = useCallback((): void => {
-    setIsUnsavedDialogOpen(false);
+    setUnsavedSaveError(null);
 
     if (activeSavedRecipeId && activeSavedRecipe) {
       void saveActiveRecipe(
         activeSavedRecipe.name,
         wizard.hasOpenedSchedule || saveDialogSource === 'schedule',
-      ).then(() => {
-        finishLeaving();
-      });
+      )
+        .then(() => {
+          finishLeaving();
+        })
+        .catch((error: unknown) => {
+          const message = error instanceof Error ? error.message : 'Failed to save recipe.';
+          setUnsavedSaveError(message);
+          setIsUnsavedDialogOpen(true);
+        });
       return;
     }
 
+    setIsUnsavedDialogOpen(false);
     setPendingGoHomeAfterSave(true);
     setSaveDialogSource(wizard.hasOpenedSchedule ? 'schedule' : 'results');
     setIsSaveDialogOpen(true);
@@ -184,15 +197,21 @@ export function useAppNavigation({
 
   const handleMainTabChange = useCallback(
     (tab: AppMainTab): void => {
+      const targetPath = tab === 'history' ? APP_ROUTES.history : APP_ROUTES.home;
+      const navigationAllowed =
+        !isDirty || location.phase === 'companion' || pathname === targetPath;
+
       if (tab === 'history') {
         routes.toHistory();
       } else {
         routes.toHome();
       }
 
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      if (navigationAllowed) {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      }
     },
-    [routes],
+    [isDirty, location.phase, pathname, routes],
   );
 
   const openSaveDialog = useCallback((source: SaveDialogSource): void => {
@@ -227,6 +246,7 @@ export function useAppNavigation({
     saveDialogSource,
     pendingDeleteRecipeId,
     isUnsavedDialogOpen,
+    unsavedSaveError,
     setIsUnsavedDialogOpen: cancelUnsavedDialog,
     pendingGoHomeAfterSave,
     pendingStartBakeAfterSave,

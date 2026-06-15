@@ -4,6 +4,7 @@ import { AppHeader } from '../../components/AppHeader.tsx';
 import { HomeIcon } from '../../components/icons.tsx';
 import { useAuth } from '../../lib/auth/useAuth.ts';
 import { useAuthPrompt } from '../../lib/auth/useAuthPrompt.ts';
+import { loadBakeSession } from '../../lib/storage/bakeSessionStorage.ts';
 import { generateDefaultRecipeName } from '../../lib/storage/recipeStorage.ts';
 import { useSavedRecipes } from '../../lib/storage/useSavedRecipes.ts';
 import type { SavedRecipe } from '../../lib/storage/types.ts';
@@ -26,7 +27,7 @@ import { isInputWizardStep } from './recipeBuilderSteps.ts';
 
 export function RecipeBuilder() {
   const { user, isConfigured, isLoading: isAuthLoading } = useAuth();
-  const { location, phase, tab, wizardStep, historyDetailId, routes, isKnownPath } = useAppRouter();
+  const { location, phase, tab, wizardStep, historyDetailId, routes, isKnownPath, pathname } = useAppRouter();
 
   useEffect(() => {
     if (!isKnownPath) {
@@ -66,7 +67,7 @@ export function RecipeBuilder() {
     user,
     isConfigured,
     isAuthLoading,
-    shouldPrompt: phase === 'wizard' && wizard.currentStep === 'welcome' && tab === 'home',
+    shouldPrompt: phase === 'wizard' && wizardStep === 'welcome' && tab === 'home',
   });
 
   const {
@@ -99,11 +100,34 @@ export function RecipeBuilder() {
     onBakeSavedToHistory: handleBakeSavedToHistory,
   });
 
+  const {
+    bakeSession,
+    resumableBakeSession,
+    pendingOverwriteBakeName,
+    isStartingBake,
+    isSavingBakeHistory,
+    saveBakeHistoryError,
+    tryBeginBakeSession,
+    confirmPendingBeginBakeSession,
+    cancelPendingBeginBakeSession,
+    resumeBakeSession,
+    updateBakeSession,
+    refreshResumableBakeSession,
+    stashSessionOnLeaveCompanion,
+    clearSessionAfterFinish,
+    saveCompletedBake,
+    runStartBake,
+  } = bakeSessionState;
+
   useEffect(() => {
-    if (phase === 'companion' && !bakeSessionState.bakeSession) {
-      routes.toHome();
+    if (phase === 'companion' && !bakeSession) {
+      if (loadBakeSession()) {
+        resumeBakeSession();
+      } else {
+        routes.toHome();
+      }
     }
-  }, [bakeSessionState.bakeSession, phase, routes]);
+  }, [bakeSession, phase, resumeBakeSession, routes]);
 
   const saveActiveRecipe = useCallback(
     async (name: string, includeSchedule: boolean): Promise<SavedRecipe> => {
@@ -118,10 +142,11 @@ export function RecipeBuilder() {
   );
 
   const navigation = useAppNavigation({
+    pathname,
     location,
     routes,
     wizard: {
-      currentStep: wizard.currentStep,
+      currentStep: wizardStep,
       recipeInput: wizard.recipeInput,
       scheduleInput: wizard.scheduleInput,
       hasOpenedSchedule: wizard.hasOpenedSchedule,
@@ -133,8 +158,8 @@ export function RecipeBuilder() {
     restoreFromSavedRecipe: wizard.restoreFromSavedRecipe,
     restoreToDefaults: wizard.restoreToDefaults,
     refreshDraftSummary: wizard.refreshDraftSummary,
-    stashSessionOnLeaveCompanion: bakeSessionState.stashSessionOnLeaveCompanion,
-    refreshResumableBakeSession: bakeSessionState.refreshResumableBakeSession,
+    stashSessionOnLeaveCompanion,
+    refreshResumableBakeSession,
     saveActiveRecipe,
   });
 
@@ -150,18 +175,19 @@ export function RecipeBuilder() {
     openSaveDialog: navigation.openSaveDialog,
     setPendingStartBakeAfterSave: navigation.setPendingStartBakeAfterSave,
     bakeSession: {
-      beginBakeSession: bakeSessionState.beginBakeSession,
-      resumeBakeSession: bakeSessionState.resumeBakeSession,
-      runStartBake: bakeSessionState.runStartBake,
-      saveCompletedBakeToHistory: bakeSessionState.saveCompletedBake,
-      clearSessionAfterFinish: bakeSessionState.clearSessionAfterFinish,
-      stashSessionOnLeaveCompanion: bakeSessionState.stashSessionOnLeaveCompanion,
+      tryBeginBakeSession,
+      confirmPendingBeginBakeSession,
+      resumeBakeSession,
+      runStartBake,
+      saveCompletedBakeToHistory: saveCompletedBake,
+      clearSessionAfterFinish,
+      stashSessionOnLeaveCompanion,
     },
   });
 
   const screen = useMemo(
-    () => resolveAppScreen(location, wizard.currentStep, historyDetailId),
-    [historyDetailId, location, wizard.currentStep],
+    () => resolveAppScreen(location, wizardStep, historyDetailId),
+    [historyDetailId, location, wizardStep],
   );
 
   const saveDialogSchedule =
@@ -175,9 +201,16 @@ export function RecipeBuilder() {
   const dialogs = (
     <RecipeBuilderDialogs
       isUnsavedDialogOpen={navigation.isUnsavedDialogOpen}
+      unsavedSaveError={navigation.unsavedSaveError}
       onCancelUnsaved={navigation.setIsUnsavedDialogOpen}
       onDiscardUnsaved={navigation.discardUnsavedChanges}
       onSaveBeforeLeaving={navigation.saveBeforeLeavingHome}
+      pendingOverwriteBakeName={pendingOverwriteBakeName}
+      onCancelOverwriteBake={cancelPendingBeginBakeSession}
+      onConfirmOverwriteBake={() => {
+        confirmPendingBeginBakeSession();
+        navigation.enterCompanion();
+      }}
       isSaveDialogOpen={navigation.isSaveDialogOpen}
       saveDialogDefaultName={saveDialogDefaultName}
       activeSavedRecipeId={activeSavedRecipeId}
@@ -243,16 +276,16 @@ export function RecipeBuilder() {
     </button>
   ) : null;
 
-  if (screen.kind === 'companion' && bakeSessionState.bakeSession) {
+  if (screen.kind === 'companion' && bakeSession) {
     return (
       <>
         {homeHeader}
         <CompanionView
-          session={bakeSessionState.bakeSession}
-          onSessionChange={bakeSessionState.updateBakeSession}
+          session={bakeSession}
+          onSessionChange={updateBakeSession}
           onSaveBake={bakeFlow.saveCompletedBake}
-          isSavingBake={bakeSessionState.isSavingBakeHistory}
-          saveBakeError={bakeSessionState.saveBakeHistoryError}
+          isSavingBake={isSavingBakeHistory}
+          saveBakeError={saveBakeHistoryError}
           onExit={(finished) => bakeFlow.exitCompanion({ finished })}
         />
         {dialogs}
@@ -276,7 +309,7 @@ export function RecipeBuilder() {
           onBack={navigation.returnToResults}
           onSave={() => navigation.openSaveDialog('schedule')}
           onStartBake={() => void bakeFlow.startBakeFromSchedule()}
-          isStartingBake={bakeSessionState.isStartingBake}
+          isStartingBake={isStartingBake}
         />
         {dialogs}
       </>
@@ -311,10 +344,10 @@ export function RecipeBuilder() {
           savedRecipes={savedRecipes}
           savedRecipesError={savedRecipesError}
           draftSummary={wizard.draftSummary}
-          resumableBakeSession={bakeSessionState.resumableBakeSession}
+          resumableBakeSession={resumableBakeSession}
           importMessage={recipeImportMessage}
           onStart={wizard.startNewRecipe}
-          onResumeDraft={wizard.resumeDraft}
+          onResumeDraft={() => void wizard.resumeDraft()}
           onResumeBake={bakeFlow.handleResumeBake}
           onLoadTemplate={wizard.loadTemplate}
           onLoadRecipe={(id) => void handleLoadSavedRecipe(id)}
@@ -345,13 +378,13 @@ export function RecipeBuilder() {
     );
   }
 
-  if (!isInputWizardStep(wizard.currentStep)) {
+  if (!isInputWizardStep(wizardStep)) {
     return null;
   }
 
   return (
     <WizardInputSteps
-      currentStep={wizard.currentStep}
+      currentStep={wizardStep}
       recipeInput={wizard.recipeInput}
       validationIssues={wizard.validationIssues}
       canGoBack={wizard.canGoBack}

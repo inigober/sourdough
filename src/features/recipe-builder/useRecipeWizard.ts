@@ -70,7 +70,6 @@ export function useRecipeWizard({
   userId,
   useCloudRecipes,
 }: UseRecipeWizardOptions) {
-  const [currentStep, setCurrentStep] = useState<RecipeBuilderStep>(routeStep);
   const [hasCompletedWizard, setHasCompletedWizard] = useState(false);
   const [editingFromResults, setEditingFromResults] = useState(false);
   const [hasOpenedSchedule, setHasOpenedSchedule] = useState(false);
@@ -91,18 +90,14 @@ export function useRecipeWizard({
     [formula, recipeInput],
   );
 
-  const canGoBack = getPreviousStep(currentStep) !== null;
-  const canContinue = getWizardContinueEnabled(validationIssues, currentStep);
-  const isLastWizardStep = currentStep === 'fermentation';
+  const canGoBack = getPreviousStep(routeStep) !== null;
+  const canContinue = getWizardContinueEnabled(validationIssues, routeStep);
+  const isLastWizardStep = routeStep === 'fermentation';
   const showReturnToSummary = hasCompletedWizard && editingFromResults;
 
   const refreshDraftSummary = useCallback((): void => {
     setDraftSummary(getBuilderDraftSummary());
   }, []);
-
-  useEffect(() => {
-    setCurrentStep(routeStep);
-  }, [routeStep]);
 
   useEffect(() => {
     setDraftSummary(getBuilderDraftSummary());
@@ -115,7 +110,7 @@ export function useRecipeWizard({
 
     saveBuilderDraft({
       phase,
-      currentStep,
+      currentStep: routeStep,
       hasCompletedWizard,
       editingFromResults,
       hasOpenedSchedule,
@@ -126,7 +121,7 @@ export function useRecipeWizard({
     setDraftSummary(getBuilderDraftSummary());
   }, [
     phase,
-    currentStep,
+    routeStep,
     hasCompletedWizard,
     editingFromResults,
     hasOpenedSchedule,
@@ -136,7 +131,6 @@ export function useRecipeWizard({
   ]);
 
   const resetToWelcome = useCallback((): void => {
-    setCurrentStep('welcome');
     setEditingFromResults(false);
   }, []);
 
@@ -167,30 +161,26 @@ export function useRecipeWizard({
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, [refreshDraftSummary, restoreToDefaults, routes]);
 
-  const resumeDraft = useCallback((): void => {
+  const resumeDraft = useCallback(async (): Promise<void> => {
     const draft = loadBuilderDraft();
     if (!draft) {
       refreshDraftSummary();
       return;
     }
 
+    let savedRecipe: SavedRecipe | null = null;
+    if (draft.activeSavedRecipeId) {
+      savedRecipe = await fetchSavedRecipe(draft.activeSavedRecipeId);
+    }
+
     setRecipeInput(draft.recipeInput);
     setScheduleInput(draft.scheduleInput);
     setActiveSavedRecipeId(draft.activeSavedRecipeId);
-    setActiveSavedRecipe(null);
+    setActiveSavedRecipe(savedRecipe);
     setHasCompletedWizard(draft.hasCompletedWizard);
     setEditingFromResults(draft.editingFromResults);
     setHasOpenedSchedule(draft.hasOpenedSchedule);
     routes.toPath(buildAppPathFromDraft(draft));
-
-    if (draft.activeSavedRecipeId) {
-      void fetchSavedRecipe(draft.activeSavedRecipeId).then((saved) => {
-        if (saved) {
-          setActiveSavedRecipe(saved);
-        }
-      });
-    }
-
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, [fetchSavedRecipe, refreshDraftSummary, routes, setActiveSavedRecipe, setActiveSavedRecipeId]);
 
@@ -207,7 +197,6 @@ export function useRecipeWizard({
       setHasCompletedWizard(true);
       setEditingFromResults(false);
       setHasOpenedSchedule(Boolean(saved.scheduleInput));
-      setCurrentStep('fermentation');
       routes.toSummary();
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     },
@@ -261,7 +250,7 @@ export function useRecipeWizard({
   }, [routes]);
 
   const goBack = useCallback((): void => {
-    const previousStep = getPreviousStep(currentStep);
+    const previousStep = getPreviousStep(routeStep);
     if (previousStep && isInputWizardStep(previousStep)) {
       routes.toWizardStep(previousStep);
       return;
@@ -270,7 +259,7 @@ export function useRecipeWizard({
     if (previousStep === 'welcome') {
       routes.toHome();
     }
-  }, [currentStep, routes]);
+  }, [routeStep, routes]);
 
   const goContinue = useCallback((): void => {
     if (isLastWizardStep) {
@@ -280,11 +269,11 @@ export function useRecipeWizard({
       return;
     }
 
-    const nextStep = getNextStep(currentStep);
+    const nextStep = getNextStep(routeStep);
     if (nextStep && isInputWizardStep(nextStep)) {
       routes.toWizardStep(nextStep);
     }
-  }, [currentStep, isLastWizardStep, routes]);
+  }, [isLastWizardStep, routeStep, routes]);
 
   const openScheduleBuilder = useCallback((): void => {
     setScheduleInput((current) =>
@@ -303,20 +292,18 @@ export function useRecipeWizard({
   );
 
   const updateNumberField = useCallback((field: WizardNumberField, value: number): void => {
+    let nextInput: RecipeInput | undefined;
+
     setRecipeInput((currentInput) => {
-      const nextInput = {
-        ...currentInput,
-        [field]: value,
-      };
-
-      if (field === 'finalDoughWeightGrams' || field === 'numberOfLoaves') {
-        setScheduleInput((currentSchedule) =>
-          scaleScheduleBakeParamsForDoughSize(nextInput, currentSchedule),
-        );
-      }
-
+      nextInput = { ...currentInput, [field]: value };
       return nextInput;
     });
+
+    if (field === 'finalDoughWeightGrams' || field === 'numberOfLoaves') {
+      setScheduleInput((currentSchedule) =>
+        scaleScheduleBakeParamsForDoughSize(nextInput!, currentSchedule),
+      );
+    }
   }, []);
 
   const updateFlourType = useCallback((entryId: string, flourType: FlourType): void => {
@@ -393,7 +380,6 @@ export function useRecipeWizard({
   );
 
   return {
-    currentStep,
     hasCompletedWizard,
     editingFromResults,
     hasOpenedSchedule,

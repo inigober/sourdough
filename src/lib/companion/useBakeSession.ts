@@ -14,7 +14,7 @@ import {
 } from '../storage/bakeSessionStorage.ts';
 import type { BakeCompleteSaveInput } from './types.ts';
 
-type BeginBakeSessionOptions = {
+export type BeginBakeSessionOptions = {
   savedRecipeId: string | null;
   recipeName: string;
   recipe: RecipeInput;
@@ -27,11 +27,24 @@ type UseBakeSessionOptions = {
   onBakeSavedToHistory: () => void;
 };
 
+function applyBeginBakeSession(options: BeginBakeSessionOptions): BakeSession {
+  const session = createBakeSession({
+    savedRecipeId: options.savedRecipeId,
+    recipeName: options.recipeName,
+    recipeInput: options.recipe,
+    scheduleInput: options.schedule,
+  });
+
+  saveBakeSession(session);
+  return session;
+}
+
 export function useBakeSession({ user, onRequireAuth, onBakeSavedToHistory }: UseBakeSessionOptions) {
   const [bakeSession, setBakeSession] = useState<BakeSession | null>(null);
   const [resumableBakeSession, setResumableBakeSession] = useState<BakeSession | null>(() =>
     loadBakeSession(),
   );
+  const [pendingBeginOptions, setPendingBeginOptions] = useState<BeginBakeSessionOptions | null>(null);
   const [isStartingBake, setIsStartingBake] = useState(false);
   const [isSavingBakeHistory, setIsSavingBakeHistory] = useState(false);
   const [saveBakeHistoryError, setSaveBakeHistoryError] = useState<string | null>(null);
@@ -41,18 +54,38 @@ export function useBakeSession({ user, onRequireAuth, onBakeSavedToHistory }: Us
   }, []);
 
   const beginBakeSession = useCallback((options: BeginBakeSessionOptions): void => {
-    const session = createBakeSession({
-      savedRecipeId: options.savedRecipeId,
-      recipeName: options.recipeName,
-      recipeInput: options.recipe,
-      scheduleInput: options.schedule,
-    });
-
-    saveBakeSession(session);
+    const session = applyBeginBakeSession(options);
     setBakeSession(session);
     setResumableBakeSession(session);
+    setPendingBeginOptions(null);
     setSaveBakeHistoryError(null);
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, []);
+
+  const tryBeginBakeSession = useCallback(
+    (options: BeginBakeSessionOptions, options2?: { force?: boolean }): boolean => {
+      const existing = loadBakeSession();
+      if (!options2?.force && existing) {
+        setPendingBeginOptions(options);
+        return false;
+      }
+
+      beginBakeSession(options);
+      return true;
+    },
+    [beginBakeSession],
+  );
+
+  const confirmPendingBeginBakeSession = useCallback((): void => {
+    if (!pendingBeginOptions) {
+      return;
+    }
+
+    beginBakeSession(pendingBeginOptions);
+  }, [beginBakeSession, pendingBeginOptions]);
+
+  const cancelPendingBeginBakeSession = useCallback((): void => {
+    setPendingBeginOptions(null);
   }, []);
 
   const resumeBakeSession = useCallback((): void => {
@@ -63,6 +96,7 @@ export function useBakeSession({ user, onRequireAuth, onBakeSavedToHistory }: Us
     }
 
     setBakeSession(session);
+    setResumableBakeSession(session);
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, [refreshResumableBakeSession]);
 
@@ -84,6 +118,7 @@ export function useBakeSession({ user, onRequireAuth, onBakeSavedToHistory }: Us
     clearBakeSession();
     setResumableBakeSession(null);
     setBakeSession(null);
+    setPendingBeginOptions(null);
     setSaveBakeHistoryError(null);
   }, []);
 
@@ -132,26 +167,27 @@ export function useBakeSession({ user, onRequireAuth, onBakeSavedToHistory }: Us
     [bakeSession, clearSessionAfterFinish, onBakeSavedToHistory, onRequireAuth, user],
   );
 
-  const runStartBake = useCallback(
-    async (start: () => Promise<void>): Promise<void> => {
-      setIsStartingBake(true);
-      try {
-        await start();
-      } finally {
-        setIsStartingBake(false);
-      }
-    },
-    [],
-  );
+  const runStartBake = useCallback(async (start: () => Promise<void>): Promise<void> => {
+    setIsStartingBake(true);
+    try {
+      await start();
+    } finally {
+      setIsStartingBake(false);
+    }
+  }, []);
 
   return {
     bakeSession,
     resumableBakeSession,
+    pendingOverwriteBakeName: pendingBeginOptions?.recipeName ?? null,
     isStartingBake,
     isSavingBakeHistory,
     saveBakeHistoryError,
     setSaveBakeHistoryError,
     beginBakeSession,
+    tryBeginBakeSession,
+    confirmPendingBeginBakeSession,
+    cancelPendingBeginBakeSession,
     resumeBakeSession,
     updateBakeSession,
     refreshResumableBakeSession,

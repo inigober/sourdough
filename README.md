@@ -16,6 +16,8 @@ cp .env.example .env.local
 
 Edit `.env.local` with your Supabase project URL and publishable (or anon) key. The app runs without Supabase for local-only recipe storage; sign-in enables cloud sync and bake history.
 
+For the hosted project, also configure GitHub Actions secrets so the daily keepalive workflow can run — see [Supabase operations](docs/engineering/supabase-ops.md).
+
 ## Scripts
 
 | Command | Purpose |
@@ -54,3 +56,4 @@ supabase/       # Database migrations
 
 - [UI/UX practices](docs/product/ui-ux-practices.md)
 - [Phase 1 implementation plan](docs/engineering/phase-1-implementation-plan.md)
+- [Supabase operations](docs/engineering/supabase-ops.md) — keepalive workflow and GitHub secrets

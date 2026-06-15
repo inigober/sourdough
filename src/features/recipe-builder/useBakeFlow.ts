@@ -20,7 +20,8 @@ type BeginBakeSessionOptions = {
 };
 
 type BakeSessionActions = {
-  beginBakeSession: (options: BeginBakeSessionOptions) => void;
+  tryBeginBakeSession: (options: BeginBakeSessionOptions) => boolean;
+  confirmPendingBeginBakeSession: () => void;
   resumeBakeSession: () => void;
   runStartBake: (start: () => Promise<void>) => Promise<void>;
   saveCompletedBakeToHistory: (input: BakeCompleteSaveInput) => Promise<boolean>;
@@ -56,9 +57,12 @@ export function useBakeFlow({
   bakeSession,
 }: UseBakeFlowOptions) {
   const enterCompanionBake = useCallback(
-    (options: BeginBakeSessionOptions): void => {
-      bakeSession.beginBakeSession(options);
-      enterCompanion();
+    (options: BeginBakeSessionOptions): boolean => {
+      const started = bakeSession.tryBeginBakeSession(options);
+      if (started) {
+        enterCompanion();
+      }
+      return started;
     },
     [bakeSession, enterCompanion],
   );

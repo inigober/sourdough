@@ -2,8 +2,8 @@ name: Supabase keepalive
 
 on:
   schedule:
-    # Every 5 days at 09:00 UTC — keeps the free-tier project from pausing between bakes.
-    - cron: '0 9 */5 * *'
+    # Daily at 09:00 UTC — keeps the free-tier project from pausing between bakes.
+    - cron: '0 9 * * *'
   workflow_dispatch:
 
 jobs:
