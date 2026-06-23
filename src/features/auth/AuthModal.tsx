@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 
 import { CloseIcon, EyeIcon, EyeOffIcon } from '../../components/icons.tsx';
+import { CLOUD_SYNC_UNAVAILABLE_COPY } from '../../lib/auth/cloudSyncCopy.ts';
 import { useAuth } from '../../lib/auth/useAuth.ts';
 
 type AuthModalStep = 'choose' | 'signIn' | 'signUp';
@@ -11,7 +12,17 @@ type AuthModalProps = {
 };
 
 export function AuthModal({ onClose, initialStep = 'choose' }: AuthModalProps) {
-  const { isLoading, user, authError, authMessage, clearAuthError, clearAuthMessage, signIn, signUp } = useAuth();
+  const {
+    isConfigured,
+    isLoading,
+    user,
+    authError,
+    authMessage,
+    clearAuthError,
+    clearAuthMessage,
+    signIn,
+    signUp,
+  } = useAuth();
   const [step, setStep] = useState<AuthModalStep>(initialStep);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -73,7 +84,21 @@ export function AuthModal({ onClose, initialStep = 'choose' }: AuthModalProps) {
           <CloseIcon />
         </button>
 
-        {isLoading ? (
+        {!isConfigured ? (
+          <>
+            <div className="auth-modal__intro">
+              <h2 id="auth-modal-title">Cloud sync unavailable</h2>
+              <p className="section-copy">{CLOUD_SYNC_UNAVAILABLE_COPY}</p>
+            </div>
+            <button
+              type="button"
+              className="wizard-button wizard-button--secondary auth-modal__submit"
+              onClick={() => onClose(true)}
+            >
+              Close
+            </button>
+          </>
+        ) : isLoading ? (
           <p className="auth-modal__status">Checking account…</p>
         ) : step === 'choose' ? (
           <>

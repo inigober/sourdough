@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { UserIcon } from '../../components/icons.tsx';
+import { CLOUD_SYNC_UNAVAILABLE_COPY } from '../../lib/auth/cloudSyncCopy.ts';
 import { useAuth } from '../../lib/auth/useAuth.ts';
 
 type WelcomeTopBarProps = {
@@ -31,11 +32,11 @@ export function WelcomeTopBar({ onOpenAuth, variant = 'header' }: WelcomeTopBarP
     return () => document.removeEventListener('mousedown', handlePointerDown);
   }, [showAccountMenu]);
 
-  if (!isConfigured || isLoading) {
-    return null;
-  }
-
   if (user) {
+    if (!isConfigured || isLoading) {
+      return null;
+    }
+
     return (
       <div className={variant === 'inline' ? 'welcome-top-bar welcome-top-bar--inline' : 'app-header welcome-top-bar'}>
         <div className="welcome-top-bar__account" ref={menuRef}>
@@ -67,21 +68,29 @@ export function WelcomeTopBar({ onOpenAuth, variant = 'header' }: WelcomeTopBarP
     );
   }
 
-  if (variant === 'inline') {
-    return (
-      <div className="welcome-top-bar welcome-top-bar--inline">
-        <button type="button" className="wizard-button wizard-button--secondary welcome-top-bar__sign-in" onClick={onOpenAuth}>
-          Sign in
-        </button>
-      </div>
-    );
+  if (isLoading && isConfigured) {
+    return null;
   }
 
+  const wrapperClass =
+    variant === 'inline' ? 'welcome-top-bar welcome-top-bar--inline' : 'app-header welcome-top-bar';
+
   return (
-    <header className="app-header welcome-top-bar">
-      <button type="button" className="wizard-button wizard-button--secondary welcome-top-bar__sign-in" onClick={onOpenAuth}>
-        Sign in
-      </button>
-    </header>
+    <div className={wrapperClass}>
+      <div className="welcome-top-bar__sign-in-group">
+        <button
+          type="button"
+          className="wizard-button wizard-button--secondary welcome-top-bar__sign-in"
+          onClick={onOpenAuth}
+        >
+          Sign in
+        </button>
+        {!isConfigured ? (
+          <p className="welcome-top-bar__sync-hint" role="status">
+            {CLOUD_SYNC_UNAVAILABLE_COPY}
+          </p>
+        ) : null}
+      </div>
+    </div>
   );
 }

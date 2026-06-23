@@ -9,6 +9,7 @@ import {
 import type { Session, User } from '@supabase/supabase-js';
 
 import { clearLocalRecipesOnSignOut } from '../storage/cloudRecipeDeviceStorage.ts';
+import { CLOUD_SYNC_UNAVAILABLE_COPY } from './cloudSyncCopy.ts';
 import { formatAuthError } from './formatAuthError.ts';
 import { isSupabaseConfigured } from './config.ts';
 import { getSupabaseClient } from './supabaseClient.ts';
@@ -82,7 +83,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signIn = useCallback(
     async (email: string, password: string): Promise<boolean> => {
       if (!supabase) {
-        setAuthError('Cloud sync is not configured.');
+        setAuthError(CLOUD_SYNC_UNAVAILABLE_COPY);
         return false;
       }
 
@@ -102,7 +103,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signUp = useCallback(
     async (email: string, password: string): Promise<'signed_in' | 'needs_confirmation' | 'failed'> => {
       if (!supabase) {
-        setAuthError('Cloud sync is not configured.');
+        setAuthError(CLOUD_SYNC_UNAVAILABLE_COPY);
         return 'failed';
       }
 
