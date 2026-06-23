@@ -12,20 +12,28 @@ jobs:
     steps:
       - name: Ping Supabase REST API
         env:
-          # Accept repository Secrets or Variables (Settings → Secrets and variables → Actions).
+          # Project URL — same value as in .env.local (VITE_ prefix matches the app).
           SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || vars.VITE_SUPABASE_URL }}
-          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          # Server-only key — never use VITE_ prefix; do not add to .env.local.
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY || secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
-          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_PUBLISHABLE_KEY" ]; then
-            echo "Missing VITE_SUPABASE_URL and/or VITE_SUPABASE_PUBLISHABLE_KEY."
-            echo "Add them under Settings → Secrets and variables → Actions → Secrets (or Variables)."
-            echo "Names must match exactly, including the VITE_ prefix."
+          if [ -z "$SUPABASE_URL" ]; then
+            echo "Missing VITE_SUPABASE_URL."
+            echo "Add it under Settings → Secrets and variables → Actions → Secrets (or Variables)."
             exit 1
           fi
 
+          if [ -z "$SUPABASE_SECRET_KEY" ]; then
+            echo "Missing SUPABASE_SECRET_KEY (or legacy SUPABASE_SERVICE_ROLE_KEY)."
+            echo "Add the secret key from Supabase → Project Settings → API → Secret keys."
+            echo "GitHub: Settings → Secrets and variables → Actions → New repository secret."
+            echo "Do not add this key to .env.local or any VITE_ variable."
+            exit 1
+          fi
+
+          # Use apikey header only — new sb_secret_ keys are not JWTs and must not go on Authorization.
           curl -fsS -X GET \
             "${SUPABASE_URL%/}/rest/v1/saved_recipes?select=id&limit=1" \
-            -H "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
-            -H "Authorization: Bearer ${SUPABASE_PUBLISHABLE_KEY}"
+            -H "apikey: ${SUPABASE_SECRET_KEY}"
 
           echo "Supabase keepalive ping succeeded."
