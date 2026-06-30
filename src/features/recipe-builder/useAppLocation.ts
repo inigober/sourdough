@@ -8,7 +8,7 @@ import type { ScheduleInput } from '../../lib/schedule/types.ts';
 import type { SavedRecipe } from '../../lib/storage/types.ts';
 import type { AppLocation } from './appLocation.ts';
 import { showHomeButton as getShowHomeButton } from './appLocation.ts';
-import { APP_ROUTES, type AppRouteNavigate } from './appRoutes.ts';
+import { APP_ROUTES, shouldBlockUnsavedNavigation, type AppRouteNavigate } from './appRoutes.ts';
 import type { RecipeBuilderStep } from './recipeBuilderSteps.ts';
 import type { SaveDialogSource } from './types.ts';
 
@@ -82,9 +82,12 @@ export function useAppNavigation({
       currentLocation: { pathname: string };
       nextLocation: { pathname: string };
     }) =>
-      location.phase !== 'companion' &&
-      isDirty &&
-      currentLocation.pathname !== nextLocation.pathname,
+      shouldBlockUnsavedNavigation({
+        currentPathname: currentLocation.pathname,
+        nextPathname: nextLocation.pathname,
+        isDirty,
+        phase: location.phase,
+      }),
     [isDirty, location.phase],
   );
 
@@ -242,6 +245,7 @@ export function useAppNavigation({
   }, [routes]);
 
   return {
+    isDirty,
     isSaveDialogOpen,
     saveDialogSource,
     pendingDeleteRecipeId,

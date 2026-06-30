@@ -23,9 +23,10 @@ const savedRecipe: SavedRecipe = {
   updatedAt: '2026-05-01T10:00:00.000Z',
 };
 
-test('shouldPromptSaveBeforeBake requires a saved recipe id', () => {
+test('shouldPromptSaveBeforeBake requires a saved recipe id or clean saved state', () => {
   assert.equal(shouldPromptSaveBeforeBake(null), true);
   assert.equal(shouldPromptSaveBeforeBake('recipe-1'), false);
+  assert.equal(shouldPromptSaveBeforeBake('recipe-1', true), true);
 });
 
 test('canStartBakeFromSavedRecipe requires a schedule', () => {

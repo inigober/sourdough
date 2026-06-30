@@ -166,6 +166,7 @@ export function RecipeBuilder() {
   const bakeFlow = useBakeFlow({
     activeSavedRecipeId,
     activeSavedRecipe,
+    isDirty: navigation.isDirty,
     recipeInput: wizard.recipeInput,
     scheduleInput: wizard.scheduleInput,
     fetchSavedRecipe,

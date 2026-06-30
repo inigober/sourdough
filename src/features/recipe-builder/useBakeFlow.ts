@@ -32,6 +32,7 @@ type BakeSessionActions = {
 type UseBakeFlowOptions = {
   activeSavedRecipeId: string | null;
   activeSavedRecipe: SavedRecipe | null;
+  isDirty: boolean;
   recipeInput: RecipeInput;
   scheduleInput: ScheduleInput;
   fetchSavedRecipe: (id: string) => Promise<SavedRecipe | null>;
@@ -46,6 +47,7 @@ type UseBakeFlowOptions = {
 export function useBakeFlow({
   activeSavedRecipeId,
   activeSavedRecipe,
+  isDirty,
   recipeInput,
   scheduleInput,
   fetchSavedRecipe,
@@ -89,14 +91,14 @@ export function useBakeFlow({
   }, [bakeSession, enterCompanion]);
 
   const startBakeFromSchedule = useCallback(async (): Promise<void> => {
-    if (shouldPromptSaveBeforeBake(activeSavedRecipeId)) {
+    if (shouldPromptSaveBeforeBake(activeSavedRecipeId, isDirty)) {
       setPendingStartBakeAfterSave(true);
       openSaveDialog('schedule');
       return;
     }
 
     await proceedWithStartBake();
-  }, [activeSavedRecipeId, openSaveDialog, proceedWithStartBake, setPendingStartBakeAfterSave]);
+  }, [activeSavedRecipeId, isDirty, openSaveDialog, proceedWithStartBake, setPendingStartBakeAfterSave]);
 
   const startBakeFromSavedRecipe = useCallback(
     async (id: string): Promise<void> => {

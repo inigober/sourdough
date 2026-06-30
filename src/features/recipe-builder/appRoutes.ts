@@ -35,6 +35,45 @@ function normalizePathname(pathname: string): string {
   return trimmed.length === 0 ? '/' : trimmed;
 }
 
+export function isBuilderPath(pathname: string): boolean {
+  const path = normalizePathname(pathname);
+
+  if (path === APP_ROUTES.buildSummary || path === APP_ROUTES.buildSchedule) {
+    return true;
+  }
+
+  const buildMatch = path.match(/^\/build\/([^/]+)$/);
+  return Boolean(buildMatch && SLUG_TO_WIZARD_STEP[buildMatch[1]]);
+}
+
+export function shouldBlockUnsavedNavigation(options: {
+  currentPathname: string;
+  nextPathname: string;
+  isDirty: boolean;
+  phase: BuilderPhase;
+}): boolean {
+  const { currentPathname, nextPathname, isDirty, phase } = options;
+
+  if (phase === 'companion' || !isDirty) {
+    return false;
+  }
+
+  if (normalizePathname(currentPathname) === normalizePathname(nextPathname)) {
+    return false;
+  }
+
+  if (isBuilderPath(currentPathname) && isBuilderPath(nextPathname)) {
+    return false;
+  }
+
+  // Bake entry is handled by save-before-bake flow in useBakeFlow.
+  if (normalizePathname(nextPathname) === APP_ROUTES.bake) {
+    return false;
+  }
+
+  return true;
+}
+
 export function isKnownAppPath(pathname: string): boolean {
   const path = normalizePathname(pathname);
 

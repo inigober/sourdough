@@ -3,9 +3,12 @@ import type { SavedRecipe } from '../../lib/storage/types.ts';
 import type { ScheduleInput } from '../../lib/schedule/types.ts';
 import type { RecipeInput } from '../../lib/recipe/types.ts';
 
-/** Schedule start requires a saved recipe id so the bake links back to cloud storage. */
-export function shouldPromptSaveBeforeBake(activeSavedRecipeId: string | null): boolean {
-  return !activeSavedRecipeId;
+/** Bake requires a saved recipe id; prompt when unsaved or when a saved recipe has unsaved edits. */
+export function shouldPromptSaveBeforeBake(
+  activeSavedRecipeId: string | null,
+  isDirty = false,
+): boolean {
+  return !activeSavedRecipeId || isDirty;
 }
 
 export function canStartBakeFromSavedRecipe(

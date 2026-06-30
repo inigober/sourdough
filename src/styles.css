@@ -1539,12 +1539,31 @@ p {
   box-sizing: border-box;
   line-height: 1.35;
   min-height: 2.75rem;
+  text-align: start;
+  -webkit-appearance: none;
+  appearance: none;
+  overflow: hidden;
 }
 
 .field-card input[type='date']::-webkit-date-and-time-value,
 .field-card input[type='time']::-webkit-date-and-time-value {
   line-height: 1.35;
   min-height: 1.2em;
+  text-align: start;
+  margin: 0;
+}
+
+.field-card input[type='date']::-webkit-datetime-edit,
+.field-card input[type='time']::-webkit-datetime-edit {
+  display: inline-flex;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.field-card input[type='date']::-webkit-datetime-edit-fields-wrapper,
+.field-card input[type='time']::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
 }
 
 @media (min-width: 640px) {
@@ -1594,6 +1613,7 @@ p {
 .field-card {
   display: grid;
   gap: 10px;
+  min-width: 0;
   padding: 14px;
   border: 1px solid #f0dfce;
   border-radius: 20px;
