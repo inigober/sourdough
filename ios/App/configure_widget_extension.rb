@@ -17,14 +17,18 @@ shared_group = project.main_group.find_subpath('BakeTimerShared', true)
 shared_group.set_source_tree('<group>')
 shared_group.set_path('BakeTimerShared')
 
-shared_file = shared_group.new_file('BakeTimerAlarmMetadata.swift')
+shared_file = shared_group.files.find { |f| f.path == 'BakeTimerAlarmMetadata.swift' }
+shared_file ||= shared_group.new_file('BakeTimerAlarmMetadata.swift')
+
 widget_files = [
   'BakeTimerWidgetBundle.swift',
   'BakeTimerLiveActivity.swift',
   'BakeTimerCountdownViews.swift',
-].map { |name| widget_group.new_file(name) }
+].map do |name|
+  widget_group.files.find { |f| f.path == name } || widget_group.new_file(name)
+end
 
-info_plist = widget_group.new_file('Info.plist')
+widget_group.files.find { |f| f.path == 'Info.plist' } || widget_group.new_file('Info.plist')
 
 extension_target = project.targets.find { |t| t.name == 'BakeTimerWidgetExtension' }
 unless extension_target
@@ -39,6 +43,8 @@ end
 extension_target.build_configurations.each do |config|
   config.build_settings['INFOPLIST_FILE'] = 'BakeTimerWidget/Info.plist'
   config.build_settings['PRODUCT_BUNDLE_IDENTIFIER'] = 'com.inigo.sourdough.BakeTimerWidget'
+  config.build_settings['PRODUCT_NAME'] = 'BakeTimerWidgetExtension'
+  config.build_settings['SKIP_INSTALL'] = 'YES'
   config.build_settings['SWIFT_VERSION'] = '5.0'
   config.build_settings['TARGETED_DEVICE_FAMILY'] = '1,2'
   config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '26.0'
@@ -49,10 +55,20 @@ extension_target.build_configurations.each do |config|
   config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'YES'
 end
 
+extension_target.product_reference.name = 'BakeTimerWidgetExtension.appex'
+extension_target.product_reference.path = 'BakeTimerWidgetExtension.appex'
+extension_target.product_name = 'BakeTimerWidgetExtension'
+
 extension_target.source_build_phase.clear
 extension_target.add_file_references(widget_files + [shared_file])
 
-app_target.add_file_references([shared_file]) unless app_target.source_build_phase.files_references.include?(shared_file)
+unless app_target.source_build_phase.files_references.include?(shared_file)
+  app_target.add_file_references([shared_file])
+end
+
+unless app_target.dependencies.any? { |dep| dep.target == extension_target }
+  app_target.add_dependency(extension_target)
+end
 
 embed_phase = app_target.copy_files_build_phases.find { |phase| phase.name == 'Embed Foundation Extensions' }
 unless embed_phase

@@ -8,7 +8,12 @@ import AlarmKit
 struct BakeTimerLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: AlarmAttributes<BakeTimerAlarmMetadata>.self) { context in
-            BakeTimerLockScreenView(context: context)
+            BakeTimerLockScreenView(
+                stepTitle: context.attributes.metadata.stepTitle,
+                recipeName: context.attributes.metadata.recipeName,
+                tintColor: context.attributes.tintColor,
+                state: context.state
+            )
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {

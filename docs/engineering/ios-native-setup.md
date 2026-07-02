@@ -88,5 +88,6 @@ Permission is re-checked when the app returns to the foreground.
 | --- | --- |
 | `xcodebuild requires Xcode` | Install Xcode from the App Store; run `xcode-select` command above. |
 | Pod install fails | `cd ios/App && pod install --repo-update` |
-| Plugin not found (`BakeTimer`) | Confirm `BakeTimerPlugin.swift` is in the App target (already wired in `project.pbxproj`). Rebuild in Xcode. |
+| Multiple commands produce `.appex` | Stale widget extension product name. Run:<br>`cd ios/App && ruby repair_widget_extension.rb`<br>`rm -rf ~/Library/Developer/Xcode/DerivedData/App-*`<br>Then in Xcode: **Product → Clean Build Folder**, rebuild. |
+| `[CP] Embed Pods Frameworks` warning | Harmless CocoaPods warning; safe to ignore. |
 | No AlarmKit behavior | Requires iOS 26+ device/simulator and Xcode 26 SDK; older OS uses notifications only. |

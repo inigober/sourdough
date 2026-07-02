@@ -1,5 +1,5 @@
-import ActivityKit
 import SwiftUI
+import WidgetKit
 
 #if canImport(AlarmKit)
 import AlarmKit
@@ -29,20 +29,23 @@ struct BakeTimerCountdownText: View {
 
 @available(iOS 26.0, *)
 struct BakeTimerLockScreenView: View {
-    let context: ActivityViewContext<AlarmAttributes<BakeTimerAlarmMetadata>>
+    let stepTitle: String
+    let recipeName: String
+    let tintColor: Color
+    let state: AlarmPresentationState
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: "timer")
-                    .foregroundStyle(context.attributes.tintColor)
-                Text(context.attributes.metadata.stepTitle)
+                    .foregroundStyle(tintColor)
+                Text(stepTitle)
                     .font(.headline)
-                    .foregroundStyle(context.attributes.tintColor)
+                    .foregroundStyle(tintColor)
                 Spacer()
-                BakeTimerCountdownText(state: context.state)
+                BakeTimerCountdownText(state: state)
             }
-            Text(context.attributes.metadata.recipeName)
+            Text(recipeName)
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
