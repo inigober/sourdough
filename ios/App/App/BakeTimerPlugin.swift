@@ -1,3 +1,4 @@
+import ActivityKit
 import AppIntents
 import Capacitor
 import Foundation
@@ -7,16 +8,6 @@ import UserNotifications
 #if canImport(AlarmKit)
 import AlarmKit
 #endif
-
-@available(iOS 16.0, *)
-struct OpenBakeModeIntent: AppIntent {
-    static var title: LocalizedStringResource = "Open bake mode"
-    static var openAppWhenRun = true
-
-    func perform() async throws -> some IntentResult {
-        .result()
-    }
-}
 
 @objc(BakeTimerPlugin)
 public class BakeTimerPlugin: CAPPlugin, CAPBridgedPlugin {
@@ -33,6 +24,16 @@ public class BakeTimerPlugin: CAPPlugin, CAPBridgedPlugin {
 
     private let storageKey = "sourdough.activeBakeTimerIds"
     private let alarmIdStorageKey = "sourdough.activeBakeAlarmIds"
+
+    /// AlarmKit is unreliable on the simulator (silent alerts, SpringBoard crashes).
+    /// Use notification fallback there; reserve AlarmKit for physical devices.
+    private var prefersAlarmKit: Bool {
+        #if targetEnvironment(simulator)
+        return false
+        #else
+        return true
+        #endif
+    }
 
     @objc func getPermissionStatus(_ call: CAPPluginCall) {
         Task {
@@ -84,19 +85,17 @@ public class BakeTimerPlugin: CAPPlugin, CAPBridgedPlugin {
         }
 
         let durationSeconds = call.getDouble("durationSeconds") ?? 60
-        let recipeName = call.getString("recipeName") ?? "Sourdough bake"
-        let body = "\(recipeName) — \(title)"
+        let body = title
 
         Task {
             do {
                 if #available(iOS 26.0, *) {
                     #if canImport(AlarmKit)
-                    if await self.isAlarmKitAuthorized() {
+                    if self.prefersAlarmKit, await self.isAlarmKitAuthorized() {
                         try await self.scheduleAlarmKitTimer(
                             timerId: timerId,
                             durationSeconds: durationSeconds,
-                            title: title,
-                            recipeName: recipeName
+                            title: title
                         )
                         self.trackTimerId(timerId)
                         call.resolve()
@@ -162,7 +161,7 @@ public class BakeTimerPlugin: CAPPlugin, CAPBridgedPlugin {
     private func currentAlertMode() async -> String {
         if #available(iOS 26.0, *) {
             #if canImport(AlarmKit)
-            if await self.isAlarmKitAuthorized() {
+            if self.prefersAlarmKit, await self.isAlarmKitAuthorized() {
                 return "alarm"
             }
             #endif
@@ -244,60 +243,41 @@ public class BakeTimerPlugin: CAPPlugin, CAPBridgedPlugin {
     private func scheduleAlarmKitTimer(
         timerId: String,
         durationSeconds: Double,
-        title: String,
-        recipeName: String
+        title: String
     ) async throws {
         let alarmUUID = UUID()
-        let stopButton = AlarmButton(
-            text: "Dismiss",
-            textColor: .white,
-            systemImageName: "stop.circle"
-        )
         let openButton = AlarmButton(
             text: "Open app",
             textColor: .white,
-            systemImageName: "arrow.up.forward.app"
+            // AlarmKit only accepts SF Symbols; "arrow.right" is the closest system match to ArrowRightIcon.
+            systemImageName: "arrow.right"
         )
         let alert = AlarmPresentation.Alert(
-            title: LocalizedStringResource(stringLiteral: "\(recipeName): \(title)"),
-            stopButton: stopButton,
+            title: LocalizedStringResource(stringLiteral: title),
+            stopButton: BakeTimerAlarmButtons.stop,
             secondaryButton: openButton,
             secondaryButtonBehavior: .custom
         )
-        let pauseButton = AlarmButton(
-            text: "Pause",
-            textColor: .white,
-            systemImageName: "pause.fill"
-        )
         let countdown = AlarmPresentation.Countdown(
-            title: LocalizedStringResource(stringLiteral: title),
-            pauseButton: pauseButton
-        )
-        let resumeButton = AlarmButton(
-            text: "Resume",
-            textColor: .white,
-            systemImageName: "play.fill"
-        )
-        let paused = AlarmPresentation.Paused(
-            title: "Paused",
-            resumeButton: resumeButton
+            title: LocalizedStringResource(stringLiteral: title)
         )
         let presentation = AlarmPresentation(
             alert: alert,
-            countdown: countdown,
-            paused: paused
+            countdown: countdown
         )
-        let metadata = BakeTimerAlarmMetadata(stepTitle: title, recipeName: recipeName)
+        let metadata = BakeTimerAlarmMetadata(stepTitle: title)
         let attributes = AlarmAttributes(
             presentation: presentation,
             metadata: metadata,
             tintColor: .orange
         )
-        let configuration = AlarmManager.AlarmConfiguration.timer(
+        typealias BakeTimerAlarmConfiguration = AlarmManager.AlarmConfiguration<BakeTimerAlarmMetadata>
+        let configuration: BakeTimerAlarmConfiguration = AlarmManager.AlarmConfiguration.timer(
             duration: durationSeconds,
             attributes: attributes,
-            stopIntent: nil,
-            secondaryIntent: OpenBakeModeIntent()
+            stopIntent: StopBakeTimerIntent(alarmID: alarmUUID.uuidString),
+            secondaryIntent: OpenBakeModeIntent(alarmID: alarmUUID.uuidString),
+            sound: .named(BakeTimerAlertSound.fileName)
         )
 
         _ = try await AlarmManager.shared.schedule(id: alarmUUID, configuration: configuration)

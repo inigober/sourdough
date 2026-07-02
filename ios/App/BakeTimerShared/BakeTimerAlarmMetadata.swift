@@ -5,6 +5,5 @@ import AlarmKit
 
 nonisolated struct BakeTimerAlarmMetadata: AlarmMetadata, Codable, Hashable, Sendable {
     var stepTitle: String
-    var recipeName: String
 }
 #endif

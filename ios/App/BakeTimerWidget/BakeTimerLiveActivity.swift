@@ -8,35 +8,41 @@ import AlarmKit
 struct BakeTimerLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: AlarmAttributes<BakeTimerAlarmMetadata>.self) { context in
-            let metadata = context.attributes.metadata
+            let stepTitle = context.attributes.metadata?.stepTitle ?? "Timer"
             return BakeTimerLockScreenView(
-                stepTitle: metadata?.stepTitle ?? "Timer",
-                recipeName: metadata?.recipeName ?? "",
+                stepTitle: stepTitle,
                 tintColor: context.attributes.tintColor,
+                presentation: context.attributes.presentation,
                 state: context.state
             )
         } dynamicIsland: { context in
-            let metadata = context.attributes.metadata
+            let stepTitle = context.attributes.metadata?.stepTitle ?? "Timer"
             return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(metadata?.stepTitle ?? "Timer")
-                            .font(.headline)
-                        Text(metadata?.recipeName ?? "")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
+                    Text(stepTitle)
+                        .font(.headline)
+                        .lineLimit(2)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    BakeTimerCountdownText(state: context.state)
+                    BakeTimerCountdownText(stepTitle: stepTitle, state: context.state)
+                }
+                DynamicIslandExpandedRegion(.bottom) {
+                    BakeTimerLockScreenControls(
+                        presentation: context.attributes.presentation,
+                        state: context.state,
+                        tintColor: context.attributes.tintColor
+                    )
+                    .padding(.top, 4)
                 }
             } compactLeading: {
                 Image(systemName: "timer")
                     .foregroundStyle(context.attributes.tintColor)
             } compactTrailing: {
-                BakeTimerCountdownText(state: context.state)
+                BakeTimerCountdownText(stepTitle: stepTitle, state: context.state)
+                    .font(.caption.weight(.semibold))
             } minimal: {
                 Image(systemName: "timer")
+                    .foregroundStyle(context.attributes.tintColor)
             }
         }
     }

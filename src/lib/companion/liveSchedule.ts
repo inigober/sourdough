@@ -4,6 +4,7 @@ import { getMixDateIso, parseIsoDate } from '../schedule/dates.ts';
 import { formatClockTime, formatOffsetDateTime } from '../schedule/mixDateTime.ts';
 import type { BakeSession } from './types.ts';
 import { createTimerEndsAt } from './bakeTimer.ts';
+import { getEffectiveStepDurationMinutes } from './bakeTimerTestOverride.ts';
 
 function upsertStepLog(
   session: BakeSession,
@@ -93,7 +94,7 @@ export function startTimedStep(
     ...session,
     scheduleDriftMinutes: nextDrift,
     currentStepStartedAt: nowIso,
-    activeTimerEndsAt: createTimerEndsAt(step.durationMinutes, now),
+    activeTimerEndsAt: createTimerEndsAt(getEffectiveStepDurationMinutes(step), now),
     updatedAt: nowIso,
     stepLogs: upsertStepLog(session, step, {
       actualStartedAt: nowIso,

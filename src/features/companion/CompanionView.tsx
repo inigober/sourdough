@@ -36,6 +36,7 @@ import { BakeCompleteDialog, type BakeCompleteSaveInput } from './BakeCompleteDi
 import { CompanionCoachPanel } from './CompanionCoachPanel.tsx';
 import { CompanionStepEditDialog } from './CompanionStepEditDialog.tsx';
 import { CompanionBakeTimerPermissionNotice } from './CompanionBakeTimerPermissionNotice.tsx';
+import { getBakeTimerTestOverrideMinutes } from '../../lib/companion/bakeTimerTestOverride.ts';
 import { useBakeNativeTimer } from '../../lib/companion/nativeBakeTimer/useBakeNativeTimer.ts';
 
 type CompanionViewProps = {
@@ -78,6 +79,9 @@ export function CompanionView({
   );
   const previousStep = getPreviousTimelineStep(timeline, session);
   const isComplete = isBakeSessionComplete(session, timeline.length);
+  const timerTestOverrideMinutes = currentStep
+    ? getBakeTimerTestOverrideMinutes(currentStep)
+    : null;
   const canEditStep = currentStep ? Boolean(getStepScheduleEdit(currentStep.id)) : false;
   const stepIsRunning = isTimedStepRunning(session);
   const stepCanStart = currentStep ? canStartTimedStep(session, currentStep) : false;
@@ -201,6 +205,13 @@ export function CompanionView({
             showOpenSettings={permissionNotice.showOpenSettings}
             onOpenSettings={openTimerSettings}
           />
+        ) : null}
+        {timerTestOverrideMinutes !== null ? (
+          <p className="companion__drift" role="status">
+            Test mode: this step&apos;s timer runs for {timerTestOverrideMinutes} minute
+            {timerTestOverrideMinutes === 1 ? '' : 's'}. Remove <code>VITE_BAKE_TIMER_TEST_MINUTES</code>{' '}
+            from <code>.env.local</code> to use the real duration.
+          </p>
         ) : null}
       </section>
 

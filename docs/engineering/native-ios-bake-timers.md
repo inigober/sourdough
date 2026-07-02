@@ -15,9 +15,9 @@ Instead:
 
 1. **Keep the current in-app timer** (`activeTimerEndsAt` in bake session state) as the source of truth for schedule drift, step logs, and on-screen countdown while the app is open.
 2. **Wrap the web app in Capacitor** when we ship a native iOS shell (natural fit for the existing Vite + React PWA).
-3. **Bridge to native timers on Start timer** via a thin Capacitor plugin:
+3. **Bridge to native timers on Start timer** via the custom `BakeTimer` Capacitor plugin (`ios/App/App/BakeTimerPlugin.swift`):
    - **iOS 26+:** [AlarmKit](https://developer.apple.com/videos/play/wwdc2025/230/) for system-level countdown timers (Lock Screen, Dynamic Island, alert on completion).
-   - **Older iOS:** `@capacitor/local-notifications` to fire a single “time’s up” notification at the step end time.
+   - **Older iOS:** `UNUserNotificationCenter` in the same plugin to fire a single “time’s up” notification at the step end time (not `@capacitor/local-notifications` — scheduling lives in native Swift).
 4. **Keep native and in-app timers in sync** — cancel, restart, step change, and bake exit must update or clear the matching native alarm/notification.
 
 ## User flow
@@ -27,9 +27,9 @@ Instead:
        │
        ├─► startTimedStep()              ← existing JS (session state, drift, logs)
        │
-       └─► NativeTimer.schedule()        ← new Capacitor plugin
+       └─► NativeTimer.schedule()        ← BakeTimer Capacitor plugin
              ├─ iOS 26+: AlarmKit countdown
-             └─ older iOS: local notification at end time
+             └─ older iOS: UNUserNotificationCenter at end time
 ```
 
 Suggested native payload:
@@ -78,15 +78,17 @@ Apple restrictions and caveats:
 
 **Product intent:** On iOS 26+, bake step completion should feel like a real timer alarm: audible, persistent until dismissed, and visible on the Lock Screen — not a easy-to-miss notification ping.
 
-### Local notifications fallback (pre–iOS 26)
+### Notification fallback (pre–iOS 26)
 
-Standard local notifications are **much more restricted**:
+Implemented in `BakeTimerPlugin.scheduleNotificationTimer()` using `UNUserNotificationCenter` directly. Standard local notifications are **much more restricted**:
 
 - Typically **one short sound**, then done — they do **not** keep ringing until stopped.
 - **Respect Silent mode and Focus** unless the app has a rare Critical Alerts entitlement (not appropriate for sourdough timers).
 - No Lock Screen countdown UI comparable to AlarmKit.
 
 Use this fallback only for older OS versions. Copy should set expectations: “You’ll get a notification when the step ends” rather than “alarm-style alert.”
+
+We do **not** depend on `@capacitor/local-notifications`; the pre–iOS 26 path is handled entirely in `BakeTimerPlugin.swift`.
 
 ## Implementation sketch (future)
 

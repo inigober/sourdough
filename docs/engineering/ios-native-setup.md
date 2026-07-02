@@ -57,8 +57,9 @@ Timer alerts can open bake mode via `sourdough://bake`. The URL scheme is declar
 2. Tap **Start timer** — iOS should prompt for alarm/notification permission on first use.
 3. Lock the device — on iOS 26+ you should see a Lock Screen / Dynamic Island countdown (Bake Timer widget extension).
 4. Background the app and confirm alert/notification at step end.
-5. On iOS 26+ with AlarmKit enabled, confirm dismiss stops the alert and **Open app** returns to bake mode.
-6. If permission is denied or only notifications are enabled, bake mode shows a notice with **Open Settings**.
+5. **Use a physical iPhone for AlarmKit testing.** The iOS Simulator does not reliably play alarm sounds and may crash SpringBoard when a timer fires; the app automatically falls back to end-of-step notifications on the simulator.
+6. On iOS 26+ with AlarmKit enabled, confirm dismiss stops the alert and **Open app** returns to bake mode.
+7. If permission is denied or only notifications are enabled, bake mode shows a notice with **Open Settings**.
 
 ## Widget extension (Phase 4)
 
@@ -91,3 +92,4 @@ Permission is re-checked when the app returns to the foreground.
 | Multiple commands produce `.appex` | Stale widget extension product name. Run:<br>`cd ios/App && ruby repair_widget_extension.rb`<br>`rm -rf ~/Library/Developer/Xcode/DerivedData/App-*`<br>Then in Xcode: **Product → Clean Build Folder**, rebuild. |
 | `[CP] Embed Pods Frameworks` warning | Harmless CocoaPods warning; safe to ignore. |
 | No AlarmKit behavior | Requires iOS 26+ device/simulator and Xcode 26 SDK; older OS uses notifications only. |
+| `Failed to show Widget` / `Failed to get descriptors for extensionBundleID` | Xcode tried to run the widget extension scheme. Use the shared **App** scheme only (not `BakeTimerWidgetExtension`). The repo disables auto-generated extension schemes in `App.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings`. If the error returns, confirm the scheme picker shows **App** and re-run `ruby configure_widget_extension.rb`. |

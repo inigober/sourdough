@@ -1,6 +1,7 @@
 import type { ScheduleInput } from '../schedule/types.ts';
 import type { TimelineStep } from '../schedule/types.ts';
 import { createTimerEndsAt } from './bakeTimer.ts';
+import { getEffectiveStepDurationMinutes } from './bakeTimerTestOverride.ts';
 import { completeTimedStep, recordSkippedStep, startTimedStep } from './liveSchedule.ts';
 import { CURRENT_BAKE_SESSION_TIMELINE_VERSION } from './migrateBakeSession.ts';
 import type { BakeSession } from './types.ts';
@@ -170,7 +171,7 @@ export function restartStepTimer(
   return {
     ...session,
     currentStepStartedAt: new Date(now).toISOString(),
-    activeTimerEndsAt: createTimerEndsAt(step.durationMinutes, now),
+    activeTimerEndsAt: createTimerEndsAt(getEffectiveStepDurationMinutes(step), now),
     updatedAt: new Date(now).toISOString(),
   };
 }

@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require 'fileutils'
 require 'xcodeproj'
 
 project_path = File.expand_path('App.xcodeproj', __dir__)
@@ -17,8 +18,14 @@ shared_group = project.main_group.find_subpath('BakeTimerShared', true)
 shared_group.set_source_tree('<group>')
 shared_group.set_path('BakeTimerShared')
 
-shared_file = shared_group.files.find { |f| f.path == 'BakeTimerAlarmMetadata.swift' }
-shared_file ||= shared_group.new_file('BakeTimerAlarmMetadata.swift')
+shared_files = [
+  'BakeTimerAlarmMetadata.swift',
+  'BakeTimerAlarmIntents.swift',
+  'BakeTimerAlarmButtons.swift',
+  'AppIcons.swift',
+].map do |name|
+  shared_group.files.find { |f| f.path == name } || shared_group.new_file(name)
+end
 
 widget_files = [
   'BakeTimerWidgetBundle.swift',
@@ -60,9 +67,11 @@ extension_target.product_reference.path = 'BakeTimerWidgetExtension.appex'
 extension_target.product_name = 'BakeTimerWidgetExtension'
 
 extension_target.source_build_phase.clear
-extension_target.add_file_references(widget_files + [shared_file])
+extension_target.add_file_references(widget_files + shared_files)
 
-unless app_target.source_build_phase.files_references.include?(shared_file)
+shared_files.each do |shared_file|
+  next if app_target.source_build_phase.files_references.include?(shared_file)
+
   app_target.add_file_references([shared_file])
 end
 
@@ -82,5 +91,28 @@ unless embed_phase.files_references.include?(product_ref)
   build_file.settings = { 'ATTRIBUTES' => ['RemoveHeadersOnCopy'] }
 end
 
+scheme = Xcodeproj::XCScheme.new
+scheme.add_build_target(app_target)
+scheme.add_build_target(extension_target)
+scheme.set_launch_target(app_target)
+scheme.save_as(project_path, 'App', true)
+
+workspace_settings_dir = File.expand_path('App.xcworkspace/xcshareddata', __dir__)
+FileUtils.mkdir_p(workspace_settings_dir)
+File.write(
+  File.join(workspace_settings_dir, 'WorkspaceSettings.xcsettings'),
+  <<~XML,
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+    \t<key>IDEWorkspaceSharedSettings_AutocreateSchemesIfNeeded</key>
+    \t<false/>
+    </dict>
+    </plist>
+  XML
+)
+
 project.save
 puts 'BakeTimerWidgetExtension target configured.'
+puts 'Shared App scheme created; auto-generated widget extension scheme disabled.'
