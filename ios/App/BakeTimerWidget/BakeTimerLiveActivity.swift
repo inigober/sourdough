@@ -8,19 +8,21 @@ import AlarmKit
 struct BakeTimerLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: AlarmAttributes<BakeTimerAlarmMetadata>.self) { context in
-            BakeTimerLockScreenView(
-                stepTitle: context.attributes.metadata.stepTitle,
-                recipeName: context.attributes.metadata.recipeName,
+            let metadata = context.attributes.metadata
+            return BakeTimerLockScreenView(
+                stepTitle: metadata?.stepTitle ?? "Timer",
+                recipeName: metadata?.recipeName ?? "",
                 tintColor: context.attributes.tintColor,
                 state: context.state
             )
         } dynamicIsland: { context in
-            DynamicIsland {
+            let metadata = context.attributes.metadata
+            return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(context.attributes.metadata.stepTitle)
+                        Text(metadata?.stepTitle ?? "Timer")
                             .font(.headline)
-                        Text(context.attributes.metadata.recipeName)
+                        Text(metadata?.recipeName ?? "")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                     }
