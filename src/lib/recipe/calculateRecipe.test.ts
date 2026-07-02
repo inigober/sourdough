@@ -10,12 +10,12 @@ test('calculates the default 900g Type 1050 recipe', () => {
   assert.equal(formula.totalFlourGrams, 494.5);
   assert.equal(formula.totalWaterGrams, 395.6);
   assert.equal(formula.saltGrams, 9.9);
-  assert.equal(formula.prefermentedFlourPercent, 13.3);
-  assert.equal(formula.levainFlourGrams, 65.8);
-  assert.equal(formula.levainWaterGrams, 65.8);
-  assert.equal(formula.levainGrams, 131.5);
-  assert.equal(formula.addedFlourGrams, 428.7);
-  assert.equal(formula.addedWaterGrams, 329.8);
+  assert.equal(formula.prefermentedFlourPercent, 9.5);
+  assert.equal(formula.levainFlourGrams, 47);
+  assert.equal(formula.levainWaterGrams, 47);
+  assert.equal(formula.levainGrams, 94);
+  assert.equal(formula.addedFlourGrams, 447.5);
+  assert.equal(formula.addedWaterGrams, 348.6);
   assert.equal(formula.perLoafDoughWeightGrams, 900);
   assert.deepEqual(formula.estimatedBakedLoafWeightGrams, { low: 765, high: 810 });
 });
@@ -27,9 +27,9 @@ test('60% levain hydration contributes more flour than water', () => {
     levainHydrationPercent: 60,
   });
 
-  assert.equal(formula.levainWaterGrams, 39.5);
-  assert.equal(formula.levainFlourGrams, 65.8);
-  assert.equal(formula.levainGrams, 105.2);
+  assert.equal(formula.levainWaterGrams, 28.2);
+  assert.equal(formula.levainFlourGrams, 47);
+  assert.equal(formula.levainGrams, 75.2);
 });
 
 test('140% levain hydration contributes more water than flour', () => {
@@ -39,9 +39,9 @@ test('140% levain hydration contributes more water than flour', () => {
     levainHydrationPercent: 140,
   });
 
-  assert.equal(formula.levainWaterGrams, 92.1);
-  assert.equal(formula.levainFlourGrams, 65.8);
-  assert.equal(formula.levainGrams, 157.8);
+  assert.equal(formula.levainWaterGrams, 65.8);
+  assert.equal(formula.levainFlourGrams, 47);
+  assert.equal(formula.levainGrams, 112.7);
 });
 
 test('multiple loaves divide dough weight correctly', () => {

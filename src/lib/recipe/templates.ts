@@ -29,7 +29,7 @@ export const recipeTemplates: readonly RecipeTemplate[] = [
       saltPercent: 2,
       doughFlours: [createFlourBlendEntry('wheatType1050', 100)],
       levainFlourType: 'wheatType1050',
-      targetBulkHours: 6,
+      targetBulkHours: 8,
       roomTemperatureCelsius: 22,
       levainType: 'standard100',
       levainHydrationPercent: levainHydrationPresets.standard100,

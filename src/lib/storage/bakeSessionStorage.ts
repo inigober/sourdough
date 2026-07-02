@@ -1,5 +1,6 @@
-import { normalizeScheduleInput } from '../schedule/normalizeScheduleInput.ts';
+import { migrateBakeSession } from '../companion/migrateBakeSession.ts';
 import type { BakeSession } from '../companion/types.ts';
+import { normalizeScheduleInput } from '../schedule/normalizeScheduleInput.ts';
 
 export const BAKE_SESSION_STORAGE_KEY = 'sourdough:bake-session:v1';
 
@@ -25,14 +26,14 @@ export function loadBakeSession(storage: StorageLike = getDefaultStorage()): Bak
       return null;
     }
 
-    return {
+    return migrateBakeSession({
       ...parsed,
       scheduleInput: normalizeScheduleInput(parsed.scheduleInput, parsed.recipeInput),
       scheduleDriftMinutes: parsed.scheduleDriftMinutes ?? 0,
       currentStepStartedAt: parsed.currentStepStartedAt ?? null,
       stepLogs: parsed.stepLogs ?? [],
       coachQuestionsAsked: parsed.coachQuestionsAsked ?? 0,
-    };
+    });
   } catch {
     return null;
   }

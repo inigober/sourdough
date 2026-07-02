@@ -10,6 +10,7 @@ import {
   calculateStarterRefreshFeeding,
   DEFAULT_LEVAIN_BUILD_HOURS,
   describeStarterPrepPlan,
+  formatLevainBuildAmounts,
   formatLevainBuildDetail,
   formatRatioLabel,
   getDefaultLevainBuildHours,
@@ -105,7 +106,7 @@ test('formatLevainBuildDetail keeps copy short', () => {
   assert.equal(formatLevainBuildDetail('1:3:3', '09:00'), '1:3:3 feeding · ready for mix at 09:00');
   assert.equal(
     formatLevainBuildDetail('1:4:4', '09:00', 'high_ratio'),
-    '1:4:4 feeding · includes fridge refresh · ready at 09:00',
+    '1:4:4 feeding · includes fridge refresh · ready for mix at 09:00',
   );
 });
 
@@ -149,6 +150,16 @@ test('default levain build time is 12 hours', () => {
   assert.equal(getDefaultLevainBuildHours(), DEFAULT_LEVAIN_BUILD_HOURS);
   assert.equal(createDefaultScheduleInput(defaultRecipeInput).levainBuildHours, 12);
   assert.equal(createDefaultScheduleInput(defaultRecipeInput).starterFromFridge, true);
+});
+
+test('formatLevainBuildAmounts lists starter, flour, and water grams', () => {
+  const formula = calculateRecipe(defaultRecipeInput);
+  const ratio = getLevainBuildRatio(12, defaultRecipeInput.roomTemperatureCelsius, defaultRecipeInput.levainActivity);
+  const feeding = calculateLevainBuildFeeding(formula, ratio, 15);
+
+  assert.match(formatLevainBuildAmounts(feeding), /starter/);
+  assert.match(formatLevainBuildAmounts(feeding), /flour/);
+  assert.match(formatLevainBuildAmounts(feeding), /water/);
 });
 
 test('ratio label is formatted for display', () => {

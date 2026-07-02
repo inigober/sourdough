@@ -21,6 +21,8 @@ export type BakeSession = {
   recipeName: string;
   recipeInput: RecipeInput;
   scheduleInput: ScheduleInput;
+  /** Bumped when companion timeline shape changes; used to migrate resumed sessions. */
+  timelineVersion?: number;
   currentStepIndex: number;
   scheduleDriftMinutes: number;
   currentStepStartedAt: string | null;

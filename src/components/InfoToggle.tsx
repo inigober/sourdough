@@ -52,6 +52,10 @@ export function InfoToggle({ label, children }: InfoToggleProps) {
         return;
       }
 
+      if (target instanceof Element && target.closest('.dialog-backdrop')) {
+        return;
+      }
+
       if (buttonRef.current?.contains(target) || bubbleRef.current?.contains(target)) {
         return;
       }

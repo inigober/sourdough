@@ -25,7 +25,7 @@ export const defaultRecipeInput: RecipeInput = {
   saltPercent: 2,
   doughFlours: [createFlourBlendEntry('wheatType1050', 100)],
   levainFlourType: 'wheatType1050',
-  targetBulkHours: 6,
+  targetBulkHours: 8,
   roomTemperatureCelsius: 24,
   levainType: 'standard100',
   levainHydrationPercent: levainHydrationPresets.standard100,

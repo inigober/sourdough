@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type MouseEvent } from 'react';
 
 import { DialogCard } from '../../components/DialogCard.tsx';
 import { LoafAssessmentPicker } from '../../components/LoafAssessmentPicker.tsx';
@@ -25,6 +25,11 @@ export function BakeCompleteDialog({
   const [note, setNote] = useState('');
   const [assessment, setAssessment] = useState<BakeSessionAssessment | undefined>();
 
+  function handleAction(event: MouseEvent<HTMLButtonElement>, action: () => void): void {
+    event.stopPropagation();
+    action();
+  }
+
   return (
     <DialogCard
       title="Bake complete"
@@ -34,13 +39,18 @@ export function BakeCompleteDialog({
       onClose={onClose}
       actions={
         <div className="dialog-card__actions">
-          <button type="button" className="wizard-button wizard-button--secondary" onClick={onClose} disabled={isSaving}>
+          <button
+            type="button"
+            className="wizard-button wizard-button--secondary"
+            onClick={(event) => handleAction(event, onClose)}
+            disabled={isSaving}
+          >
             Back to home
           </button>
           <button
             type="button"
             className="wizard-button wizard-button--primary"
-            onClick={() => void onSave({ note, assessment })}
+            onClick={(event) => handleAction(event, () => void onSave({ note, assessment }))}
             disabled={isSaving}
           >
             {isSaving ? 'Saving…' : 'Save bake'}
@@ -51,19 +61,21 @@ export function BakeCompleteDialog({
       <p id="bake-complete-message" className="dialog-card__message">
         Nice work finishing <strong>{recipeName}</strong>. Your loaf is ready to cool and enjoy.
       </p>
-      <label className="field-card">
-        <span className="field-label-row">Loaf assessment (optional)</span>
-        <LoafAssessmentPicker value={assessment} onChange={setAssessment} />
-      </label>
-      <label className="field-card">
-        <span className="field-label-row">Bake notes (optional)</span>
-        <textarea
-          rows={4}
-          value={note}
-          onChange={(event) => setNote(event.currentTarget.value)}
-          placeholder="What went well? Anything to adjust next time?"
-        />
-      </label>
+      <div className="dialog-card__fields">
+        <label className="field-card">
+          <span className="field-label-row">Loaf assessment (optional)</span>
+          <LoafAssessmentPicker value={assessment} onChange={setAssessment} />
+        </label>
+        <label className="field-card">
+          <span className="field-label-row">Bake notes (optional)</span>
+          <textarea
+            rows={4}
+            value={note}
+            onChange={(event) => setNote(event.currentTarget.value)}
+            placeholder="What went well? Anything to adjust next time?"
+          />
+        </label>
+      </div>
       {saveError ? <p className="auth-modal__error">{saveError}</p> : null}
     </DialogCard>
   );

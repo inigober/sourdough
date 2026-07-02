@@ -43,7 +43,7 @@ export function CompanionCoachPanel({
     {
       id: 'intro',
       role: 'assistant',
-      text: getCoachTipForStep(stepId, stepLabel),
+      text: getCoachTipForStep(stepId, stepLabel, session.recipeInput),
     },
   ]);
   const [draft, setDraft] = useState('');
@@ -59,12 +59,12 @@ export function CompanionCoachPanel({
       {
         id: 'intro',
         role: 'assistant',
-        text: getCoachTipForStep(stepId, stepLabel),
+        text: getCoachTipForStep(stepId, stepLabel, session.recipeInput),
       },
     ]);
     setDraft('');
     setPendingPhoto(null);
-  }, [stepId, stepLabel]);
+  }, [stepId, stepLabel, session.recipeInput]);
 
   useEffect(() => {
     transcriptRef.current?.scrollTo({ top: transcriptRef.current.scrollHeight, behavior: 'smooth' });

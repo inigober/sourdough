@@ -191,7 +191,7 @@ export function formatLevainBuildDetail(
   refreshSkippedBecause?: 'max_ratio' | 'high_ratio',
 ): string {
   if (refreshSkippedBecause) {
-    return `${ratioLabel} feeding · includes fridge refresh · ready at ${mixStartTime}`;
+    return `${ratioLabel} feeding · includes fridge refresh · ready for mix at ${mixStartTime}`;
   }
 
   return `${ratioLabel} feeding · ready for mix at ${mixStartTime}`;
@@ -199,6 +199,10 @@ export function formatLevainBuildDetail(
 
 export function formatFeedingDetail(amounts: FeedingAmounts, ratioLabel: string): string {
   return `${ratioLabel} · ${Math.round(amounts.starterGrams)}g starter + ${Math.round(amounts.flourGrams)}g flour + ${Math.round(amounts.waterGrams)}g water (${Math.round(amounts.totalGrams)}g total)`;
+}
+
+export function formatLevainBuildAmounts(amounts: FeedingAmounts): string {
+  return `${Math.round(amounts.starterGrams)}g starter · ${Math.round(amounts.flourGrams)}g flour · ${Math.round(amounts.waterGrams)}g water (${Math.round(amounts.totalGrams)}g total)`;
 }
 
 function roundFeeding(amounts: FeedingAmounts): FeedingAmounts {

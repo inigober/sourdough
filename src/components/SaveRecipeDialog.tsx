@@ -1,19 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState, type MouseEvent } from 'react';
 
+import { findSavedRecipeSummaryByName } from '../lib/storage/recipeStorage.ts';
+import type { SavedRecipeSummary } from '../lib/storage/types.ts';
 import { DialogCard } from './DialogCard.tsx';
 
 type SaveRecipeDialogProps = {
   defaultName: string;
-  title: string;
-  submitLabel: string;
+  activeSavedRecipeId: string | null;
+  savedRecipes: SavedRecipeSummary[];
   onCancel: () => void;
-  onSave: (name: string) => void | Promise<void>;
+  onSave: (name: string, recipeId: string | null) => void | Promise<void>;
 };
 
 export function SaveRecipeDialog({
   defaultName,
-  title,
-  submitLabel,
+  activeSavedRecipeId,
+  savedRecipes,
   onCancel,
   onSave,
 }: SaveRecipeDialogProps) {
@@ -23,22 +25,43 @@ export function SaveRecipeDialog({
     setName(defaultName);
   }, [defaultName]);
 
+  const resolvedName = name.trim() || defaultName;
+  const updateRecipeId = useMemo(() => {
+    if (activeSavedRecipeId) {
+      return activeSavedRecipeId;
+    }
+
+    return findSavedRecipeSummaryByName(resolvedName, savedRecipes)?.id ?? null;
+  }, [activeSavedRecipeId, resolvedName, savedRecipes]);
+  const isUpdate = Boolean(updateRecipeId);
+
+  function handleAction(event: MouseEvent<HTMLButtonElement>, action: () => void): void {
+    event.stopPropagation();
+    action();
+  }
+
   return (
     <DialogCard
-      title={title}
+      title={isUpdate ? 'Update saved recipe' : 'Save recipe'}
       titleId="save-recipe-dialog-title"
       onClose={onCancel}
       actions={
         <div className="dialog-card__actions">
-          <button type="button" className="wizard-button wizard-button--secondary" onClick={onCancel}>
+          <button
+            type="button"
+            className="wizard-button wizard-button--secondary"
+            onClick={(event) => handleAction(event, onCancel)}
+          >
             Cancel
           </button>
           <button
             type="button"
             className="wizard-button wizard-button--primary"
-            onClick={() => void onSave(name.trim() || defaultName)}
+            onClick={(event) =>
+              handleAction(event, () => void onSave(resolvedName, updateRecipeId))
+            }
           >
-            {submitLabel}
+            {isUpdate ? 'Update recipe' : 'Save recipe'}
           </button>
         </div>
       }

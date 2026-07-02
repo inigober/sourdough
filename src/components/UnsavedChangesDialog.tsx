@@ -1,4 +1,5 @@
 import { DialogCard } from './DialogCard.tsx';
+import type { MouseEvent } from 'react';
 
 type UnsavedChangesDialogProps = {
   onCancel: () => void;
@@ -13,6 +14,11 @@ export function UnsavedChangesDialog({
   onSave,
   saveError,
 }: UnsavedChangesDialogProps) {
+  function handleAction(event: MouseEvent<HTMLButtonElement>, action: () => void): void {
+    event.stopPropagation();
+    action();
+  }
+
   return (
     <DialogCard
       title="Save changes?"
@@ -22,13 +28,25 @@ export function UnsavedChangesDialog({
       onClose={onCancel}
       actions={
         <div className="dialog-card__actions dialog-card__actions--stack">
-          <button type="button" className="wizard-button wizard-button--primary" onClick={onSave}>
+          <button
+            type="button"
+            className="wizard-button wizard-button--primary"
+            onClick={(event) => handleAction(event, onSave)}
+          >
             Save recipe
           </button>
-          <button type="button" className="wizard-button wizard-button--secondary" onClick={onDiscard}>
+          <button
+            type="button"
+            className="wizard-button wizard-button--secondary"
+            onClick={(event) => handleAction(event, onDiscard)}
+          >
             Discard changes
           </button>
-          <button type="button" className="wizard-button wizard-button--secondary" onClick={onCancel}>
+          <button
+            type="button"
+            className="wizard-button wizard-button--secondary"
+            onClick={(event) => handleAction(event, onCancel)}
+          >
             Keep editing
           </button>
         </div>

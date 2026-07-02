@@ -6,9 +6,11 @@ import { createDefaultScheduleInput } from '../schedule/defaults.ts';
 import {
   deleteSavedRecipe,
   duplicateSavedRecipe,
+  findSavedRecipeSummaryByName,
   generateDefaultRecipeName,
   getSavedRecipe,
   listSavedRecipeSummaries,
+  toSavedRecipeSummary,
   upsertSavedRecipe,
 } from './recipeStorage.ts';
 
@@ -33,6 +35,22 @@ test('generateDefaultRecipeName uses bread style only', () => {
   schedule.mixDate = '2026-05-20';
 
   assert.equal(generateDefaultRecipeName(defaultRecipeInput, schedule), 'dark wheat moderate hydration');
+});
+
+test('findSavedRecipeSummaryByName matches names case-insensitively', () => {
+  const storage = new MemoryStorage();
+  const created = upsertSavedRecipe(
+    {
+      name: 'Weekend Loaf',
+      recipeInput: defaultRecipeInput,
+    },
+    storage,
+  );
+  const summaries = listSavedRecipeSummaries(storage);
+
+  assert.equal(findSavedRecipeSummaryByName('weekend loaf', summaries)?.id, created.id);
+  assert.equal(findSavedRecipeSummaryByName('  Weekend Loaf  ', summaries)?.id, created.id);
+  assert.equal(findSavedRecipeSummaryByName('Other loaf', summaries), undefined);
 });
 
 test('upsertSavedRecipe creates and updates saved recipes', () => {

@@ -1,8 +1,12 @@
+import {
+  formatEndOfBulkRiseGuidance,
+  formatPreShapeRiseGuidance,
+  getBulkRiseTargets,
+} from '../recipe/bulkRiseTargets.ts';
 import type { RecipeInput } from '../recipe/types.ts';
 import { calculateRecipe } from '../recipe/calculateRecipe.ts';
 import { getSlapAndFoldDurationMinutes } from './defaults.ts';
 import {
-  calculateLevainBuildFeeding,
   calculateStarterRefreshFeeding,
   formatFeedingDetail,
   formatLevainBuildDetail,
@@ -14,7 +18,12 @@ import {
   STARTER_REFRESH_MIN_HOURS,
 } from './levainPrep.ts';
 import { formatOffsetDateTime } from './mixDateTime.ts';
-import { getColdRetardHours, getBulkStartOffset, roundColdRetardHoursUp } from './scheduleTiming.ts';
+import {
+  getColdRetardHours,
+  getBulkStartOffset,
+  getLevainMixOffsetMinutes,
+  roundColdRetardHoursUp,
+} from './scheduleTiming.ts';
 import type { ScheduleInput, TimelineStep } from './types.ts';
 
 type MutableStep = {
@@ -26,6 +35,7 @@ type MutableStep = {
 };
 
 export function buildTimeline(schedule: ScheduleInput, recipeInput: RecipeInput): TimelineStep[] {
+  const riseTargets = getBulkRiseTargets(recipeInput);
   const steps: MutableStep[] = [];
   let offset = 0;
 
@@ -58,7 +68,6 @@ export function buildTimeline(schedule: ScheduleInput, recipeInput: RecipeInput)
 
   if (schedule.includeStarterPrep) {
     const levainBuildHours = schedule.levainBuildHours ?? getDefaultLevainBuildHours();
-    const levainBufferPercent = schedule.levainBufferPercent ?? 15;
     const prepPlan = planStarterPrep({
       buildHours: levainBuildHours,
       roomTemperatureCelsius: recipeInput.roomTemperatureCelsius,
@@ -66,23 +75,25 @@ export function buildTimeline(schedule: ScheduleInput, recipeInput: RecipeInput)
       starterFromFridge: schedule.starterFromFridge,
     });
     const levainBuildMinutes = Math.round(prepPlan.levainBuildHours * 60);
-    const levainBuildStartOffset = -levainBuildMinutes;
+    const levainMixOffsetMinutes = getLevainMixOffsetMinutes(schedule);
+    const levainBuildStartOffset = levainMixOffsetMinutes - levainBuildMinutes;
     const levainBuildHoursLabel = formatLevainBuildHoursLabel(prepPlan.levainBuildHours);
     const levainRatioLabel = formatRatioLabel(prepPlan.levainBuildRatio);
     const buildLabel = prepPlan.refreshSkippedBecause
       ? `Build levain from fridge starter (${levainBuildHoursLabel})`
       : `Build levain (${levainBuildHoursLabel})`;
-    let levainDetail = formatLevainBuildDetail(levainRatioLabel, schedule.startTime);
+    const levainMixTime = formatOffsetDateTime(schedule, levainMixOffsetMinutes).timeLabel;
+    let levainDetail = formatLevainBuildDetail(levainRatioLabel, levainMixTime);
 
     try {
       calculateRecipe(recipeInput);
       levainDetail = formatLevainBuildDetail(
         levainRatioLabel,
-        schedule.startTime,
+        levainMixTime,
         prepPlan.refreshSkippedBecause,
       );
     } catch {
-      levainDetail = `${levainRatioLabel} feeding · ready for mix at ${schedule.startTime}`;
+      levainDetail = formatLevainBuildDetail(levainRatioLabel, levainMixTime);
     }
 
     if (prepPlan.includeRefreshStep) {
@@ -130,25 +141,17 @@ export function buildTimeline(schedule: ScheduleInput, recipeInput: RecipeInput)
   const bulkTotalMinutes = Math.round(recipeInput.targetBulkHours * 60);
   const bulkEndOffset = bulkStartOffset + bulkTotalMinutes;
   const preShapeStartOffset = bulkEndOffset - schedule.preShapeMinutesBeforeBulkEnd;
-
   if (schedule.slapAndFolds > 0) {
     const slapDuration = getSlapAndFoldDurationMinutes(schedule.slapAndFolds);
+    const totalSlapMinutes = slapDuration + schedule.restAfterSlapAndFoldMinutes;
     appendAtOffset(
       foldCursor,
       'slap-and-fold',
       'Slap and folds',
-      slapDuration,
-      `${schedule.slapAndFolds} slaps`,
+      totalSlapMinutes,
+      `${schedule.slapAndFolds} slaps · ${schedule.restAfterSlapAndFoldMinutes} min rest after`,
     );
-    foldCursor += slapDuration;
-    appendAtOffset(
-      foldCursor,
-      'rest-after-slap',
-      'Rest after slap and folds',
-      schedule.restAfterSlapAndFoldMinutes,
-      `${schedule.restAfterSlapAndFoldMinutes} min rest`,
-    );
-    foldCursor += schedule.restAfterSlapAndFoldMinutes;
+    foldCursor += totalSlapMinutes;
   }
 
   for (let index = 0; index < schedule.stretchAndFoldSets; index += 1) {
@@ -159,12 +162,13 @@ export function buildTimeline(schedule: ScheduleInput, recipeInput: RecipeInput)
       break;
     }
 
+    const restDetail = `${schedule.stretchAndFoldRestMinutes} min rest · Set ${index + 1} of ${schedule.stretchAndFoldSets}`;
     appendAtOffset(
       restStart,
       `stretch-fold-${index + 1}`,
       `Stretch and fold ${index + 1}`,
       schedule.stretchAndFoldRestMinutes,
-      `${schedule.stretchAndFoldRestMinutes} min rest · Set ${index + 1} of ${schedule.stretchAndFoldSets}`,
+      restDetail,
     );
   }
 
@@ -176,12 +180,13 @@ export function buildTimeline(schedule: ScheduleInput, recipeInput: RecipeInput)
       break;
     }
 
+    const restDetail = `${schedule.coilFoldRestMinutes} min rest · Set ${index + 1} of ${schedule.coilFoldSets}`;
     appendAtOffset(
       restStart,
       `coil-fold-${index + 1}`,
       `Coil fold ${index + 1}`,
       schedule.coilFoldRestMinutes,
-      `${schedule.coilFoldRestMinutes} min rest · Set ${index + 1} of ${schedule.coilFoldSets}`,
+      restDetail,
     );
   }
 
@@ -190,9 +195,9 @@ export function buildTimeline(schedule: ScheduleInput, recipeInput: RecipeInput)
     'pre-shape',
     'Pre-shape',
     Math.max(1, bulkEndOffset - preShapeStartOffset),
-    'Pre-shape when the dough looks domed, smooth, and aerated — edges pulling from the bowl — not just because the clock says so.',
+    formatPreShapeRiseGuidance(riseTargets),
   );
-  appendInstantAt(bulkEndOffset, 'shape', 'Shape', 'End of bulk fermentation');
+  appendInstantAt(bulkEndOffset, 'shape', 'Shape', formatEndOfBulkRiseGuidance(riseTargets));
 
   offset = bulkEndOffset;
 

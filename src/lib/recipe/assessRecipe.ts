@@ -1,10 +1,17 @@
+import { formatRisePercentRange, getBulkRiseTargets } from './bulkRiseTargets.ts';
 import { formatFlourBlendSummary, getPrimaryFlourType } from './flourBlend.ts';
 import { flourProfiles } from './flourProfiles.ts';
+import {
+  describeEffectiveHydration,
+  getEffectiveHydrationPercent,
+  isHighEffectiveHydration,
+} from './hydrationEquivalent.ts';
 import type { AssessmentSection, RecipeFormula, RecipeInput } from './types.ts';
 
 export function assessRecipe(input: RecipeInput, formula: RecipeFormula): AssessmentSection[] {
   return [
     createOverview(input, formula),
+    createBulkRiseSection(input),
     ...getHydrationIssues(input),
     ...getFermentationIssues(input, formula),
     ...getLevainIssues(input),
@@ -19,23 +26,53 @@ function createOverview(input: RecipeInput, formula: RecipeFormula): AssessmentS
   const difficultyLabel = difficultyScore >= 3 ? 'advanced' : difficultyScore >= 1 ? 'moderate' : 'approachable';
   const hydrationLabel = getHydrationLabel(input);
 
+  const hydrationEquivalentNote = describeEffectiveHydration(input);
+  const planningDetails = `This looks like a ${hydrationLabel} formula using ${formula.prefermentedFlourPercent}% prefermented flour for a ${input.targetBulkHours}h target bulk at ${input.roomTemperatureCelsius}C. Use this as a planning estimate and confirm readiness from dough signs.`;
+
   return {
     level: difficultyScore >= 3 ? 'risk' : difficultyScore >= 1 ? 'warning' : 'positive',
     title: 'Overall recipe shape',
     shortMessage: `${input.hydrationPercent}% hydration loaf (${flourSummary}) with ${difficultyLabel} handling.`,
-    details: `This looks like a ${hydrationLabel} formula using ${formula.prefermentedFlourPercent}% prefermented flour for a ${input.targetBulkHours}h target bulk at ${input.roomTemperatureCelsius}C. Use this as a planning estimate and confirm readiness from dough signs.`,
+    details: hydrationEquivalentNote
+      ? `${planningDetails} ${hydrationEquivalentNote}`
+      : planningDetails,
+  };
+}
+
+function createBulkRiseSection(input: RecipeInput): AssessmentSection {
+  const targets = getBulkRiseTargets(input);
+  const detailParts = [
+    `Adjusted for ${input.roomTemperatureCelsius}°C bulk temperature, hydration, and flour blend.`,
+    'Confirm readiness from dough signs — domed surface, visible bubbles, aeration, and strength — not the clock alone.',
+  ];
+
+  if (targets.spreadNote) {
+    detailParts.push(targets.spreadNote);
+  }
+
+  return {
+    level: 'info',
+    title: 'Target dough rise',
+    shortMessage: `End of bulk: ${formatRisePercentRange(targets.endOfBulk)} volume rise since mix.`,
+    details: detailParts.join(' '),
   };
 }
 
 function getHydrationIssues(input: RecipeInput): AssessmentSection[] {
   const flour = flourProfiles[getPrimaryFlourType(input.doughFlours)];
 
-  if (input.hydrationPercent >= flour.highHydrationStartsAt) {
+  if (isHighEffectiveHydration(input)) {
+    const effectiveHydration = getEffectiveHydrationPercent(input);
+    const hasMeaningfulEquivalent =
+      Math.abs(effectiveHydration - input.hydrationPercent) >= 1;
+
     return [
       {
         level: 'risk',
         title: 'High hydration for this flour',
-        shortMessage: `${input.hydrationPercent}% is high for ${flour.label}.`,
+        shortMessage: hasMeaningfulEquivalent
+          ? `${input.hydrationPercent}% on ${flour.label} handles like ~${effectiveHydration}% on white flour.`
+          : `${input.hydrationPercent}% is high for ${flour.label}.`,
         details:
           getPrimaryFlourType(input.doughFlours) === 'ryeType1150' ||
             getPrimaryFlourType(input.doughFlours) === 'wholeRye'
@@ -156,7 +193,7 @@ function getFormulaIssues(input: RecipeInput, formula: RecipeFormula): Assessmen
 function getDifficultyScore(input: RecipeInput, formula: RecipeFormula): number {
   let score = 0;
 
-  if (isHighHydrationForFlour(input)) score += 1;
+  if (isHighEffectiveHydration(input)) score += 1;
   if (formula.prefermentedFlourPercent > 25) score += 1;
   if (input.roomTemperatureCelsius > 27) score += 1;
   if (input.levainActivity !== 'active' && input.levainActivity !== 'veryActive') score += 1;
@@ -179,7 +216,7 @@ function getDifficultyScore(input: RecipeInput, formula: RecipeFormula): number 
 function getHydrationLabel(input: RecipeInput): string {
   const flour = flourProfiles[getPrimaryFlourType(input.doughFlours)];
 
-  if (input.hydrationPercent >= flour.highHydrationStartsAt) {
+  if (isHighEffectiveHydration(input)) {
     return 'high-hydration';
   }
 
@@ -213,8 +250,4 @@ function hasHighFermentationConfidence(input: RecipeInput, formula: RecipeFormul
     formula.prefermentedFlourPercent >= 8 &&
     formula.prefermentedFlourPercent <= 18
   );
-}
-
-function isHighHydrationForFlour(input: RecipeInput): boolean {
-  return input.hydrationPercent >= flourProfiles[getPrimaryFlourType(input.doughFlours)].highHydrationStartsAt;
 }

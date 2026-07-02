@@ -116,9 +116,10 @@ export function useSavedRecipes({ user, isConfigured }: UseSavedRecipesOptions) 
       recipeInput: RecipeInput;
       scheduleInput: ScheduleInput;
       includeSchedule: boolean;
+      recipeId?: string | null;
     }): Promise<SavedRecipe> => {
       const payload = {
-        id: activeSavedRecipeId ?? undefined,
+        id: params.recipeId ?? activeSavedRecipeId ?? undefined,
         name: params.name,
         recipeInput: params.recipeInput,
         scheduleInput: params.includeSchedule ? params.scheduleInput : undefined,

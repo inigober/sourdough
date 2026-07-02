@@ -2,7 +2,9 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { createBakeSession } from '../companion/bakeSession.ts';
+import { CURRENT_BAKE_SESSION_TIMELINE_VERSION } from '../companion/migrateBakeSession.ts';
 import { defaultRecipeInput } from '../recipe/defaults.ts';
+import { buildTimeline, formatTimelineForDisplay } from '../schedule/buildTimeline.ts';
 import { createDefaultScheduleInput } from '../schedule/defaults.ts';
 import {
   BAKE_SESSION_STORAGE_KEY,
@@ -67,4 +69,34 @@ test('clearBakeSession removes stored session', () => {
 
   clearBakeSession(storage);
   assert.equal(loadBakeSession(storage), null);
+});
+
+test('loadBakeSession migrates old slap-and-fold rest step index', () => {
+  const storage = new MemoryStorage();
+  const schedule = createDefaultScheduleInput({ ...defaultRecipeInput, hydrationPercent: 85 });
+  schedule.includeStarterPrep = false;
+  schedule.autolyseEnabled = false;
+  schedule.slapAndFolds = 50;
+
+  const session = createBakeSession({
+    savedRecipeId: null,
+    recipeName: 'Resume loaf',
+    recipeInput: { ...defaultRecipeInput, hydrationPercent: 85 },
+    scheduleInput: schedule,
+  });
+  const timeline = formatTimelineForDisplay(buildTimeline(session.scheduleInput, session.recipeInput));
+  const slapIndex = timeline.findIndex((step) => step.id === 'slap-and-fold');
+
+  const legacySession = {
+    ...session,
+    currentStepIndex: slapIndex + 1,
+  };
+  delete (legacySession as { timelineVersion?: number }).timelineVersion;
+
+  storage.setItem(BAKE_SESSION_STORAGE_KEY, JSON.stringify(legacySession));
+  const loaded = loadBakeSession(storage);
+
+  assert.ok(loaded);
+  assert.equal(loaded.currentStepIndex, slapIndex);
+  assert.equal(loaded.timelineVersion, CURRENT_BAKE_SESSION_TIMELINE_VERSION);
 });

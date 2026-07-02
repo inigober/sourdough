@@ -45,4 +45,4 @@ export const summarySectionInfo: Partial<Record<'fermentation', string>> = {
 };
 
 export const assessmentInfo =
-  'Rule-based coaching from your recipe inputs and formula. Warnings and risks appear here when the recipe needs extra caution.';
+  'Rule-based coaching from your recipe inputs and formula. Includes target dough rise for bulk, plus warnings and risks when the recipe needs extra caution.';

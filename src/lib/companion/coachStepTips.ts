@@ -1,3 +1,9 @@
+import {
+  formatEndOfBulkRiseGuidance,
+  formatPreShapeRiseGuidance,
+  getBulkRiseTargets,
+} from '../recipe/bulkRiseTargets.ts';
+import type { RecipeInput } from '../recipe/types.ts';
 import { getCoachTopicForStepId } from './coachTopics.ts';
 import { getCoachTip } from './coachTips.ts';
 
@@ -21,11 +27,9 @@ const STEP_TIPS: Record<string, string> = {
   'mix-salt-rest-after-salt':
     'Mix salt in until fully dissolved and the dough feels cohesive, then cover and rest. Salt tightens gluten, so the dough may firm up — the rest helps it relax before continuing bulk fermentation.',
   'slap-and-fold':
-    'Slap the dough onto the counter and fold it over itself with confidence. You are building strength quickly — stop when the dough holds together and feels less shaggy, not when it is tearing or overheating from friction.',
-  'rest-after-slap':
-    'Cover the bowl and let the dough recover after slap-and-folds. It should relax slightly and spread back into the bowl before the next set of folds or rest period.',
+    'Slap the dough onto the counter and fold it over itself with confidence. You are building strength quickly — stop when the dough holds together and feels less shaggy, not when it is tearing or overheating from friction. Cover and rest afterward so the dough relaxes before the next fold.',
   'pre-shape':
-    'Turn the dough out gently and shape a loose round or batard. Build light surface tension without degassing aggressively — the goal is structure for the final shape, not a tight final form yet.',
+    'Turn the dough out gently and shape a loose round or batard. Build light surface tension without degassing aggressively.',
   shape:
     'Shape when the dough has enough strength to hold tension but still feels alive. Use confident, floured hands, build surface tension on the counter, and avoid degassing more than you need to.',
   'cold-retard':
@@ -44,7 +48,19 @@ const STEP_TIPS: Record<string, string> = {
     'Lower to your finish temperature for the last segment. Trust color, aroma, and internal temperature over the timer alone — schedules are guides, not guarantees.',
 };
 
-export function getCoachTipForStep(stepId: string, stepLabel?: string): string {
+export function getCoachTipForStep(
+  stepId: string,
+  stepLabel?: string,
+  recipeInput?: RecipeInput,
+): string {
+  if (recipeInput && stepId === 'pre-shape') {
+    return `${STEP_TIPS['pre-shape']} ${formatPreShapeRiseGuidance(getBulkRiseTargets(recipeInput))}`;
+  }
+
+  if (recipeInput && stepId === 'shape') {
+    return `${STEP_TIPS.shape} ${formatEndOfBulkRiseGuidance(getBulkRiseTargets(recipeInput))}`;
+  }
+
   if (STEP_TIPS[stepId]) {
     return STEP_TIPS[stepId];
   }

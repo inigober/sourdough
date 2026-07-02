@@ -17,7 +17,9 @@ import type { RecipeInput } from '../../lib/recipe/types.ts';
 import type { ScheduleInput } from '../../lib/schedule/types.ts';
 import {
   describeStarterPrepPlan,
+  formatLevainBuildAmounts,
   formatRatioLabel,
+  calculateLevainBuildFeeding,
   planStarterPrep,
 } from '../../lib/schedule/levainPrep.ts';
 import { formatRecipeExportJson, formatScheduleAsText } from '../../lib/schedule/exportSchedule.ts';
@@ -89,7 +91,18 @@ export function useScheduleBuilder({ recipeInput, scheduleInput, recipeName }: U
   );
   const levainBuildRatioLabel = formatRatioLabel(starterPrepPlan.levainBuildRatio);
   const starterPrepPlanDescription = describeStarterPrepPlan(starterPrepPlan);
+  const levainBuildAmountsLabel = useMemo(() => {
+    if (!formula) {
+      return null;
+    }
 
+    const feeding = calculateLevainBuildFeeding(
+      formula,
+      starterPrepPlan.levainBuildRatio,
+      scheduleInput.levainBufferPercent,
+    );
+    return formatLevainBuildAmounts(feeding);
+  }, [formula, scheduleInput.levainBufferPercent, starterPrepPlan.levainBuildRatio]);
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, []);
@@ -153,6 +166,7 @@ export function useScheduleBuilder({ recipeInput, scheduleInput, recipeName }: U
     formula,
     ingredientRows,
     levainBuildRatioLabel,
+    levainBuildAmountsLabel,
     starterPrepPlanDescription,
     copyScheduleText,
     copyIngredientList,

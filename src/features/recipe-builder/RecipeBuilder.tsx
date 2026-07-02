@@ -130,12 +130,17 @@ export function RecipeBuilder() {
   }, [bakeSession, phase, resumeBakeSession, routes]);
 
   const saveActiveRecipe = useCallback(
-    async (name: string, includeSchedule: boolean): Promise<SavedRecipe> => {
+    async (
+      name: string,
+      includeSchedule: boolean,
+      recipeId?: string | null,
+    ): Promise<SavedRecipe> => {
       return persistRecipe({
         name,
         recipeInput: wizard.recipeInput,
         scheduleInput: wizard.scheduleInput,
         includeSchedule,
+        recipeId,
       });
     },
     [persistRecipe, wizard.recipeInput, wizard.scheduleInput],
@@ -215,8 +220,9 @@ export function RecipeBuilder() {
       isSaveDialogOpen={navigation.isSaveDialogOpen}
       saveDialogDefaultName={saveDialogDefaultName}
       activeSavedRecipeId={activeSavedRecipeId}
+      savedRecipes={savedRecipes}
       onCancelSave={navigation.closeSaveDialog}
-      onConfirmSave={(name) => void confirmSaveRecipe(name)}
+      onConfirmSave={(name, recipeId) => void confirmSaveRecipe(name, recipeId)}
       pendingDeleteRecipe={pendingDeleteRecipe}
       useCloudRecipes={useCloudRecipes}
       onCancelDelete={navigation.clearPendingDeleteRecipe}
@@ -243,10 +249,11 @@ export function RecipeBuilder() {
     navigation.clearPendingDeleteRecipe();
   }
 
-  async function confirmSaveRecipe(name: string): Promise<void> {
+  async function confirmSaveRecipe(name: string, recipeId: string | null): Promise<void> {
     await saveActiveRecipe(
       name,
       navigation.saveDialogSource === 'schedule' || wizard.hasOpenedSchedule,
+      recipeId,
     );
     navigation.closeSaveDialog();
     await bakeFlow.continueAfterSaveRecipe({
@@ -311,6 +318,7 @@ export function RecipeBuilder() {
           onSave={() => navigation.openSaveDialog('schedule')}
           onStartBake={() => void bakeFlow.startBakeFromSchedule()}
           isStartingBake={isStartingBake}
+          isSavedRecipe={Boolean(activeSavedRecipeId)}
         />
         {dialogs}
       </>

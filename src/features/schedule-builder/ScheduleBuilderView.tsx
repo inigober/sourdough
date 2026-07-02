@@ -26,6 +26,7 @@ type ScheduleBuilderViewProps = {
   onSave: () => void;
   onStartBake: () => void;
   isStartingBake?: boolean;
+  isSavedRecipe?: boolean;
 };
 
 export function ScheduleBuilderView({
@@ -37,6 +38,7 @@ export function ScheduleBuilderView({
   onSave,
   onStartBake,
   isStartingBake = false,
+  isSavedRecipe = false,
 }: ScheduleBuilderViewProps) {
   const mixDateInputId = useId();
   const startTimeInputId = useId();
@@ -57,6 +59,7 @@ export function ScheduleBuilderView({
     formula,
     levainBuildRatioLabel,
     starterPrepPlanDescription,
+    levainBuildAmountsLabel,
     copyScheduleText,
     copyIngredientList,
     copyRecipeJson,
@@ -70,7 +73,7 @@ export function ScheduleBuilderView({
           secondaryAction={
             <button type="button" className="page-shell__secondary-link" onClick={onSave}>
               <SaveIcon />
-              Save recipe
+              {isSavedRecipe ? 'Update recipe' : 'Save recipe'}
             </button>
           }
         >
@@ -130,6 +133,12 @@ export function ScheduleBuilderView({
               {scheduleInput.starterFromFridge ? ' (fridge starter — inactive until refreshed)' : ''}:{' '}
               <strong>{levainBuildRatioLabel}</strong>. {starterPrepPlanDescription}
             </p>
+            {levainBuildAmountsLabel ? (
+              <p className="schedule-starter-prep__amounts" role="status">
+                Levain to build: <strong>{levainBuildAmountsLabel}</strong> — includes{' '}
+                {scheduleInput.levainBufferPercent}% extra margin for scrape and transfer.
+              </p>
+            ) : null}
           </form>
         ) : null}
       </section>

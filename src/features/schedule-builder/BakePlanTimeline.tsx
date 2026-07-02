@@ -6,21 +6,33 @@ type BakePlanTimelineProps = {
   steps: TimelineStep[];
   mixDateLabel?: string;
   bakeDateLabel?: string;
+  embedded?: boolean;
 };
 
-export function BakePlanTimeline({ steps, mixDateLabel, bakeDateLabel }: BakePlanTimelineProps) {
+export function BakePlanTimeline({
+  steps,
+  mixDateLabel,
+  bakeDateLabel,
+  embedded = false,
+}: BakePlanTimelineProps) {
   if (steps.length === 0) {
-    return (
-      <section className="card bake-plan">
-        <h2>Bake schedule</h2>
+    const emptyContent = (
+      <>
+        {!embedded ? <h2>Bake schedule</h2> : null}
         <p className="section-copy">Adjust schedule inputs to generate a timeline.</p>
-      </section>
+      </>
     );
+
+    if (embedded) {
+      return emptyContent;
+    }
+
+    return <section className="card bake-plan">{emptyContent}</section>;
   }
 
-  return (
-    <section className="card bake-plan" aria-label="Bake schedule timeline">
-      <h2>Bake schedule</h2>
+  const timelineContent = (
+    <>
+      {!embedded ? <h2>Bake schedule</h2> : null}
       <p className="section-copy">
         {mixDateLabel && bakeDateLabel
           ? `Clock times on mix day (${mixDateLabel}). Oven-bake on ${bakeDateLabel}.`
@@ -39,6 +51,16 @@ export function BakePlanTimeline({ steps, mixDateLabel, bakeDateLabel }: BakePla
           />
         ))}
       </ol>
+    </>
+  );
+
+  if (embedded) {
+    return timelineContent;
+  }
+
+  return (
+    <section className="card bake-plan" aria-label="Bake schedule timeline">
+      {timelineContent}
     </section>
   );
 }

@@ -41,6 +41,18 @@ export function getSavedRecipe(
   return readSavedRecipes(storage).find((recipe) => recipe.id === id) ?? null;
 }
 
+export function findSavedRecipeSummaryByName(
+  name: string,
+  recipes: SavedRecipeSummary[],
+): SavedRecipeSummary | undefined {
+  const normalized = name.trim().toLocaleLowerCase();
+  if (!normalized) {
+    return undefined;
+  }
+
+  return recipes.find((recipe) => recipe.name.trim().toLocaleLowerCase() === normalized);
+}
+
 export function upsertSavedRecipe(
   input: UpsertSavedRecipeInput,
   storage: StorageLike = getDefaultStorage(),

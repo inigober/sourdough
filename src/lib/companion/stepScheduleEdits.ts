@@ -39,9 +39,9 @@ const STEP_EDITS: Record<string, StepScheduleEdit> = {
     min: 0,
     step: 5,
   },
-  'rest-after-slap': {
+  'slap-and-fold': {
     scheduleField: 'restAfterSlapAndFoldMinutes',
-    label: 'Rest time',
+    label: 'Rest after slaps',
     suffix: 'min',
     min: 0,
     step: 5,

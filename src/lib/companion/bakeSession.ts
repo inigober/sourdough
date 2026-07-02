@@ -2,6 +2,7 @@ import type { ScheduleInput } from '../schedule/types.ts';
 import type { TimelineStep } from '../schedule/types.ts';
 import { createTimerEndsAt } from './bakeTimer.ts';
 import { completeTimedStep, recordSkippedStep, startTimedStep } from './liveSchedule.ts';
+import { CURRENT_BAKE_SESSION_TIMELINE_VERSION } from './migrateBakeSession.ts';
 import type { BakeSession } from './types.ts';
 
 export function createBakeSession(options: {
@@ -18,6 +19,7 @@ export function createBakeSession(options: {
     recipeName: options.recipeName,
     recipeInput: structuredClone(options.recipeInput),
     scheduleInput: structuredClone(options.scheduleInput),
+    timelineVersion: CURRENT_BAKE_SESSION_TIMELINE_VERSION,
     currentStepIndex: 0,
     scheduleDriftMinutes: 0,
     currentStepStartedAt: null,

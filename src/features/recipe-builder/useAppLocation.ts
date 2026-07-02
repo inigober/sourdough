@@ -188,7 +188,11 @@ export function useAppNavigation({
     setIsUnsavedDialogOpen(false);
     setPendingGoHomeAfterSave(true);
     setSaveDialogSource(wizard.hasOpenedSchedule ? 'schedule' : 'results');
-    setIsSaveDialogOpen(true);
+    // Open on the next turn so the click that chose "Save recipe" cannot fall through
+    // to the new dialog's backdrop and dismiss it immediately.
+    queueMicrotask(() => {
+      setIsSaveDialogOpen(true);
+    });
   }, [
     activeSavedRecipe,
     activeSavedRecipeId,
@@ -219,7 +223,11 @@ export function useAppNavigation({
 
   const openSaveDialog = useCallback((source: SaveDialogSource): void => {
     setSaveDialogSource(source);
-    setIsSaveDialogOpen(true);
+    // Open on the next turn so the click that opened this dialog cannot fall through
+    // to the new backdrop and dismiss it immediately.
+    queueMicrotask(() => {
+      setIsSaveDialogOpen(true);
+    });
   }, []);
 
   const closeSaveDialog = useCallback((): void => {

@@ -6,6 +6,7 @@ import { createDefaultScheduleInput } from './defaults.ts';
 import {
   getBulkStartOffset,
   getColdRetardHours,
+  getLevainMixOffsetMinutes,
   parseTimeToMinutes,
   roundColdRetardHoursUp,
 } from './scheduleTiming.ts';
@@ -13,6 +14,24 @@ import {
 test('parseTimeToMinutes parses clock times and falls back to 09:00', () => {
   assert.equal(parseTimeToMinutes('08:30'), 8 * 60 + 30);
   assert.equal(parseTimeToMinutes('bad'), 9 * 60);
+});
+
+test('getLevainMixOffsetMinutes includes autolyse and salt-first rest', () => {
+  const saltFirst = {
+    ...createDefaultScheduleInput(defaultRecipeInput),
+    autolyseEnabled: true,
+    autolyseMinutes: 45,
+    saltAfterLevain: false,
+    restAfterSaltMinutes: 30,
+  };
+  const levainFirst = {
+    ...saltFirst,
+    saltAfterLevain: true,
+  };
+
+  assert.equal(getLevainMixOffsetMinutes(levainFirst), 45);
+  assert.equal(getLevainMixOffsetMinutes(saltFirst), 75);
+  assert.equal(getBulkStartOffset(levainFirst), 45);
 });
 
 test('getBulkStartOffset includes autolyse when enabled', () => {

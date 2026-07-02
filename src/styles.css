@@ -1177,6 +1177,22 @@ p {
   grid-template-columns: 1fr;
 }
 
+.dialog-card__fields {
+  display: grid;
+  gap: 16px;
+}
+
+.dialog-card .field-card {
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #6f5d4e;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
 .wizard-step {
   display: grid;
   gap: 24px;
@@ -1484,6 +1500,20 @@ p {
   color: #6f5d4e;
   font-size: 0.92rem;
   line-height: 1.45;
+}
+
+.schedule-starter-prep__amounts {
+  margin: 10px 0 0;
+  color: #4a3f35;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.schedule-starter-prep__note {
+  margin: 8px 0 0;
+  color: #6f5d4e;
+  font-size: 0.88rem;
+  line-height: 1.4;
 }
 
 .section-heading h2,
@@ -2896,7 +2926,8 @@ p {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   min-width: 0;
   border: 1px solid #e1c7ad;
@@ -2904,9 +2935,20 @@ select {
   background: #fffaf4;
   color: #2f241c;
   font: inherit;
-  font-size: 1.05rem;
-  font-weight: 800;
+  font-size: 1rem;
   padding: 10px 12px;
+}
+
+input,
+select {
+  font-weight: 800;
+}
+
+textarea {
+  min-height: 6rem;
+  font-weight: 500;
+  line-height: 1.45;
+  resize: vertical;
 }
 
 input[type="checkbox"] {
@@ -2923,7 +2965,8 @@ select {
 }
 
 input:focus,
-select:focus {
+select:focus,
+textarea:focus {
   border-color: #a15b2a;
   outline: 3px solid rgb(161 91 42 / 18%);
 }

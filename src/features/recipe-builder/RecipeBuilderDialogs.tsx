@@ -15,8 +15,9 @@ type RecipeBuilderDialogsProps = {
   isSaveDialogOpen: boolean;
   saveDialogDefaultName: string;
   activeSavedRecipeId: string | null;
+  savedRecipes: SavedRecipeSummary[];
   onCancelSave: () => void;
-  onConfirmSave: (name: string) => void;
+  onConfirmSave: (name: string, recipeId: string | null) => void;
   pendingDeleteRecipe: SavedRecipeSummary | undefined;
   useCloudRecipes: boolean;
   onCancelDelete: () => void;
@@ -35,6 +36,7 @@ export function RecipeBuilderDialogs({
   isSaveDialogOpen,
   saveDialogDefaultName,
   activeSavedRecipeId,
+  savedRecipes,
   onCancelSave,
   onConfirmSave,
   pendingDeleteRecipe,
@@ -64,10 +66,10 @@ export function RecipeBuilderDialogs({
       {isSaveDialogOpen ? (
         <SaveRecipeDialog
           defaultName={saveDialogDefaultName}
-          title={activeSavedRecipeId ? 'Update saved recipe' : 'Save recipe'}
-          submitLabel={activeSavedRecipeId ? 'Update recipe' : 'Save recipe'}
+          activeSavedRecipeId={activeSavedRecipeId}
+          savedRecipes={savedRecipes}
           onCancel={onCancelSave}
-          onSave={(name) => void onConfirmSave(name)}
+          onSave={(name, recipeId) => void onConfirmSave(name, recipeId)}
         />
       ) : null}
       {pendingDeleteRecipe ? (

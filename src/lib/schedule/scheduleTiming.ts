@@ -20,6 +20,16 @@ export function getBulkStartOffset(schedule: ScheduleInput): number {
   return offset;
 }
 
+export function getLevainMixOffsetMinutes(schedule: ScheduleInput): number {
+  let offset = getBulkStartOffset(schedule);
+
+  if (!schedule.saltAfterLevain) {
+    offset += schedule.restAfterSaltMinutes;
+  }
+
+  return offset;
+}
+
 export function getShapeEndOffset(schedule: ScheduleInput, recipeInput: RecipeInput): number {
   return getBulkStartOffset(schedule) + Math.round(recipeInput.targetBulkHours * 60);
 }

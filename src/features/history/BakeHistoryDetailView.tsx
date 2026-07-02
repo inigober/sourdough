@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { ConfirmDialog } from '../../components/ConfirmDialog.tsx';
 import { LoafAssessmentPicker } from '../../components/LoafAssessmentPicker.tsx';
 import { PageShell } from '../../components/PageShell.tsx';
 import { PenEditButton } from '../../components/PenEditButton.tsx';
+import { RecipeCard } from '../../components/RecipeCard.tsx';
 import { ArrowLeftIcon } from '../../components/icons.tsx';
+import { BakePlanTimeline } from '../schedule-builder/BakePlanTimeline.tsx';
 import { getLoafAssessmentLabel } from '../../lib/history/assessment.ts';
 import {
   formatDriftMinutes,
@@ -13,6 +15,10 @@ import {
   getStartDriftMinutes,
 } from '../../lib/history/formatHistory.ts';
 import type { BakeHistorySession, BakeSessionAssessment, UpdateBakeHistorySessionInput } from '../../lib/history/types.ts';
+import { calculateRecipe } from '../../lib/recipe/calculateRecipe.ts';
+import { buildIngredientRows, type IngredientRow } from '../../lib/recipe/formatIngredients.ts';
+import { buildTimeline, formatTimelineForDisplay } from '../../lib/schedule/buildTimeline.ts';
+import { formatBakeDateLong, getBakeDateIso, getMixDateIso } from '../../lib/schedule/dates.ts';
 
 type BakeHistoryDetailViewProps = {
   session: BakeHistorySession;
@@ -43,6 +49,29 @@ export function BakeHistoryDetailView({
     Math.round((new Date(session.completedAt).getTime() - new Date(session.startedAt).getTime()) / 60_000),
   );
   const assessmentLabel = getLoafAssessmentLabel(session.overallAssessment);
+  const formula = useMemo(() => {
+    try {
+      return calculateRecipe(session.recipeInput);
+    } catch {
+      return null;
+    }
+  }, [session.recipeInput]);
+  const ingredientRows = useMemo(() => {
+    if (!formula) {
+      return [];
+    }
+
+    return [
+      ...buildIngredientRows(session.recipeInput, formula),
+      ['Prefermented flour', `${formula.prefermentedFlourPercent}%`] as IngredientRow,
+    ];
+  }, [formula, session.recipeInput]);
+  const plannedTimeline = useMemo(
+    () => formatTimelineForDisplay(buildTimeline(session.scheduleInput, session.recipeInput)),
+    [session.recipeInput, session.scheduleInput],
+  );
+  const mixDateLabel = formatBakeDateLong(getMixDateIso(session.scheduleInput));
+  const bakeDateLabel = formatBakeDateLong(getBakeDateIso(session.scheduleInput, session.recipeInput));
 
   async function handleSaveEdits(): Promise<void> {
     await onUpdate({
@@ -127,6 +156,30 @@ export function BakeHistoryDetailView({
         ) : (
           <p className="saved-recipes__empty">No notes for this bake yet.</p>
         )}
+      </section>
+
+      <section className="card bake-history-detail__recipe" aria-label="Recipe snapshot">
+        <h2 className="bake-history-detail__section-title">Recipe ingredients</h2>
+        <p className="section-copy">Ingredient amounts from when this bake was saved.</p>
+        {formula ? (
+          <RecipeCard title="Ingredient list" rows={ingredientRows} embedded />
+        ) : (
+          <p className="saved-recipes__empty">Ingredient amounts could not be calculated from the saved recipe.</p>
+        )}
+      </section>
+
+      <section className="card bake-history-detail__schedule" aria-label="Schedule snapshot">
+        <h2 className="bake-history-detail__section-title">Planned schedule</h2>
+        <p className="section-copy">
+          Schedule settings saved with this bake. Companion timing shifts are shown in the actual step timings
+          below.
+        </p>
+        <BakePlanTimeline
+          steps={plannedTimeline}
+          mixDateLabel={mixDateLabel}
+          bakeDateLabel={bakeDateLabel}
+          embedded
+        />
       </section>
 
       <section className="card bake-history-detail__steps" aria-label="Step timings">

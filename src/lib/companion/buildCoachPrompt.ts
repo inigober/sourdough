@@ -43,7 +43,7 @@ export function buildCoachPrompt(input: BuildCoachPromptInput): CoachPromptParts
     `Current step: ${input.stepLabel} (${input.stepId})`,
     input.stepDetail ? `Step detail: ${input.stepDetail}` : null,
     `Coach focus: ${input.topic}`,
-    `Default tip for this step: ${getCoachTipForStep(input.stepId, input.stepLabel)}`,
+    `Default tip for this step: ${getCoachTipForStep(input.stepId, input.stepLabel, input.recipeInput)}`,
     `Hydration: ${input.recipeInput.hydrationPercent}%`,
     `Room temperature: ${input.recipeInput.roomTemperatureCelsius}°C`,
     `Target bulk: ${input.recipeInput.targetBulkHours}h`,

@@ -3,38 +3,31 @@ import { getTomorrowIsoDate } from './dates.ts';
 import { getDefaultLevainBuildHours } from './levainPrep.ts';
 import type { FoldDefaults, ScheduleInput } from './types.ts';
 
-export function getDefaultSlapAndFolds(hydrationPercent: number): number {
-  return hydrationPercent >= 83 ? 50 : 0;
+export function getDefaultSlapAndFolds(recipeInput: RecipeInput): number {
+  return recipeInput.hydrationPercent >= 80 ? 50 : 0;
 }
 
-export function getDefaultFoldSets(hydrationPercent: number): FoldDefaults {
+export function getDefaultFoldSets(recipeInput: RecipeInput): FoldDefaults {
+  const hydrationPercent = recipeInput.hydrationPercent;
+
   if (hydrationPercent <= 72) {
     return { stretchAndFoldSets: 2, coilFoldSets: 0, slapAndFolds: 0, foldRestMinutes: 30 };
   }
 
-  if (hydrationPercent <= 82) {
+  if (hydrationPercent < 80) {
     return {
       stretchAndFoldSets: 3,
       coilFoldSets: 0,
-      slapAndFolds: getDefaultSlapAndFolds(hydrationPercent),
-      foldRestMinutes: 30,
-    };
-  }
-
-  if (hydrationPercent <= 88) {
-    return {
-      stretchAndFoldSets: 4,
-      coilFoldSets: 2,
-      slapAndFolds: getDefaultSlapAndFolds(hydrationPercent),
+      slapAndFolds: getDefaultSlapAndFolds(recipeInput),
       foldRestMinutes: 30,
     };
   }
 
   return {
-    stretchAndFoldSets: 4,
+    stretchAndFoldSets: 3,
     coilFoldSets: 3,
-    slapAndFolds: getDefaultSlapAndFolds(hydrationPercent),
-    foldRestMinutes: 25,
+    slapAndFolds: getDefaultSlapAndFolds(recipeInput),
+    foldRestMinutes: 30,
   };
 }
 
@@ -79,7 +72,7 @@ export function getSlapAndFoldDurationMinutes(slapCount: number): number {
 }
 
 export function createDefaultScheduleInput(recipeInput: RecipeInput): ScheduleInput {
-  const foldDefaults = getDefaultFoldSets(recipeInput.hydrationPercent);
+  const foldDefaults = getDefaultFoldSets(recipeInput);
   const perLoafGrams = recipeInput.finalDoughWeightGrams / recipeInput.numberOfLoaves;
   const bakeTemps = getBakeTempsForPerLoafGrams(perLoafGrams);
   const dutchOvenPhases = getDutchOvenPhaseMinutes(recipeInput.finalDoughWeightGrams);
