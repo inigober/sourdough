@@ -1,6 +1,7 @@
 import { useEffect, useRef, type MouseEvent, type ReactNode } from 'react';
 
 import { CloseIcon } from './icons.tsx';
+import { runDialogButtonAction } from './dialogAction.ts';
 
 const BACKDROP_DISMISS_GRACE_MS = 300;
 
@@ -68,8 +69,7 @@ export function DialogCard({
   }
 
   function handleCloseClick(event: MouseEvent<HTMLButtonElement>): void {
-    event.stopPropagation();
-    onClose();
+    runDialogButtonAction(event, onClose);
   }
 
   return (
@@ -105,7 +105,11 @@ export function DialogCard({
           </button>
         </header>
         {children}
-        <div onMouseDown={stopEventPropagation} onClick={stopEventPropagation}>
+        <div
+          onPointerDown={stopEventPropagation}
+          onMouseDown={stopEventPropagation}
+          onClick={stopEventPropagation}
+        >
           {actions}
         </div>
       </div>

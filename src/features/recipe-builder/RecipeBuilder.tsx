@@ -19,6 +19,7 @@ import { resolveAppScreen, showWelcomeBottomNav } from './appLocation.ts';
 import { RecipeBuilderDialogs } from './RecipeBuilderDialogs.tsx';
 import { useAppNavigation } from './useAppLocation.ts';
 import { useAppRouter } from './useAppRouter.ts';
+import { useBakeDeepLink } from '../../lib/companion/useBakeDeepLink.ts';
 import { useBakeFlow } from './useBakeFlow.ts';
 import { useRecipeWizard } from './useRecipeWizard.ts';
 import { WelcomeScreen } from './WelcomeScreen.tsx';
@@ -128,6 +129,20 @@ export function RecipeBuilder() {
       }
     }
   }, [bakeSession, phase, resumeBakeSession, routes]);
+
+  const openBakeModeFromDeepLink = useCallback((): void => {
+    if (bakeSession) {
+      routes.toBake();
+      return;
+    }
+
+    if (loadBakeSession()) {
+      resumeBakeSession();
+      routes.toBake();
+    }
+  }, [bakeSession, resumeBakeSession, routes]);
+
+  useBakeDeepLink(openBakeModeFromDeepLink);
 
   const saveActiveRecipe = useCallback(
     async (

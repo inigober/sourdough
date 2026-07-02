@@ -5,11 +5,13 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
+    "build:ios": "npm run build && npx cap sync ios",
+    "cap:open:ios": "npx cap open ios",
     "preview": "vite preview",
     "test:schedule": "node --experimental-strip-types --test \"src/lib/schedule/*.test.ts\"",
     "test:storage": "node --experimental-strip-types --test \"src/lib/storage/*.test.ts\"",
     "test:recipe": "node --experimental-strip-types --test \"src/lib/recipe/*.test.ts\"",
-    "test:companion": "node --experimental-strip-types --test \"src/lib/companion/*.test.ts\"",
+    "test:companion": "node --experimental-strip-types --test \"src/lib/companion/**/*.test.ts\"",
     "test:history": "node --experimental-strip-types --test \"src/lib/history/*.test.ts\"",
     "test:ui": "node --experimental-strip-types --test \"src/lib/ui/*.test.ts\"",
     "test:auth": "node --experimental-strip-types --test \"src/lib/auth/*.test.ts\"",
@@ -17,12 +19,17 @@
     "test": "npm run test:recipe && npm run test:schedule && npm run test:storage && npm run test:companion && npm run test:history && npm run test:ui && npm run test:auth && npm run test:features"
   },
   "dependencies": {
+    "@capacitor/app": "^7.0.1",
+    "@capacitor/core": "^7.0.1",
+    "@capacitor/ios": "^7.0.1",
+    "@capacitor/local-notifications": "^7.0.1",
     "@supabase/supabase-js": "^2.106.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.17.0"
   },
   "devDependencies": {
+    "@capacitor/cli": "^7.0.1",
     "@types/node": "^25.9.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

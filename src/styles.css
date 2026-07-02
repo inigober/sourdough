@@ -2570,6 +2570,31 @@ p {
   line-height: 1.4;
 }
 
+.companion__permission-notice {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border: 1px solid #d9c4a8;
+  border-radius: 12px;
+  background: #fff8ef;
+  color: #5c4a3d;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.companion__permission-notice-title {
+  display: block;
+  margin: 0 0 4px;
+  font-size: 0.9rem;
+}
+
+.companion__permission-notice-body {
+  margin: 0;
+}
+
+.companion__permission-settings {
+  margin-top: 10px;
+}
+
 .companion__start-step {
   justify-self: start;
   flex: 1;

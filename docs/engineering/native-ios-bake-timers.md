@@ -125,11 +125,35 @@ type NativeBakeTimer = {
 - [ ] Alert persists until Dismiss; sound stops on dismiss.
 - [ ] Restart timer clears previous native alarm and reschedules.
 - [ ] Jump step / exit bake cancels native alarm.
-- [ ] Denied permission → in-app timer still works; UI explains reduced alerting.
-- [ ] Pre–iOS 26 → end-time notification only; no false promise of alarm behavior.
+- [ ] Denied permission → in-app timer still works; notice with Open Settings.
+- [ ] Pre–iOS 26 → end-time notification only; degraded-mode notice shown.
+- [ ] Notification-only mode → notice explains difference vs alarm mode.
+
+## Phase 4 — Live Activity (implemented)
+
+- `BakeTimerWidgetExtension` widget target with `BakeTimerLiveActivity`
+- Shared `BakeTimerAlarmMetadata` for step title + recipe name
+- AlarmKit countdown + paused presentations in `BakeTimerPlugin`
+- `NSSupportsLiveActivities` in main app `Info.plist`
+
+## Phase 5 — Permission UX (implemented)
+
+- `alertMode`: `alarm` | `notification` | `none` returned from native plugin
+- Contextual notice in bake mode (denied, notification-only)
+- **Open Settings** button via `BakeTimer.openSettings()`
+- Permission re-checked when app returns to foreground
 
 ## References
 
 - [Wake up to the AlarmKit API (WWDC25)](https://developer.apple.com/videos/play/wwdc2025/230/)
 - [Scheduling an alarm with AlarmKit](https://developer.apple.com/documentation/alarmkit/scheduling-an-alarm-with-alarmkit)
+- [iOS native app setup](./ios-native-setup.md)
 - In-app timer today: `src/lib/companion/bakeTimer.ts`, `src/features/companion/CompanionView.tsx`
+- JS bridge: `src/lib/companion/nativeBakeTimer/`
+- Native plugin: `ios/App/App/BakeTimerPlugin.swift`
+
+## Product decisions (locked)
+
+1. **Permission timing:** ask on first **Start timer** tap in bake mode.
+2. **Step jumps:** cancel the previous native timer id; a new step gets a fresh id (`session.id:step.id`).
+3. **Open app on dismiss:** AlarmKit secondary action opens `sourdough://bake`; web layer routes to `/bake` and resumes the stashed session when needed.

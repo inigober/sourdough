@@ -1,6 +1,5 @@
-import type { MouseEvent } from 'react';
-
 import { DialogCard } from './DialogCard.tsx';
+import { runDialogButtonAction } from './dialogAction.ts';
 
 type ConfirmDialogProps = {
   title: string;
@@ -17,11 +16,6 @@ export function ConfirmDialog({
   onCancel,
   onConfirm,
 }: ConfirmDialogProps) {
-  function handleAction(event: MouseEvent<HTMLButtonElement>, action: () => void): void {
-    event.stopPropagation();
-    action();
-  }
-
   return (
     <DialogCard
       title={title}
@@ -34,14 +28,14 @@ export function ConfirmDialog({
           <button
             type="button"
             className="wizard-button wizard-button--secondary"
-            onClick={(event) => handleAction(event, onCancel)}
+            onClick={(event) => runDialogButtonAction(event, onCancel)}
           >
             Cancel
           </button>
           <button
             type="button"
             className="wizard-button wizard-button--primary"
-            onClick={(event) => handleAction(event, onConfirm)}
+            onClick={(event) => runDialogButtonAction(event, onConfirm)}
           >
             {confirmLabel}
           </button>

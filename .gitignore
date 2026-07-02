@@ -3,3 +3,10 @@
 node_modules
 dist
 supabase/.temp
+
+# Capacitor / iOS
+ios/App/Pods
+ios/App/App/public
+ios/DerivedData
+*.xcuserstate
+xcuserdata

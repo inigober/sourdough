@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState, type MouseEvent } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { findSavedRecipeSummaryByName } from '../lib/storage/recipeStorage.ts';
 import type { SavedRecipeSummary } from '../lib/storage/types.ts';
 import { DialogCard } from './DialogCard.tsx';
+import { runDialogButtonAction } from './dialogAction.ts';
 
 type SaveRecipeDialogProps = {
   defaultName: string;
@@ -35,11 +36,6 @@ export function SaveRecipeDialog({
   }, [activeSavedRecipeId, resolvedName, savedRecipes]);
   const isUpdate = Boolean(updateRecipeId);
 
-  function handleAction(event: MouseEvent<HTMLButtonElement>, action: () => void): void {
-    event.stopPropagation();
-    action();
-  }
-
   return (
     <DialogCard
       title={isUpdate ? 'Update saved recipe' : 'Save recipe'}
@@ -50,7 +46,7 @@ export function SaveRecipeDialog({
           <button
             type="button"
             className="wizard-button wizard-button--secondary"
-            onClick={(event) => handleAction(event, onCancel)}
+            onClick={(event) => runDialogButtonAction(event, onCancel)}
           >
             Cancel
           </button>
@@ -58,7 +54,7 @@ export function SaveRecipeDialog({
             type="button"
             className="wizard-button wizard-button--primary"
             onClick={(event) =>
-              handleAction(event, () => void onSave(resolvedName, updateRecipeId))
+              runDialogButtonAction(event, () => void onSave(resolvedName, updateRecipeId))
             }
           >
             {isUpdate ? 'Update recipe' : 'Save recipe'}

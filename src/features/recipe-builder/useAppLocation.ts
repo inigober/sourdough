@@ -139,7 +139,10 @@ export function useAppNavigation({
     if (isDirty) {
       pendingBlockedNavigation.current = false;
       setUnsavedSaveError(null);
-      setIsUnsavedDialogOpen(true);
+      // Open on the next turn so the home click cannot fall through to the new backdrop.
+      queueMicrotask(() => {
+        setIsUnsavedDialogOpen(true);
+      });
       return;
     }
 

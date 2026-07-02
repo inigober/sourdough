@@ -35,6 +35,8 @@ import type { ScheduleInput } from '../../lib/schedule/types.ts';
 import { BakeCompleteDialog, type BakeCompleteSaveInput } from './BakeCompleteDialog.tsx';
 import { CompanionCoachPanel } from './CompanionCoachPanel.tsx';
 import { CompanionStepEditDialog } from './CompanionStepEditDialog.tsx';
+import { CompanionBakeTimerPermissionNotice } from './CompanionBakeTimerPermissionNotice.tsx';
+import { useBakeNativeTimer } from '../../lib/companion/nativeBakeTimer/useBakeNativeTimer.ts';
 
 type CompanionViewProps = {
   session: BakeSession;
@@ -70,6 +72,10 @@ export function CompanionView({
   }, [session.recipeInput, session.scheduleDriftMinutes, session.scheduleInput]);
 
   const currentStep = getCurrentTimelineStep(timeline, session);
+  const { permissionNotice, ensurePermissionForStartTimer, openTimerSettings } = useBakeNativeTimer(
+    session,
+    currentStep ?? null,
+  );
   const previousStep = getPreviousTimelineStep(timeline, session);
   const isComplete = isBakeSessionComplete(session, timeline.length);
   const canEditStep = currentStep ? Boolean(getStepScheduleEdit(currentStep.id)) : false;
@@ -120,11 +126,12 @@ export function CompanionView({
     setIsEditingStep(false);
   }
 
-  function handleStartStep(): void {
+  async function handleStartStep(): Promise<void> {
     if (!currentStep) {
       return;
     }
 
+    await ensurePermissionForStartTimer();
     onSessionChange(startTimedStep(session, currentStep));
     setTimerNow(Date.now());
   }
@@ -186,6 +193,14 @@ export function CompanionView({
           <p className="companion__drift" role="status">
             Remaining schedule shifted by {formatDriftLabel(session.scheduleDriftMinutes)} based on actual timing.
           </p>
+        ) : null}
+        {permissionNotice ? (
+          <CompanionBakeTimerPermissionNotice
+            title={permissionNotice.title}
+            body={permissionNotice.body}
+            showOpenSettings={permissionNotice.showOpenSettings}
+            onOpenSettings={openTimerSettings}
+          />
         ) : null}
       </section>
 
