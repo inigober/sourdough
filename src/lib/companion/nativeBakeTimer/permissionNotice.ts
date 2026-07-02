@@ -27,7 +27,7 @@ export function getBakeTimerPermissionNotice(
   if (state.status === 'granted' && state.alertMode === 'notification') {
     return {
       title: 'Notification alerts only',
-      body: 'This device will send a notification when the step ends. Alarm-style lock-screen timers require a physical iPhone with alarms enabled for Sourdough in Settings.',
+      body: 'This device will send a notification when the step ends. For lock-screen countdown timers and alarm-style alerts, allow alarms for Sourdough in Settings.',
     };
   }
 

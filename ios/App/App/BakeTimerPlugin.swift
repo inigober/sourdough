@@ -25,16 +25,6 @@ public class BakeTimerPlugin: CAPPlugin, CAPBridgedPlugin {
     private let storageKey = "sourdough.activeBakeTimerIds"
     private let alarmIdStorageKey = "sourdough.activeBakeAlarmIds"
 
-    /// AlarmKit is unreliable on the simulator (silent alerts, SpringBoard crashes).
-    /// Use notification fallback there; reserve AlarmKit for physical devices.
-    private var prefersAlarmKit: Bool {
-        #if targetEnvironment(simulator)
-        return false
-        #else
-        return true
-        #endif
-    }
-
     @objc func getPermissionStatus(_ call: CAPPluginCall) {
         Task {
             let status = await self.currentPermissionStatus()
@@ -91,7 +81,7 @@ public class BakeTimerPlugin: CAPPlugin, CAPBridgedPlugin {
             do {
                 if #available(iOS 26.0, *) {
                     #if canImport(AlarmKit)
-                    if self.prefersAlarmKit, await self.isAlarmKitAuthorized() {
+                    if await self.isAlarmKitAuthorized() {
                         try await self.scheduleAlarmKitTimer(
                             timerId: timerId,
                             durationSeconds: durationSeconds,
@@ -161,7 +151,7 @@ public class BakeTimerPlugin: CAPPlugin, CAPBridgedPlugin {
     private func currentAlertMode() async -> String {
         if #available(iOS 26.0, *) {
             #if canImport(AlarmKit)
-            if self.prefersAlarmKit, await self.isAlarmKitAuthorized() {
+            if await self.isAlarmKitAuthorized() {
                 return "alarm"
             }
             #endif

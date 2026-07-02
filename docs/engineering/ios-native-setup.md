@@ -57,7 +57,7 @@ Timer alerts can open bake mode via `sourdough://bake`. The URL scheme is declar
 2. Tap **Start timer** — iOS should prompt for alarm/notification permission on first use.
 3. Lock the device — on iOS 26+ you should see a Lock Screen / Dynamic Island countdown (Bake Timer widget extension).
 4. Background the app and confirm alert/notification at step end.
-5. **Use a physical iPhone for AlarmKit testing.** The iOS Simulator does not reliably play alarm sounds and may crash SpringBoard when a timer fires; the app automatically falls back to end-of-step notifications on the simulator.
+5. **Use a physical iPhone to verify the full alarm at step end** (sound, dismiss-to-stop). The simulator shows the lock-screen countdown reliably, but alarm sound and the alert UI when the timer finishes are often broken there and may crash SpringBoard.
 6. On iOS 26+ with AlarmKit enabled, confirm dismiss stops the alert and **Open app** returns to bake mode.
 7. If permission is denied or only notifications are enabled, bake mode shows a notice with **Open Settings**.
 
