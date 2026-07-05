@@ -13,8 +13,8 @@ function parseOptionalPositiveInt(raw: string | undefined): number | null {
   return Math.round(parsed);
 }
 
-const testMinutes = parseOptionalPositiveInt(import.meta.env.VITE_BAKE_TIMER_TEST_MINUTES);
-const testStepId = import.meta.env.VITE_BAKE_TIMER_TEST_STEP_ID?.trim() || null;
+const testMinutes = parseOptionalPositiveInt(import.meta.env?.VITE_BAKE_TIMER_TEST_MINUTES);
+const testStepId = import.meta.env?.VITE_BAKE_TIMER_TEST_STEP_ID?.trim() || null;
 
 export function getBakeTimerTestOverrideMinutes(step: TimelineStep): number | null {
   if (testMinutes === null || step.durationMinutes <= 0) {
