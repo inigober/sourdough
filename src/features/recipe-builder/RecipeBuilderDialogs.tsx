@@ -1,14 +1,16 @@
 import { ConfirmDialog } from '../../components/ConfirmDialog.tsx';
 import { SaveRecipeDialog } from '../../components/SaveRecipeDialog.tsx';
-import { UnsavedChangesDialog } from '../../components/UnsavedChangesDialog.tsx';
+import { LeaveRecipeDialog } from './LeaveRecipeDialog.tsx';
 import type { SavedRecipeSummary } from '../../lib/storage/types.ts';
 
 type RecipeBuilderDialogsProps = {
-  isUnsavedDialogOpen: boolean;
+  leaveDialogMode: 'unsaved' | 'save' | null;
+  isSavingExistingRecipe: boolean;
   unsavedSaveError: string | null;
-  onCancelUnsaved: () => void;
+  onCancelLeave: () => void;
   onDiscardUnsaved: () => void;
   onSaveBeforeLeaving: () => void;
+  onConfirmLeaveSave: (name: string, recipeId: string | null) => void;
   pendingOverwriteBakeName: string | null;
   onCancelOverwriteBake: () => void;
   onConfirmOverwriteBake: () => void;
@@ -25,11 +27,13 @@ type RecipeBuilderDialogsProps = {
 };
 
 export function RecipeBuilderDialogs({
-  isUnsavedDialogOpen,
+  leaveDialogMode,
+  isSavingExistingRecipe,
   unsavedSaveError,
-  onCancelUnsaved,
+  onCancelLeave,
   onDiscardUnsaved,
   onSaveBeforeLeaving,
+  onConfirmLeaveSave,
   pendingOverwriteBakeName,
   onCancelOverwriteBake,
   onConfirmOverwriteBake,
@@ -46,12 +50,18 @@ export function RecipeBuilderDialogs({
 }: RecipeBuilderDialogsProps) {
   return (
     <>
-      {isUnsavedDialogOpen ? (
-        <UnsavedChangesDialog
-          onCancel={onCancelUnsaved}
+      {leaveDialogMode ? (
+        <LeaveRecipeDialog
+          mode={leaveDialogMode}
+          saveDialogDefaultName={saveDialogDefaultName}
+          activeSavedRecipeId={activeSavedRecipeId}
+          savedRecipes={savedRecipes}
+          unsavedSaveError={unsavedSaveError}
+          isSavingExistingRecipe={isSavingExistingRecipe}
+          onCancel={onCancelLeave}
           onDiscard={onDiscardUnsaved}
-          onSave={onSaveBeforeLeaving}
-          saveError={unsavedSaveError}
+          onSaveBeforeLeaving={onSaveBeforeLeaving}
+          onConfirmSave={onConfirmLeaveSave}
         />
       ) : null}
       {pendingOverwriteBakeName ? (

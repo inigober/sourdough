@@ -153,7 +153,6 @@ export function CompanionView({
     return (
       <PageShell className="companion">
         <section className="hero companion__hero">
-          <h1>Bake mode</h1>
           <p className="hero-copy">No schedule steps found for this recipe.</p>
         </section>
         <button type="button" className="wizard-button wizard-button--secondary" onClick={() => onExit(false)}>
@@ -185,7 +184,6 @@ export function CompanionView({
       }
     >
       <section className="hero companion__hero">
-        <h1>{session.recipeName}</h1>
         <p className="hero-copy">
           Mix the dough on {mixDateLabel}. Oven-bake on {bakeDateLabel}. Stuck on a step? Tap the
           sparkles button to ask the AI baking coach for help.

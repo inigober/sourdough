@@ -231,11 +231,13 @@ export function RecipeBuilder() {
 
   const dialogs = (
     <RecipeBuilderDialogs
-      isUnsavedDialogOpen={navigation.isUnsavedDialogOpen}
+      leaveDialogMode={navigation.leaveDialogMode}
+      isSavingExistingRecipe={navigation.isSavingExistingRecipe}
       unsavedSaveError={navigation.unsavedSaveError}
-      onCancelUnsaved={navigation.setIsUnsavedDialogOpen}
+      onCancelLeave={navigation.cancelLeaveDialog}
       onDiscardUnsaved={navigation.discardUnsavedChanges}
       onSaveBeforeLeaving={navigation.saveBeforeLeavingHome}
+      onConfirmLeaveSave={(name, recipeId) => void confirmSaveRecipe(name, recipeId)}
       pendingOverwriteBakeName={pendingOverwriteBakeName}
       onCancelOverwriteBake={cancelPendingBeginBakeSession}
       onConfirmOverwriteBake={() => {
@@ -275,6 +277,9 @@ export function RecipeBuilder() {
   }
 
   async function confirmSaveRecipe(name: string, recipeId: string | null): Promise<void> {
+    const pendingGoHomeAfterSave = navigation.pendingGoHomeAfterSave;
+    const pendingStartBakeAfterSave = navigation.pendingStartBakeAfterSave;
+
     await saveActiveRecipe(
       name,
       navigation.saveDialogSource === 'schedule' || wizard.hasOpenedSchedule,
@@ -282,8 +287,8 @@ export function RecipeBuilder() {
     );
     navigation.closeSaveDialog();
     await bakeFlow.continueAfterSaveRecipe({
-      pendingGoHomeAfterSave: navigation.pendingGoHomeAfterSave,
-      pendingStartBakeAfterSave: navigation.pendingStartBakeAfterSave,
+      pendingGoHomeAfterSave,
+      pendingStartBakeAfterSave,
     });
   }
 
@@ -301,7 +306,18 @@ export function RecipeBuilder() {
     routes.toHistory();
   }
 
-  const homeHeader = navigation.showHomeButton ? <AppHeader onHome={navigation.goHome} /> : null;
+  const homeHeaderTitle =
+    screen.kind === 'schedule'
+      ? 'Schedule builder'
+      : screen.kind === 'results'
+        ? 'Ingredient summary'
+        : screen.kind === 'companion'
+          ? (bakeSession?.recipeName ?? 'Bake mode')
+          : undefined;
+
+  const homeHeader = navigation.showHomeButton ? (
+    <AppHeader onHome={navigation.goHome} title={homeHeaderTitle} />
+  ) : null;
   const wizardHomeAction = navigation.showHomeButton ? (
     <button type="button" className="app-header__home wizard-icon-button" onClick={navigation.goHome}>
       <HomeIcon />

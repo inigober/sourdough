@@ -1,11 +1,12 @@
-import { useEffect, useRef, type MouseEvent, type ReactNode } from 'react';
+import {
+  useLayoutEffect,
+  useRef,
+  type MouseEvent,
+  type ReactNode,
+} from 'react';
+import { createPortal } from 'react-dom';
 
 import { CloseIcon } from './icons.tsx';
-import { runDialogButtonAction } from './dialogAction.ts';
-
-function stopEventPropagation(event: MouseEvent<HTMLElement>): void {
-  event.stopPropagation();
-}
 
 type DialogCardProps = {
   title: string;
@@ -32,7 +33,8 @@ export function DialogCard({
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    // showModal before paint; portal to body — see docs/engineering/leave-dialog-and-unsaved-navigation.md
     const dialog = dialogRef.current;
     if (!dialog) {
       return;
@@ -43,7 +45,14 @@ export function DialogCard({
       onCloseRef.current();
     };
 
+    const handleBackdropClick = (event: Event): void => {
+      if (event.target === dialog) {
+        onCloseRef.current();
+      }
+    };
+
     dialog.addEventListener('cancel', handleCancel);
+    dialog.addEventListener('click', handleBackdropClick);
 
     if (!dialog.open) {
       dialog.showModal();
@@ -51,28 +60,19 @@ export function DialogCard({
 
     return () => {
       dialog.removeEventListener('cancel', handleCancel);
+      dialog.removeEventListener('click', handleBackdropClick);
       if (dialog.open) {
         dialog.close();
       }
     };
   }, []);
 
-  function handleDialogClick(event: MouseEvent<HTMLDialogElement>): void {
-    if (event.target === event.currentTarget) {
-      onCloseRef.current();
-    }
+  function handleCardClick(event: MouseEvent<HTMLDivElement>): void {
+    event.stopPropagation();
   }
 
-  function handleCloseClick(event: MouseEvent<HTMLButtonElement>): void {
-    runDialogButtonAction(event, () => onCloseRef.current());
-  }
-
-  return (
-    <dialog
-      ref={dialogRef}
-      className="dialog-backdrop"
-      onClick={handleDialogClick}
-    >
+  return createPortal(
+    <dialog ref={dialogRef} className="dialog-backdrop">
       <div
         className={
           variant === 'success'
@@ -83,8 +83,7 @@ export function DialogCard({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={messageId}
-        onMouseDown={stopEventPropagation}
-        onClick={stopEventPropagation}
+        onClick={handleCardClick}
       >
         <header className="dialog-card__header">
           <h2 id={titleId}>{title}</h2>
@@ -92,16 +91,15 @@ export function DialogCard({
             type="button"
             className="wizard-icon-button dialog-card__close"
             aria-label="Close dialog"
-            onClick={handleCloseClick}
+            onClick={onClose}
           >
             <CloseIcon />
           </button>
         </header>
         {children}
-        <div onMouseDown={stopEventPropagation} onClick={stopEventPropagation}>
-          {actions}
-        </div>
+        <div onClick={handleCardClick}>{actions}</div>
       </div>
-    </dialog>
+    </dialog>,
+    document.body,
   );
 }

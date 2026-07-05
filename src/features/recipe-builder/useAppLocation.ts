@@ -8,7 +8,7 @@ import type { ScheduleInput } from '../../lib/schedule/types.ts';
 import type { SavedRecipe } from '../../lib/storage/types.ts';
 import type { AppLocation } from './appLocation.ts';
 import { showHomeButton as getShowHomeButton } from './appLocation.ts';
-import { APP_ROUTES, shouldBlockUnsavedNavigation, type AppRouteNavigate } from './appRoutes.ts';
+import { APP_ROUTES, isBuilderPath, shouldBlockUnsavedNavigation, type AppRouteNavigate } from './appRoutes.ts';
 import type { RecipeBuilderStep } from './recipeBuilderSteps.ts';
 import type { SaveDialogSource } from './types.ts';
 
@@ -54,11 +54,15 @@ export function useAppNavigation({
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [saveDialogSource, setSaveDialogSource] = useState<SaveDialogSource>('results');
   const [pendingDeleteRecipeId, setPendingDeleteRecipeId] = useState<string | null>(null);
-  const [isUnsavedDialogOpen, setIsUnsavedDialogOpen] = useState(false);
+  const [leaveDialogMode, setLeaveDialogMode] = useState<'unsaved' | 'save' | null>(null);
+  const [isSavingExistingRecipe, setIsSavingExistingRecipe] = useState(false);
   const [unsavedSaveError, setUnsavedSaveError] = useState<string | null>(null);
   const [pendingGoHomeAfterSave, setPendingGoHomeAfterSave] = useState(false);
   const [pendingStartBakeAfterSave, setPendingStartBakeAfterSave] = useState(false);
   const pendingBlockedNavigation = useRef(false);
+  // Intentional discard must bypass useBlocker: isRecipeDirty can stay true until the
+  // route leaves /build/* (see docs/engineering/leave-dialog-and-unsaved-navigation.md).
+  const isDiscardingChangesRef = useRef(false);
 
   const isDirty = useMemo(
     () =>
@@ -81,13 +85,18 @@ export function useAppNavigation({
     }: {
       currentLocation: { pathname: string };
       nextLocation: { pathname: string };
-    }) =>
-      shouldBlockUnsavedNavigation({
+    }) => {
+      if (isDiscardingChangesRef.current) {
+        return false;
+      }
+
+      return shouldBlockUnsavedNavigation({
         currentPathname: currentLocation.pathname,
         nextPathname: nextLocation.pathname,
         isDirty,
         phase: location.phase,
-      }),
+      });
+    },
     [isDirty, location.phase],
   );
 
@@ -102,7 +111,8 @@ export function useAppNavigation({
     resetToWelcome();
     setIsSaveDialogOpen(false);
     setPendingDeleteRecipeId(null);
-    setIsUnsavedDialogOpen(false);
+    setLeaveDialogMode(null);
+    setIsSavingExistingRecipe(false);
     setUnsavedSaveError(null);
     setPendingGoHomeAfterSave(false);
     refreshDraftSummary();
@@ -125,9 +135,15 @@ export function useAppNavigation({
   useEffect(() => {
     if (blocker.state === 'blocked') {
       pendingBlockedNavigation.current = true;
-      setIsUnsavedDialogOpen(true);
+      setLeaveDialogMode('unsaved');
     }
   }, [blocker.state]);
+
+  useEffect(() => {
+    if (!isBuilderPath(pathname)) {
+      isDiscardingChangesRef.current = false;
+    }
+  }, [pathname]);
 
   const goHome = useCallback((): void => {
     if (location.phase === 'companion') {
@@ -139,16 +155,18 @@ export function useAppNavigation({
     if (isDirty) {
       pendingBlockedNavigation.current = false;
       setUnsavedSaveError(null);
-      setIsUnsavedDialogOpen(true);
+      setLeaveDialogMode('unsaved');
       return;
     }
 
     performGoHome();
   }, [isDirty, location.phase, performGoHome, stashSessionOnLeaveCompanion]);
 
-  const cancelUnsavedDialog = useCallback((): void => {
-    setIsUnsavedDialogOpen(false);
+  const cancelLeaveDialog = useCallback((): void => {
+    setLeaveDialogMode(null);
+    setIsSavingExistingRecipe(false);
     setUnsavedSaveError(null);
+    setPendingGoHomeAfterSave(false);
 
     if (blocker.state === 'blocked') {
       blocker.reset();
@@ -157,6 +175,8 @@ export function useAppNavigation({
   }, [blocker]);
 
   const discardUnsavedChanges = useCallback((): void => {
+    isDiscardingChangesRef.current = true;
+
     if (activeSavedRecipe) {
       restoreFromSavedRecipe(activeSavedRecipe);
     } else {
@@ -170,6 +190,7 @@ export function useAppNavigation({
     setUnsavedSaveError(null);
 
     if (activeSavedRecipeId && activeSavedRecipe) {
+      setIsSavingExistingRecipe(true);
       void saveActiveRecipe(
         activeSavedRecipe.name,
         wizard.hasOpenedSchedule || saveDialogSource === 'schedule',
@@ -180,17 +201,15 @@ export function useAppNavigation({
         .catch((error: unknown) => {
           const message = error instanceof Error ? error.message : 'Failed to save recipe.';
           setUnsavedSaveError(message);
-          setIsUnsavedDialogOpen(true);
+          setIsSavingExistingRecipe(false);
+          setLeaveDialogMode('unsaved');
         });
       return;
     }
 
-    // Close unsaved and open save in the same React batch so there is no frame where
-    // neither dialog is mounted and the in-flight click can hit the page underneath.
-    setIsUnsavedDialogOpen(false);
     setPendingGoHomeAfterSave(true);
     setSaveDialogSource(wizard.hasOpenedSchedule ? 'schedule' : 'results');
-    setIsSaveDialogOpen(true);
+    setLeaveDialogMode('save');
   }, [
     activeSavedRecipe,
     activeSavedRecipeId,
@@ -226,6 +245,7 @@ export function useAppNavigation({
 
   const closeSaveDialog = useCallback((): void => {
     setIsSaveDialogOpen(false);
+    setLeaveDialogMode(null);
     setPendingGoHomeAfterSave(false);
     setPendingStartBakeAfterSave(false);
   }, []);
@@ -251,9 +271,10 @@ export function useAppNavigation({
     isSaveDialogOpen,
     saveDialogSource,
     pendingDeleteRecipeId,
-    isUnsavedDialogOpen,
+    leaveDialogMode,
+    isSavingExistingRecipe,
     unsavedSaveError,
-    setIsUnsavedDialogOpen: cancelUnsavedDialog,
+    cancelLeaveDialog,
     pendingGoHomeAfterSave,
     pendingStartBakeAfterSave,
     setPendingStartBakeAfterSave,

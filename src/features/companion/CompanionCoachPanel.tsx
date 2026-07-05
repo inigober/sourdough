@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 
-import { compressCoachPhoto } from '../../lib/companion/compressCoachPhoto.ts';
+import { compressCoachPhoto, getCoachPhotoCompressionOptions } from '../../lib/companion/compressCoachPhoto.ts';
 import { buildCoachPrompt } from '../../lib/companion/buildCoachPrompt.ts';
 import { getCoachTipForStep } from '../../lib/companion/coachStepTips.ts';
 import type { CoachTopic } from '../../lib/companion/coachTopics.ts';
@@ -156,7 +156,7 @@ export function CompanionCoachPanel({
     setIsPreparingPhoto(true);
 
     try {
-      const compressed = await compressCoachPhoto(file);
+      const compressed = await compressCoachPhoto(file, getCoachPhotoCompressionOptions(topic));
       setPendingPhoto(compressed);
     } catch (error) {
       setPendingPhoto(null);

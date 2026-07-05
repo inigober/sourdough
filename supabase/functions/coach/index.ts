@@ -41,8 +41,8 @@ function buildUserMessage(user: string, photoDataUrl?: string): OpenAiChatMessag
         type: 'image_url',
         image_url: {
           url: photoDataUrl.trim(),
-          // Client already scales to ~1024px; low detail keeps vision token cost predictable.
-          detail: 'low',
+          // Client scales by coach topic; auto lets the model pick resolution for crumb vs dough shots.
+          detail: 'auto',
         },
       },
     ],

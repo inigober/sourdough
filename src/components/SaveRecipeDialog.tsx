@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { findSavedRecipeSummaryByName } from '../lib/storage/recipeStorage.ts';
 import type { SavedRecipeSummary } from '../lib/storage/types.ts';
 import { DialogCard } from './DialogCard.tsx';
-import { runDialogButtonAction } from './dialogAction.ts';
 
 type SaveRecipeDialogProps = {
   defaultName: string;
@@ -43,19 +42,13 @@ export function SaveRecipeDialog({
       onClose={onCancel}
       actions={
         <div className="dialog-card__actions">
-          <button
-            type="button"
-            className="wizard-button wizard-button--secondary"
-            onClick={(event) => runDialogButtonAction(event, onCancel)}
-          >
+          <button type="button" className="wizard-button wizard-button--secondary" onClick={onCancel}>
             Cancel
           </button>
           <button
             type="button"
             className="wizard-button wizard-button--primary"
-            onClick={(event) =>
-              runDialogButtonAction(event, () => void onSave(resolvedName, updateRecipeId))
-            }
+            onClick={() => void onSave(resolvedName, updateRecipeId)}
           >
             {isUpdate ? 'Update recipe' : 'Save recipe'}
           </button>

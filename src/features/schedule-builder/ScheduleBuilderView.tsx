@@ -96,7 +96,6 @@ export function ScheduleBuilderView({
       }
     >
       <section className="hero schedule-builder__hero">
-        <h1>Schedule builder</h1>
         <p className="hero-copy">
           Mix the dough on {mixDateLabel}. Oven-bake on {bakeDateLabel}. Times below follow your start time on mix day.
         </p>

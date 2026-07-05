@@ -91,7 +91,6 @@ export function RecipeResultsView({
       }
     >
       <section className="hero recipe-results__hero">
-        <h1>Ingredient summary</h1>
         <p className="hero-copy">
           Tap any section to adjust inputs. Ingredient weights update from your targets.
         </p>

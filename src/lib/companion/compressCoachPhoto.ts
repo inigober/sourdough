@@ -1,4 +1,6 @@
-/** Longest edge for coach vision — enough for dough texture without huge token cost. */
+import type { CoachTopic } from './coachTopics.ts';
+
+/** Mid-bake dough photos: macro cues (rise, surface, shape). */
 export const COACH_PHOTO_MAX_DIMENSION = 1024;
 
 /** JPEG quality starting point before stepping down to meet byte budget. */
@@ -6,6 +8,13 @@ export const COACH_PHOTO_JPEG_QUALITY = 0.82;
 
 /** Target payload size for the compressed data URL (base64 inflates ~33%). */
 export const COACH_PHOTO_MAX_BYTES = 350_000;
+
+/** Bake-step photos (crumb, crust, scoring): finer detail. */
+export const COACH_PHOTO_BAKE_MAX_DIMENSION = 1280;
+
+export const COACH_PHOTO_BAKE_JPEG_QUALITY = 0.88;
+
+export const COACH_PHOTO_BAKE_MAX_BYTES = 500_000;
 
 const MIN_JPEG_QUALITY = 0.55;
 const QUALITY_STEP = 0.07;
@@ -15,6 +24,22 @@ export type CompressCoachPhotoOptions = {
   quality?: number;
   maxBytes?: number;
 };
+
+export function getCoachPhotoCompressionOptions(topic: CoachTopic): CompressCoachPhotoOptions {
+  if (topic === 'bake') {
+    return {
+      maxDimension: COACH_PHOTO_BAKE_MAX_DIMENSION,
+      quality: COACH_PHOTO_BAKE_JPEG_QUALITY,
+      maxBytes: COACH_PHOTO_BAKE_MAX_BYTES,
+    };
+  }
+
+  return {
+    maxDimension: COACH_PHOTO_MAX_DIMENSION,
+    quality: COACH_PHOTO_JPEG_QUALITY,
+    maxBytes: COACH_PHOTO_MAX_BYTES,
+  };
+}
 
 export function computeScaledDimensions(
   width: number,

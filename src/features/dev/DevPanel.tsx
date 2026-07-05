@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 
 import { DialogCard } from '../../components/DialogCard.tsx';
-import { runDialogButtonAction } from '../../components/dialogAction.ts';
 import {
   DEV_PANEL_UNLOCK_TAP_COUNT,
   DEV_PANEL_UNLOCK_WINDOW_MS,
@@ -87,12 +86,10 @@ export function DevPanel({ isSignedIn, onClose, onSignOut }: DevPanelProps) {
               type="button"
               className="wizard-button wizard-button--secondary"
               disabled={isResetting}
-              onClick={(event) =>
-                runDialogButtonAction(event, () => {
-                  setIsConfirmingReset(false);
-                  setIsConfirmingResetAndSignOut(false);
-                })
-              }
+              onClick={() => {
+                setIsConfirmingReset(false);
+                setIsConfirmingResetAndSignOut(false);
+              }}
             >
               Cancel
             </button>
@@ -140,7 +137,7 @@ export function DevPanel({ isSignedIn, onClose, onSignOut }: DevPanelProps) {
           <button
             type="button"
             className="wizard-button wizard-button--secondary"
-            onClick={(event) => runDialogButtonAction(event, onClose)}
+            onClick={onClose}
           >
             Close
           </button>

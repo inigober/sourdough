@@ -21,6 +21,10 @@
   --space-card: 24px;
   --icon-button-size: 2.75rem;
   --number-field-width: 7.25rem;
+  --app-shell-pad-top: 24px;
+  --app-shell-pad-inline: 20px;
+  --app-chrome-bg: rgb(248 241 232 / 92%);
+  --app-chrome-blur: blur(10px);
 
   color: var(--color-text);
   background: var(--color-bg);
@@ -51,7 +55,7 @@ p {
 .app-shell {
   width: min(960px, 100%);
   margin: 0 auto;
-  padding: calc(24px + env(safe-area-inset-top, 0px)) 20px 48px;
+  padding: calc(var(--app-shell-pad-top) + env(safe-area-inset-top, 0px)) var(--app-shell-pad-inline) 48px;
   overflow-x: clip;
 }
 
@@ -65,13 +69,16 @@ p {
 
 .wizard-shell__header {
   position: sticky;
-  top: env(safe-area-inset-top, 0px);
+  top: 0;
   z-index: 20;
   display: grid;
   gap: 10px;
-  margin: -24px -20px 0;
-  padding: 16px 20px 12px;
-  background: linear-gradient(var(--color-bg) 78%, rgb(248 241 232 / 0));
+  margin: calc(-1 * (var(--app-shell-pad-top) + env(safe-area-inset-top, 0px))) calc(-1 * var(--app-shell-pad-inline)) 0;
+  padding: calc(var(--app-shell-pad-top) + env(safe-area-inset-top, 0px)) var(--app-shell-pad-inline) 12px;
+  border-bottom: 1px solid rgb(234 217 200 / 72%);
+  background: var(--app-chrome-bg);
+  backdrop-filter: var(--app-chrome-blur);
+  -webkit-backdrop-filter: var(--app-chrome-blur);
 }
 
 .page-shell__body,
@@ -407,13 +414,35 @@ p {
 
 .app-header {
   position: sticky;
-  top: env(safe-area-inset-top, 0px);
+  top: 0;
   z-index: 25;
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: calc(-1 * (var(--app-shell-pad-top) + env(safe-area-inset-top, 0px))) calc(-1 * var(--app-shell-pad-inline)) 4px;
+  padding: calc(var(--app-shell-pad-top) + env(safe-area-inset-top, 0px)) var(--app-shell-pad-inline) 8px;
+  border-bottom: 1px solid rgb(234 217 200 / 72%);
+  background: var(--app-chrome-bg);
+  backdrop-filter: var(--app-chrome-blur);
+  -webkit-backdrop-filter: var(--app-chrome-blur);
+}
+
+.app-header--home-only {
   justify-content: flex-end;
-  margin: -8px 0 4px;
-  padding: 4px 0 8px;
-  background: linear-gradient(#f8f1e8 75%, rgb(248 241 232 / 0));
+}
+
+.app-header__title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .app-header__home {
@@ -3112,8 +3141,14 @@ dd {
     gap: 4px 6px;
   }
 
+  :root {
+    --app-shell-pad-top: 16px;
+    --app-shell-pad-inline: 14px;
+  }
+
   .app-shell {
-    padding: calc(16px + env(safe-area-inset-top, 0px)) 14px calc(40px + env(safe-area-inset-bottom, 0px));
+    padding: calc(var(--app-shell-pad-top) + env(safe-area-inset-top, 0px)) var(--app-shell-pad-inline)
+      calc(40px + env(safe-area-inset-bottom, 0px));
   }
 
   .app-bottom-nav {
@@ -3194,8 +3229,7 @@ dd {
   }
 
   .wizard-shell__header {
-    margin: -16px -14px 0;
-    padding: 14px 14px 10px;
+    padding-bottom: 10px;
   }
 
   .page-shell__footer,
