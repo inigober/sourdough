@@ -56,6 +56,10 @@
 			</array>
 		</dict>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Sourdough uses the camera so you can share dough photos with the baking coach.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Sourdough uses your photo library so you can share dough photos with the baking coach.</string>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>Sourdough alerts you when a bake step timer ends, even if you leave the app.</string>
 	<key>NSAlarmKitUsageDescription</key>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { AppHeader } from '../../components/AppHeader.tsx';
 import { HomeIcon } from '../../components/icons.tsx';
@@ -25,9 +25,11 @@ import { useRecipeWizard } from './useRecipeWizard.ts';
 import { WelcomeScreen } from './WelcomeScreen.tsx';
 import { WizardInputSteps } from './WizardInputSteps.tsx';
 import { isInputWizardStep } from './recipeBuilderSteps.ts';
+import { DevPanel } from '../dev/DevPanel.tsx';
 
 export function RecipeBuilder() {
-  const { user, isConfigured, isLoading: isAuthLoading } = useAuth();
+  const { user, isConfigured, isLoading: isAuthLoading, signOut } = useAuth();
+  const [isDevPanelOpen, setIsDevPanelOpen] = useState(false);
   const { location, phase, tab, wizardStep, historyDetailId, routes, isKnownPath, pathname } = useAppRouter();
 
   useEffect(() => {
@@ -219,6 +221,14 @@ export function RecipeBuilder() {
     activeSavedRecipe?.name ?? generateDefaultRecipeName(wizard.recipeInput, saveDialogSchedule);
   const pendingDeleteRecipe = savedRecipes.find((recipe) => recipe.id === navigation.pendingDeleteRecipeId);
 
+  const devPanel = isDevPanelOpen ? (
+    <DevPanel
+      isSignedIn={Boolean(user)}
+      onClose={() => setIsDevPanelOpen(false)}
+      onSignOut={signOut}
+    />
+  ) : null;
+
   const dialogs = (
     <RecipeBuilderDialogs
       isUnsavedDialogOpen={navigation.isUnsavedDialogOpen}
@@ -312,6 +322,7 @@ export function RecipeBuilder() {
           onExit={(finished) => bakeFlow.exitCompanion({ finished })}
         />
         {dialogs}
+        {devPanel}
         {isAuthModalOpen ? <AuthModal onClose={closeAuthModal} /> : null}
       </>
     );
@@ -336,6 +347,7 @@ export function RecipeBuilder() {
           isSavedRecipe={Boolean(activeSavedRecipeId)}
         />
         {dialogs}
+        {devPanel}
       </>
     );
   }
@@ -354,6 +366,7 @@ export function RecipeBuilder() {
           isSavedRecipe={Boolean(activeSavedRecipeId)}
         />
         {dialogs}
+        {devPanel}
       </>
     );
   }
@@ -394,8 +407,10 @@ export function RecipeBuilder() {
           onCloseHistoryDetail={() => routes.toHistory()}
           onUpdateHistoryDetail={updateHistoryDetail}
           onDeleteHistoryDetail={handleDeleteHistoryDetail}
+          onDevPanelUnlock={() => setIsDevPanelOpen(true)}
         >
           {dialogs}
+          {devPanel}
           {isAuthModalOpen ? <AuthModal onClose={closeAuthModal} /> : null}
         </WelcomeScreen>
       </>
@@ -432,6 +447,7 @@ export function RecipeBuilder() {
       onLevainFlourChange={wizard.updateLevainFlourType}
     >
       {dialogs}
+      {devPanel}
     </WizardInputSteps>
   );
 }

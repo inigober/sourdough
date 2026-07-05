@@ -14,7 +14,40 @@ type CoachRequest = {
   system: string;
   user: string;
   coachQuestionsAsked?: number;
+  photoDataUrl?: string;
 };
+
+type OpenAiChatMessage =
+  | { role: 'system'; content: string }
+  | { role: 'user'; content: string }
+  | {
+      role: 'user';
+      content: Array<
+        | { type: 'text'; text: string }
+        | { type: 'image_url'; image_url: { url: string; detail: 'low' | 'high' | 'auto' } }
+      >;
+    };
+
+function buildUserMessage(user: string, photoDataUrl?: string): OpenAiChatMessage {
+  if (!photoDataUrl?.trim()) {
+    return { role: 'user', content: user };
+  }
+
+  return {
+    role: 'user',
+    content: [
+      { type: 'text', text: user },
+      {
+        type: 'image_url',
+        image_url: {
+          url: photoDataUrl.trim(),
+          // Client already scales to ~1024px; low detail keeps vision token cost predictable.
+          detail: 'low',
+        },
+      },
+    ],
+  };
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -22,7 +55,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { system, user, coachQuestionsAsked = 0 } = (await req.json()) as CoachRequest;
+    const { system, user, coachQuestionsAsked = 0, photoDataUrl } = (await req.json()) as CoachRequest;
 
     if (!system?.trim() || !user?.trim()) {
       return new Response(JSON.stringify({ error: 'Missing coach prompt content.' }), {
@@ -60,10 +93,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         model,
-        messages: [
-          { role: 'system', content: system },
-          { role: 'user', content: user },
-        ],
+        messages: [{ role: 'system', content: system }, buildUserMessage(user, photoDataUrl)],
         max_tokens: MAX_OUTPUT_TOKENS,
         temperature: 0.5,
       }),

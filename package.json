@@ -16,8 +16,9 @@
     "test:history": "node --experimental-strip-types --test \"src/lib/history/*.test.ts\"",
     "test:ui": "node --experimental-strip-types --test \"src/lib/ui/*.test.ts\"",
     "test:auth": "node --experimental-strip-types --test \"src/lib/auth/*.test.ts\"",
+    "test:dev": "node --experimental-strip-types --test \"src/lib/dev/*.test.ts\"",
     "test:features": "node --experimental-strip-types --test src/features/recipe-builder/recipeBuilderWizard.test.ts src/features/recipe-builder/appLocation.test.ts src/features/recipe-builder/appRoutes.test.ts src/features/recipe-builder/bakeFlow.test.ts && vitest run",
-    "test": "npm run test:recipe && npm run test:schedule && npm run test:storage && npm run test:companion && npm run test:history && npm run test:ui && npm run test:auth && npm run test:features"
+    "test": "npm run test:recipe && npm run test:schedule && npm run test:storage && npm run test:companion && npm run test:history && npm run test:ui && npm run test:auth && npm run test:dev && npm run test:features"
   },
   "dependencies": {
     "@capacitor/app": "^8.0.0",

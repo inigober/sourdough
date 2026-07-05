@@ -3,8 +3,6 @@ import { useEffect, useRef, type MouseEvent, type ReactNode } from 'react';
 import { CloseIcon } from './icons.tsx';
 import { runDialogButtonAction } from './dialogAction.ts';
 
-const BACKDROP_DISMISS_GRACE_MS = 300;
-
 function stopEventPropagation(event: MouseEvent<HTMLElement>): void {
   event.stopPropagation();
 }
@@ -30,54 +28,50 @@ export function DialogCard({
   actions,
   onClose,
 }: DialogCardProps) {
-  const openedAtRef = useRef(performance.now());
-  const pointerStartedInsideRef = useRef(false);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
-    openedAtRef.current = performance.now();
-    pointerStartedInsideRef.current = false;
+    const dialog = dialogRef.current;
+    if (!dialog) {
+      return;
+    }
+
+    const handleCancel = (event: Event): void => {
+      event.preventDefault();
+      onCloseRef.current();
+    };
+
+    dialog.addEventListener('cancel', handleCancel);
+
+    if (!dialog.open) {
+      dialog.showModal();
+    }
+
+    return () => {
+      dialog.removeEventListener('cancel', handleCancel);
+      if (dialog.open) {
+        dialog.close();
+      }
+    };
   }, []);
 
-  function handleDialogPointerDown(): void {
-    pointerStartedInsideRef.current = true;
-  }
-
-  function handleBackdropPointerDown(event: MouseEvent<HTMLDivElement>): void {
+  function handleDialogClick(event: MouseEvent<HTMLDialogElement>): void {
     if (event.target === event.currentTarget) {
-      pointerStartedInsideRef.current = false;
+      onCloseRef.current();
     }
-  }
-
-  function handleBackdropClick(event: MouseEvent<HTMLDivElement>): void {
-    if (event.target !== event.currentTarget) {
-      return;
-    }
-
-    // Ignore the click that completes a press that started on a dialog control.
-    if (pointerStartedInsideRef.current) {
-      pointerStartedInsideRef.current = false;
-      return;
-    }
-
-    // A button click that swaps or closes this dialog can finish bubbling after unmount
-    // and land on a newly mounted backdrop — ignore that stray click.
-    if (performance.now() - openedAtRef.current < BACKDROP_DISMISS_GRACE_MS) {
-      return;
-    }
-
-    onClose();
   }
 
   function handleCloseClick(event: MouseEvent<HTMLButtonElement>): void {
-    runDialogButtonAction(event, onClose);
+    runDialogButtonAction(event, () => onCloseRef.current());
   }
 
   return (
-    <div
+    <dialog
+      ref={dialogRef}
       className="dialog-backdrop"
-      role="presentation"
-      onPointerDown={handleBackdropPointerDown}
-      onClick={handleBackdropClick}
+      onClick={handleDialogClick}
     >
       <div
         className={
@@ -89,7 +83,6 @@ export function DialogCard({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={messageId}
-        onPointerDown={handleDialogPointerDown}
         onMouseDown={stopEventPropagation}
         onClick={stopEventPropagation}
       >
@@ -105,14 +98,10 @@ export function DialogCard({
           </button>
         </header>
         {children}
-        <div
-          onPointerDown={stopEventPropagation}
-          onMouseDown={stopEventPropagation}
-          onClick={stopEventPropagation}
-        >
+        <div onMouseDown={stopEventPropagation} onClick={stopEventPropagation}>
           {actions}
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }

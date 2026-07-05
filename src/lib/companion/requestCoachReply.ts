@@ -14,6 +14,8 @@ type CoachReplyResponse = {
 
 export type CoachReplyRequest = CoachPromptParts & {
   coachQuestionsAsked: number;
+  /** JPEG data URL, already compressed client-side for vision API cost control. */
+  photoDataUrl?: string;
 };
 
 export type CoachReplyResult =

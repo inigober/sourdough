@@ -60,7 +60,7 @@
 
 /* Begin PBXFileReference section */
 		281590BA4EECFBFEA97C0C83 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		2828F20AD48486088C26C96B /* BakeTimerWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; name = BakeTimerWidgetExtension.appex; path = BakeTimerWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		2828F20AD48486088C26C96B /* BakeTimerWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BakeTimerWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D178F14317F35EA8B7D6B8B /* BakeTimerWidgetBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BakeTimerWidgetBundle.swift; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
@@ -74,7 +74,7 @@
 		7E9A9473B6FB49230B76D1FA /* BakeTimerAlarmIntents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BakeTimerAlarmIntents.swift; sourceTree = "<group>"; };
 		7FAFB34C377B5D85ADF24F34 /* BakeTimerLiveActivity.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BakeTimerLiveActivity.swift; sourceTree = "<group>"; };
 		8160E89BBC556BBA5A58A3E1 /* BakeTimerAlarmMetadata.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BakeTimerAlarmMetadata.swift; sourceTree = "<group>"; };
-		89CCB98AF7B30EACDD3FE664 /* BakeTimerAlert.caf */ = {isa = PBXFileReference; includeInIndex = 1; path = BakeTimerAlert.caf; sourceTree = "<group>"; };
+		89CCB98AF7B30EACDD3FE664 /* BakeTimerAlert.caf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; path = BakeTimerAlert.caf; sourceTree = "<group>"; };
 		9945120E6624202D4FEEE5AC /* BakeTimerCountdownViews.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BakeTimerCountdownViews.swift; sourceTree = "<group>"; };
 		AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF51FD2D460BCFE21FA515B2 /* Pods-App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.release.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.release.xcconfig"; sourceTree = "<group>"; };
@@ -523,6 +523,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3TCCBRS8UH;
 				INFOPLIST_FILE = App/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -547,6 +548,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3TCCBRS8UH;
 				INFOPLIST_FILE = App/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -570,6 +572,7 @@
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3TCCBRS8UH;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BakeTimerWidget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
@@ -590,6 +593,7 @@
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3TCCBRS8UH;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BakeTimerWidget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;

@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 
+import { compressCoachPhoto } from '../../lib/companion/compressCoachPhoto.ts';
 import { buildCoachPrompt } from '../../lib/companion/buildCoachPrompt.ts';
 import { getCoachTipForStep } from '../../lib/companion/coachStepTips.ts';
 import type { CoachTopic } from '../../lib/companion/coachTopics.ts';
@@ -48,8 +49,11 @@ export function CompanionCoachPanel({
   ]);
   const [draft, setDraft] = useState('');
   const [pendingPhoto, setPendingPhoto] = useState<string | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [isPreparingPhoto, setIsPreparingPhoto] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const transcriptRef = useRef<HTMLDivElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const inputId = useId();
   const canAskQuestion = canAskCoachQuestion(session.coachQuestionsAsked);
   const questionsRemainingLabel = formatCoachQuestionsRemaining(session.coachQuestionsAsked);
@@ -64,6 +68,8 @@ export function CompanionCoachPanel({
     ]);
     setDraft('');
     setPendingPhoto(null);
+    setPhotoError(null);
+    setIsPreparingPhoto(false);
   }, [stepId, stepLabel, session.recipeInput]);
 
   useEffect(() => {
@@ -117,6 +123,7 @@ export function CompanionCoachPanel({
 
       const result = await requestCoachReply({
         ...prompt,
+        photoDataUrl: userMessage.imageUrl,
         coachQuestionsAsked: session.coachQuestionsAsked,
       });
 
@@ -137,7 +144,7 @@ export function CompanionCoachPanel({
     }
   }
 
-  function handlePhotoChange(event: ChangeEvent<HTMLInputElement>): void {
+  async function handlePhotoChange(event: ChangeEvent<HTMLInputElement>): Promise<void> {
     const file = event.currentTarget.files?.[0];
     event.currentTarget.value = '';
 
@@ -145,13 +152,18 @@ export function CompanionCoachPanel({
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setPendingPhoto(reader.result);
-      }
-    };
-    reader.readAsDataURL(file);
+    setPhotoError(null);
+    setIsPreparingPhoto(true);
+
+    try {
+      const compressed = await compressCoachPhoto(file);
+      setPendingPhoto(compressed);
+    } catch (error) {
+      setPendingPhoto(null);
+      setPhotoError(error instanceof Error ? error.message : 'Could not prepare that photo.');
+    } finally {
+      setIsPreparingPhoto(false);
+    }
   }
 
   return (
@@ -188,10 +200,21 @@ export function CompanionCoachPanel({
           {isSending ? <p className="companion-coach__typing">Coach is thinking…</p> : null}
         </div>
 
+        {isPreparingPhoto ? <p className="companion-coach__photo-status">Preparing photo…</p> : null}
+
+        {photoError ? (
+          <p className="companion-coach__photo-error" role="alert">
+            {photoError}
+          </p>
+        ) : null}
+
         {pendingPhoto ? (
           <div className="companion-coach__pending-photo">
             <img src={pendingPhoto} alt="Photo ready to send" />
-            <button type="button" className="companion-coach__remove-photo" onClick={() => setPendingPhoto(null)}>
+            <button type="button" className="companion-coach__remove-photo" onClick={() => {
+              setPendingPhoto(null);
+              setPhotoError(null);
+            }}>
               Remove photo
             </button>
           </div>
@@ -199,13 +222,24 @@ export function CompanionCoachPanel({
 
         {canAskQuestion ? (
           <form className="companion-coach__composer" onSubmit={(event) => void handleSubmit(event)}>
-            <label className="companion-coach__photo-input">
-              <span className="visually-hidden">Add photo</span>
-              <input type="file" accept="image/*" capture="environment" onChange={handlePhotoChange} />
-              <span className="wizard-icon-button wizard-icon-button--help companion-coach__photo-button" aria-hidden="true">
+            <div className="companion-coach__photo-input">
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/*"
+                className="visually-hidden"
+                onChange={(event) => void handlePhotoChange(event)}
+              />
+              <button
+                type="button"
+                className="wizard-icon-button wizard-icon-button--help companion-coach__photo-button"
+                aria-label="Add photo"
+                disabled={isPreparingPhoto || isSending}
+                onClick={() => photoInputRef.current?.click()}
+              >
                 <CameraIcon />
-              </span>
-            </label>
+              </button>
+            </div>
             <label className="companion-coach__text-input" htmlFor={inputId}>
               <span className="visually-hidden">Ask the coach</span>
               <input
@@ -216,7 +250,7 @@ export function CompanionCoachPanel({
                 onChange={(event) => setDraft(event.currentTarget.value)}
               />
             </label>
-            <button type="submit" className="wizard-button wizard-button--primary companion-coach__send" disabled={isSending}>
+            <button type="submit" className="wizard-button wizard-button--primary companion-coach__send" disabled={isSending || isPreparingPhoto}>
               Send
             </button>
           </form>

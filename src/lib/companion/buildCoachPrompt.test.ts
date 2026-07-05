@@ -42,4 +42,5 @@ test('coach prompt notes when a photo is attached', () => {
   });
 
   assert.match(prompt.user, /attached a photo/i);
+  assert.match(prompt.system, /photo is attached/i);
 });

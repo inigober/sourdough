@@ -139,10 +139,7 @@ export function useAppNavigation({
     if (isDirty) {
       pendingBlockedNavigation.current = false;
       setUnsavedSaveError(null);
-      // Open on the next turn so the home click cannot fall through to the new backdrop.
-      queueMicrotask(() => {
-        setIsUnsavedDialogOpen(true);
-      });
+      setIsUnsavedDialogOpen(true);
       return;
     }
 
@@ -188,14 +185,12 @@ export function useAppNavigation({
       return;
     }
 
+    // Close unsaved and open save in the same React batch so there is no frame where
+    // neither dialog is mounted and the in-flight click can hit the page underneath.
     setIsUnsavedDialogOpen(false);
     setPendingGoHomeAfterSave(true);
     setSaveDialogSource(wizard.hasOpenedSchedule ? 'schedule' : 'results');
-    // Open on the next turn so the click that chose "Save recipe" cannot fall through
-    // to the new dialog's backdrop and dismiss it immediately.
-    queueMicrotask(() => {
-      setIsSaveDialogOpen(true);
-    });
+    setIsSaveDialogOpen(true);
   }, [
     activeSavedRecipe,
     activeSavedRecipeId,
@@ -226,11 +221,7 @@ export function useAppNavigation({
 
   const openSaveDialog = useCallback((source: SaveDialogSource): void => {
     setSaveDialogSource(source);
-    // Open on the next turn so the click that opened this dialog cannot fall through
-    // to the new backdrop and dismiss it immediately.
-    queueMicrotask(() => {
-      setIsSaveDialogOpen(true);
-    });
+    setIsSaveDialogOpen(true);
   }, []);
 
   const closeSaveDialog = useCallback((): void => {

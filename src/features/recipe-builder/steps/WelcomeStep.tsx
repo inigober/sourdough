@@ -21,6 +21,7 @@ type WelcomeStepProps = {
   onOpenAuth: () => void;
   onStartBake: (id: string) => void;
   onRetrySavedRecipes: () => void;
+  onDevUnlockTap: () => void;
 };
 
 export function WelcomeStep({
@@ -39,6 +40,7 @@ export function WelcomeStep({
   onOpenAuth,
   onStartBake,
   onRetrySavedRecipes,
+  onDevUnlockTap,
 }: WelcomeStepProps) {
   return (
     <div className="welcome-screen">
@@ -50,7 +52,11 @@ export function WelcomeStep({
 
       <section className="hero welcome-screen__hero">
         <div className="welcome-screen__title-row">
-          <h1>Sourdough recipe builder</h1>
+          <h1>
+            <button type="button" className="dev-panel-unlock-target" onClick={onDevUnlockTap}>
+              Sourdough recipe builder
+            </button>
+          </h1>
           <WelcomeTopBar onOpenAuth={onOpenAuth} variant="inline" />
         </div>
         <p className="hero-copy">

@@ -30,13 +30,19 @@ export function buildCoachPrompt(input: BuildCoachPromptInput): CoachPromptParts
         .join(', ')
     : 'Ingredient list unavailable from current inputs.';
 
-  const system = [
+  const systemParts = [
     'You are a practical sourdough baking coach for a home baker mid-bake.',
     'Reply in 2–4 short sentences. Plain language only.',
     'Give one clear next check or action. No bullet lists unless essential.',
     'Prefer sensory cues (look, feel, smell) over rigid timings.',
     'If unsure, say what to inspect next — do not guess.',
-  ].join(' ');
+  ];
+
+  if (input.hasPhoto) {
+    systemParts.push('A dough photo is attached — describe what you see and tie it to the bake context.');
+  }
+
+  const system = systemParts.join(' ');
 
   const contextLines = [
     `Recipe: ${input.recipeName}`,

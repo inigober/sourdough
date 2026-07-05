@@ -51,7 +51,7 @@ p {
 .app-shell {
   width: min(960px, 100%);
   margin: 0 auto;
-  padding: 24px 20px 48px;
+  padding: calc(24px + env(safe-area-inset-top, 0px)) 20px 48px;
   overflow-x: clip;
 }
 
@@ -65,7 +65,7 @@ p {
 
 .wizard-shell__header {
   position: sticky;
-  top: 0;
+  top: env(safe-area-inset-top, 0px);
   z-index: 20;
   display: grid;
   gap: 10px;
@@ -407,7 +407,7 @@ p {
 
 .app-header {
   position: sticky;
-  top: 0;
+  top: env(safe-area-inset-top, 0px);
   z-index: 25;
   display: flex;
   justify-content: flex-end;
@@ -1142,7 +1142,23 @@ p {
   z-index: 100;
   display: grid;
   place-items: center;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
   padding: 20px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  overflow: visible;
+}
+
+.dialog-backdrop::backdrop {
+  background: rgb(47 36 28 / 42%);
+}
+
+div.dialog-backdrop {
   background: rgb(47 36 28 / 42%);
 }
 
@@ -2794,6 +2810,21 @@ p {
   padding: 0 16px 10px;
 }
 
+.companion-coach__photo-status,
+.companion-coach__photo-error {
+  margin: 0;
+  padding: 0 16px 10px;
+  font-size: 0.86rem;
+}
+
+.companion-coach__photo-status {
+  color: #5f6f7d;
+}
+
+.companion-coach__photo-error {
+  color: #9b3b2f;
+}
+
 .companion-coach__pending-photo img {
   width: 3.5rem;
   height: 3.5rem;
@@ -2825,27 +2856,7 @@ p {
 }
 
 .companion-coach__photo-input {
-  position: relative;
   display: inline-flex;
-  cursor: pointer;
-}
-
-.companion-coach__photo-input input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.companion-coach__photo-button {
-  pointer-events: none;
-}
-
-.companion-coach__photo-input:focus-within .companion-coach__photo-button {
-  outline: 3px solid rgb(42 95 143 / 18%);
-  outline-offset: 2px;
 }
 
 .companion-coach__text-input input {
@@ -3102,7 +3113,7 @@ dd {
   }
 
   .app-shell {
-    padding: 16px 14px calc(40px + env(safe-area-inset-bottom, 0px));
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 14px calc(40px + env(safe-area-inset-bottom, 0px));
   }
 
   .app-bottom-nav {
@@ -3404,4 +3415,60 @@ dd {
   .companion__exit {
     margin-bottom: 4px;
   }
+}
+
+.dev-panel-unlock-target {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  background: none;
+  cursor: default;
+}
+
+.dev-panel__hint {
+  margin: 0;
+}
+
+.dev-panel__storage {
+  display: grid;
+  gap: 10px;
+}
+
+.dev-panel__section-title {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.dev-panel__key-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dev-panel__key-list li {
+  display: grid;
+  gap: 4px;
+}
+
+.dev-panel__key-label {
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.dev-panel__key-code {
+  overflow-wrap: anywhere;
+  font-size: 0.78rem;
+  color: #6f5d4d;
+}
+
+.dev-panel__empty {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #6f5d4d;
 }

@@ -5,16 +5,26 @@ export type AppMainTab = 'home' | 'history';
 type AppBottomNavProps = {
   activeTab: AppMainTab;
   onTabChange: (tab: AppMainTab) => void;
+  onDevUnlockTap?: () => void;
 };
 
-export function AppBottomNav({ activeTab, onTabChange }: AppBottomNavProps) {
+export function AppBottomNav({ activeTab, onTabChange, onDevUnlockTap }: AppBottomNavProps) {
+  function handleHomeClick(): void {
+    if (activeTab === 'home') {
+      onDevUnlockTap?.();
+      return;
+    }
+
+    onTabChange('home');
+  }
+
   return (
     <nav className="app-bottom-nav" aria-label="Main navigation">
       <button
         type="button"
         className={activeTab === 'home' ? 'app-bottom-nav__item app-bottom-nav__item--active' : 'app-bottom-nav__item'}
         aria-current={activeTab === 'home' ? 'page' : undefined}
-        onClick={() => onTabChange('home')}
+        onClick={handleHomeClick}
       >
         <HomeIcon />
         <span>Home</span>

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { AppBottomNav, type AppMainTab } from '../../components/AppBottomNav.tsx';
+import { useDevPanelUnlock } from '../../lib/dev/useDevPanelUnlock.ts';
 import type { BakeSession } from '../../lib/companion/types.ts';
 import type {
   BakeHistorySession,
@@ -46,6 +47,7 @@ type WelcomeScreenProps = {
   onCloseHistoryDetail: () => void;
   onUpdateHistoryDetail: (input: UpdateBakeHistorySessionInput) => Promise<void>;
   onDeleteHistoryDetail: () => Promise<void>;
+  onDevPanelUnlock: () => void;
   children?: ReactNode;
 };
 
@@ -82,8 +84,11 @@ export function WelcomeScreen({
   onCloseHistoryDetail,
   onUpdateHistoryDetail,
   onDeleteHistoryDetail,
+  onDevPanelUnlock,
   children,
 }: WelcomeScreenProps) {
+  const { registerUnlockTap } = useDevPanelUnlock(onDevPanelUnlock);
+
   return (
     <div className={showBottomNav ? 'main-screen main-screen--with-nav' : 'main-screen'}>
       {mainTab === 'home' ? (
@@ -103,6 +108,7 @@ export function WelcomeScreen({
           onOpenAuth={onOpenAuth}
           onStartBake={onStartBake}
           onRetrySavedRecipes={onRetrySavedRecipes}
+          onDevUnlockTap={() => registerUnlockTap()}
         />
       ) : null}
       {mainTab === 'history' && !historyDetailId ? (
@@ -156,7 +162,13 @@ export function WelcomeScreen({
           </div>
         )
       ) : null}
-      {showBottomNav ? <AppBottomNav activeTab={mainTab} onTabChange={onTabChange} /> : null}
+      {showBottomNav ? (
+        <AppBottomNav
+          activeTab={mainTab}
+          onTabChange={onTabChange}
+          onDevUnlockTap={() => registerUnlockTap()}
+        />
+      ) : null}
       {children}
     </div>
   );
