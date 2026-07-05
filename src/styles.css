@@ -75,7 +75,6 @@ p {
   gap: 10px;
   margin: calc(-1 * (var(--app-shell-pad-top) + env(safe-area-inset-top, 0px))) calc(-1 * var(--app-shell-pad-inline)) 0;
   padding: calc(var(--app-shell-pad-top) + env(safe-area-inset-top, 0px)) var(--app-shell-pad-inline) 12px;
-  border-bottom: 1px solid rgb(234 217 200 / 72%);
   background: var(--app-chrome-bg);
   backdrop-filter: var(--app-chrome-blur);
   -webkit-backdrop-filter: var(--app-chrome-blur);
@@ -422,7 +421,6 @@ p {
   gap: 12px;
   margin: calc(-1 * (var(--app-shell-pad-top) + env(safe-area-inset-top, 0px))) calc(-1 * var(--app-shell-pad-inline)) 4px;
   padding: calc(var(--app-shell-pad-top) + env(safe-area-inset-top, 0px)) var(--app-shell-pad-inline) 8px;
-  border-bottom: 1px solid rgb(234 217 200 / 72%);
   background: var(--app-chrome-bg);
   backdrop-filter: var(--app-chrome-blur);
   -webkit-backdrop-filter: var(--app-chrome-blur);
@@ -442,10 +440,10 @@ p {
   flex: 1;
   min-width: 0;
   margin: 0;
-  font-size: 1.1rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
+  max-width: 720px;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3263,7 +3261,9 @@ dd {
     min-height: calc(100dvh - 16px - 14px - 40px - env(safe-area-inset-bottom, 0px));
   }
 
-  .hero h1 {
+  .hero h1,
+  .screen-chrome__title,
+  .app-header__title {
     font-size: clamp(1.55rem, 6vw, 2rem);
     line-height: 1.15;
   }
