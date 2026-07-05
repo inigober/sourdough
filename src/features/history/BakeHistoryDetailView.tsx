@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
 
 import { ConfirmDialog } from '../../components/ConfirmDialog.tsx';
+import { ChromeBackButton } from '../../components/ChromeBackButton.tsx';
 import { LoafAssessmentPicker } from '../../components/LoafAssessmentPicker.tsx';
 import { PageShell } from '../../components/PageShell.tsx';
 import { PenEditButton } from '../../components/PenEditButton.tsx';
 import { RecipeCard } from '../../components/RecipeCard.tsx';
-import { ArrowLeftIcon } from '../../components/icons.tsx';
+import { ScreenChrome } from '../../components/ScreenChrome.tsx';
 import { BakePlanTimeline } from '../schedule-builder/BakePlanTimeline.tsx';
 import { getLoafAssessmentLabel } from '../../lib/history/assessment.ts';
 import {
@@ -88,16 +89,19 @@ export function BakeHistoryDetailView({
   }
 
   return (
-    <PageShell className="bake-history-detail">
-      <button type="button" className="page-shell__secondary-link bake-history-detail__back" onClick={onBack}>
-        <ArrowLeftIcon />
-        Back to history
-      </button>
-
+    <PageShell
+      className="bake-history-detail"
+      topBar={
+        <ScreenChrome
+          title={session.recipeName}
+          leading={<ChromeBackButton label="Back to history" onClick={onBack} />}
+          trailing={!isEditing ? <PenEditButton label="Edit bake notes" onClick={startEditing} /> : null}
+        />
+      }
+    >
       <section className="hero bake-history-detail__hero">
         <div className="bake-history-detail__hero-row">
           <div>
-            <h1>{session.recipeName}</h1>
             <p className="hero-copy">
               Baked {formatHistoryDate(session.completedAt)} · total time {formatDuration(durationMinutes)}
             </p>
@@ -109,7 +113,6 @@ export function BakeHistoryDetailView({
               </p>
             ) : null}
           </div>
-          {!isEditing ? <PenEditButton label="Edit bake notes" onClick={startEditing} /> : null}
         </div>
       </section>
 

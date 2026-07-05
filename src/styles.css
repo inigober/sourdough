@@ -412,13 +412,13 @@ p {
   background: #f3fbe8;
 }
 
+.screen-chrome,
 .app-header {
   position: sticky;
   top: 0;
   z-index: 25;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
   margin: calc(-1 * (var(--app-shell-pad-top) + env(safe-area-inset-top, 0px))) calc(-1 * var(--app-shell-pad-inline)) 4px;
   padding: calc(var(--app-shell-pad-top) + env(safe-area-inset-top, 0px)) var(--app-shell-pad-inline) 8px;
@@ -428,10 +428,16 @@ p {
   -webkit-backdrop-filter: var(--app-chrome-blur);
 }
 
+.screen-chrome--trailing-only,
 .app-header--home-only {
   justify-content: flex-end;
 }
 
+.screen-chrome--title-only {
+  justify-content: flex-start;
+}
+
+.screen-chrome__title,
 .app-header__title {
   flex: 1;
   min-width: 0;
@@ -443,6 +449,24 @@ p {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.screen-chrome__slot {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.screen-chrome__slot--leading {
+  margin-right: -4px;
+}
+
+.screen-chrome__slot--trailing {
+  margin-left: auto;
+}
+
+.screen-chrome--trailing-only .screen-chrome__slot--trailing {
+  margin-left: 0;
 }
 
 .app-header__home {
@@ -610,12 +634,8 @@ p {
   outline-offset: 2px;
 }
 
-.bake-history-screen .hero h1 {
-  font-size: clamp(1.8rem, 5vw, 2.4rem);
-}
-
-.bake-history-detail__back {
-  margin-bottom: 4px;
+.bake-history-screen .hero {
+  margin-bottom: 0;
 }
 
 .bake-history-detail__hero {

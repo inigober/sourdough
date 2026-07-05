@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 
+import { ScreenChrome } from '../../components/ScreenChrome.tsx';
 import { FilterIcon, SearchIcon } from '../../components/icons.tsx';
 import { LoafAssessmentPicker } from '../../components/LoafAssessmentPicker.tsx';
 import { getLoafAssessmentLabel } from '../../lib/history/assessment.ts';
@@ -36,13 +37,14 @@ export function BakeHistoryView({
   );
 
   return (
-    <div className="welcome-screen bake-history-screen">
-      <section className="hero welcome-screen__hero">
-        <h1>Bake history</h1>
-        <p className="hero-copy">
-          Review completed bakes with actual step timings and notes so you can learn from each loaf.
-        </p>
-      </section>
+    <>
+      <ScreenChrome title="Bake history" />
+      <div className="welcome-screen bake-history-screen">
+        <section className="hero welcome-screen__hero">
+          <p className="hero-copy">
+            Review completed bakes with actual step timings and notes so you can learn from each loaf.
+          </p>
+        </section>
 
       <section className="card bake-history" aria-label="Bake history list">
         {!isSignedIn ? (
@@ -142,5 +144,6 @@ export function BakeHistoryView({
         )}
       </section>
     </div>
+    </>
   );
 }

@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 
 import { AppBottomNav, type AppMainTab } from '../../components/AppBottomNav.tsx';
+import { ChromeBackButton } from '../../components/ChromeBackButton.tsx';
+import { ScreenChrome } from '../../components/ScreenChrome.tsx';
 import { useDevPanelUnlock } from '../../lib/dev/useDevPanelUnlock.ts';
 import type { BakeSession } from '../../lib/companion/types.ts';
 import type {
@@ -123,9 +125,15 @@ export function WelcomeScreen({
       ) : null}
       {mainTab === 'history' && historyDetailId ? (
         isLoadingHistoryDetail ? (
-          <div className="welcome-screen">
-            <p className="saved-recipes__empty">Loading bake details…</p>
-          </div>
+          <>
+            <ScreenChrome
+              title="Bake details"
+              leading={<ChromeBackButton label="Back to history" onClick={onCloseHistoryDetail} />}
+            />
+            <div className="welcome-screen">
+              <p className="saved-recipes__empty">Loading bake details…</p>
+            </div>
+          </>
         ) : activeHistorySession ? (
           <BakeHistoryDetailView
             session={activeHistorySession}
@@ -136,30 +144,42 @@ export function WelcomeScreen({
             onDelete={onDeleteHistoryDetail}
           />
         ) : historyDetailLoadError ? (
-          <div className="welcome-screen">
-            <p className="auth-modal__error" role="alert">
-              {historyDetailLoadError}
-            </p>
-            <div className="bake-history-detail__edit-actions">
+          <>
+            <ScreenChrome
+              title="Bake details"
+              leading={<ChromeBackButton label="Back to history" onClick={onCloseHistoryDetail} />}
+            />
+            <div className="welcome-screen">
+              <p className="auth-modal__error" role="alert">
+                {historyDetailLoadError}
+              </p>
+              <div className="bake-history-detail__edit-actions">
+                <button type="button" className="wizard-button wizard-button--secondary" onClick={onCloseHistoryDetail}>
+                  Back to history
+                </button>
+                <button
+                  type="button"
+                  className="wizard-button wizard-button--primary"
+                  onClick={() => historyDetailId && onOpenHistoryEntry(historyDetailId)}
+                >
+                  Try again
+                </button>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <ScreenChrome
+              title="Bake details"
+              leading={<ChromeBackButton label="Back to history" onClick={onCloseHistoryDetail} />}
+            />
+            <div className="welcome-screen">
+              <p className="saved-recipes__empty">This bake could not be found.</p>
               <button type="button" className="wizard-button wizard-button--secondary" onClick={onCloseHistoryDetail}>
                 Back to history
               </button>
-              <button
-                type="button"
-                className="wizard-button wizard-button--primary"
-                onClick={() => historyDetailId && onOpenHistoryEntry(historyDetailId)}
-              >
-                Try again
-              </button>
             </div>
-          </div>
-        ) : (
-          <div className="welcome-screen">
-            <p className="saved-recipes__empty">This bake could not be found.</p>
-            <button type="button" className="wizard-button wizard-button--secondary" onClick={onCloseHistoryDetail}>
-              Back to history
-            </button>
-          </div>
+          </>
         )
       ) : null}
       {showBottomNav ? (
