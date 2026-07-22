@@ -6,7 +6,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "sync:ios-assets": "mkdir -p assets && cp public/icon-512.png assets/logo.png && npx @capacitor/assets generate --ios --iconBackgroundColor '#f8f1e8' --splashBackgroundColor '#f8f1e8'",
-    "build:ios": "npm run build && npm run sync:ios-assets && npx cap sync ios",
+    "build:ios": "node scripts/assertNoBakeTimerTestEnv.mjs && npm run build && npm run sync:ios-assets && npx cap sync ios",
     "cap:open:ios": "npx cap open ios",
     "preview": "vite preview",
     "test:schedule": "node --experimental-strip-types --test \"src/lib/schedule/*.test.ts\"",

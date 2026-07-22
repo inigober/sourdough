@@ -53,6 +53,16 @@ Timer alerts can open bake mode via `sourdough://bake`. The URL scheme is declar
 
 ## Testing bake timers
 
+### Short timers (optional)
+
+`VITE_BAKE_TIMER_TEST_MINUTES` in `.env.local` shortens step timers for AlarmKit testing. Vite inlines that value on **every** `vite build`, including Capacitor — so a normal `npm run build:ios` **fails** if the var is set. Comment it out for release builds, or opt in for device testing only:
+
+```bash
+ALLOW_BAKE_TIMER_TEST=1 npm run build:ios
+```
+
+### Checklist
+
 1. Start a bake and open a timed step.
 2. Tap **Start timer** — iOS should prompt for alarm/notification permission on first use.
 3. Lock the device — on iOS 26+ you should see a Lock Screen / Dynamic Island countdown (Bake Timer widget extension).
