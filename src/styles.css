@@ -25,6 +25,8 @@
   --app-shell-pad-inline: 20px;
   --app-chrome-bg: rgb(248 241 232 / 92%);
   --app-chrome-blur: blur(10px);
+  --app-chrome-header-bg: linear-gradient(var(--app-chrome-bg) 68%, rgb(248 241 232 / 0));
+  --app-chrome-footer-bg: linear-gradient(rgb(248 241 232 / 0), var(--color-bg) 28%);
 
   color: var(--color-text);
   background: var(--color-bg);
@@ -74,8 +76,8 @@ p {
   display: grid;
   gap: 10px;
   margin: calc(-1 * (var(--app-shell-pad-top) + env(safe-area-inset-top, 0px))) calc(-1 * var(--app-shell-pad-inline)) 0;
-  padding: calc(var(--app-shell-pad-top) + env(safe-area-inset-top, 0px)) var(--app-shell-pad-inline) 12px;
-  background: var(--app-chrome-bg);
+  padding: calc(var(--app-shell-pad-top) + env(safe-area-inset-top, 0px)) var(--app-shell-pad-inline) 20px;
+  background: var(--app-chrome-header-bg);
   backdrop-filter: var(--app-chrome-blur);
   -webkit-backdrop-filter: var(--app-chrome-blur);
 }
@@ -97,7 +99,7 @@ p {
   flex-shrink: 0;
   margin: 0 -20px -48px;
   padding: 12px 20px calc(16px + env(safe-area-inset-bottom, 0px));
-  background: linear-gradient(rgb(248 241 232 / 0), var(--color-bg) 28%);
+  background: var(--app-chrome-footer-bg);
 }
 
 .page-shell__footer-wrap {
@@ -419,9 +421,9 @@ p {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: calc(-1 * (var(--app-shell-pad-top) + env(safe-area-inset-top, 0px))) calc(-1 * var(--app-shell-pad-inline)) 4px;
-  padding: calc(var(--app-shell-pad-top) + env(safe-area-inset-top, 0px)) var(--app-shell-pad-inline) 8px;
-  background: var(--app-chrome-bg);
+  margin: calc(-1 * (var(--app-shell-pad-top) + env(safe-area-inset-top, 0px))) calc(-1 * var(--app-shell-pad-inline)) 0;
+  padding: calc(var(--app-shell-pad-top) + env(safe-area-inset-top, 0px)) var(--app-shell-pad-inline) 20px;
+  background: var(--app-chrome-header-bg);
   backdrop-filter: var(--app-chrome-blur);
   -webkit-backdrop-filter: var(--app-chrome-blur);
 }
@@ -3247,7 +3249,7 @@ dd {
   }
 
   .wizard-shell__header {
-    padding-bottom: 10px;
+    padding-bottom: 18px;
   }
 
   .page-shell__footer,
