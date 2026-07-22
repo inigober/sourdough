@@ -97,7 +97,22 @@ export function CompanionView({
       return;
     }
 
-    const interval = window.setInterval(() => setTimerNow(Date.now()), 1000);
+    const endsAt = session.activeTimerEndsAt;
+    const now = Date.now();
+    setTimerNow(now);
+
+    // Already finished (e.g. resumed after leaving bake mode) — no need to keep ticking.
+    if (getTimerRemainingSeconds(endsAt, now) === 0) {
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      const tickNow = Date.now();
+      setTimerNow(tickNow);
+      if (getTimerRemainingSeconds(endsAt, tickNow) === 0) {
+        window.clearInterval(interval);
+      }
+    }, 1000);
     return () => window.clearInterval(interval);
   }, [session.activeTimerEndsAt]);
 

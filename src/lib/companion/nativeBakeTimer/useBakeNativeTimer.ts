@@ -4,6 +4,7 @@ import { Capacitor } from '@capacitor/core';
 
 import type { BakeSession } from '../types.ts';
 import type { TimelineStep } from '../../schedule/types.ts';
+import { getTimerRemainingSeconds } from '../bakeTimer.ts';
 import { NATIVE_BAKE_TIMER_PERMISSION_STORAGE_KEY } from './constants.ts';
 import {
   deriveDesiredNativeBakeTimer,
@@ -75,40 +76,15 @@ export function useBakeNativeTimer(
     return nextState;
   }, []);
 
-  useEffect(() => {
-    void refreshPermissionState();
-  }, [refreshPermissionState]);
-
-  useEffect(() => {
-    if (!Capacitor.isNativePlatform()) {
-      return;
-    }
-
-    let removeListener: (() => void) | undefined;
-
-    void App.addListener('appStateChange', ({ isActive }) => {
-      if (isActive) {
-        void refreshPermissionState();
-      }
-    }).then((handle) => {
-      removeListener = () => {
-        void handle.remove();
-      };
-    });
-
-    return () => {
-      removeListener?.();
-    };
-  }, [refreshPermissionState]);
-
   const syncNativeTimer = useCallback(
     async (desired: ReturnType<typeof deriveDesiredNativeBakeTimer>) => {
       if (!desired) {
-        if (lastTimerIdRef.current) {
-          await nativeBakeTimer.cancel(lastTimerIdRef.current);
-          lastTimerIdRef.current = null;
-          lastSyncKeyRef.current = null;
-        }
+        // Desired state is "no native timer" — including expired in-app timers.
+        // cancelAll covers cold start / remount where lastTimerIdRef was lost but
+        // AlarmKit is still alerting from a finished step.
+        await nativeBakeTimer.cancelAll();
+        lastTimerIdRef.current = null;
+        lastSyncKeyRef.current = null;
         return;
       }
 
@@ -131,9 +107,68 @@ export function useBakeNativeTimer(
   );
 
   useEffect(() => {
+    void refreshPermissionState();
+  }, [refreshPermissionState]);
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) {
+      return;
+    }
+
+    let removeListener: (() => void) | undefined;
+
+    void App.addListener('appStateChange', ({ isActive }) => {
+      if (isActive) {
+        void refreshPermissionState();
+        // Re-sync on foreground: dismiss a ringing alarm if the step already ended
+        // while the app was locked (e.g. unlocked via app switcher, not Open app).
+        const desired = deriveDesiredNativeBakeTimer(session, currentStep);
+        void syncNativeTimer(desired);
+      }
+    }).then((handle) => {
+      removeListener = () => {
+        void handle.remove();
+      };
+    });
+
+    return () => {
+      removeListener?.();
+    };
+  }, [currentStep, refreshPermissionState, session, syncNativeTimer]);
+
+  useEffect(() => {
     const desired = deriveDesiredNativeBakeTimer(session, currentStep);
     void syncNativeTimer(desired);
   }, [session, currentStep, syncNativeTimer]);
+
+  // When the in-app end time passes, session.activeTimerEndsAt is unchanged, so the
+  // sync effect above does not re-run. Explicitly clear native alarms at expiry so
+  // AlarmKit stops ringing once bake mode shows "Time's up" (or on resume after).
+  useEffect(() => {
+    if (!session.activeTimerEndsAt) {
+      return;
+    }
+
+    const endsAtMs = new Date(session.activeTimerEndsAt).getTime();
+    if (Number.isNaN(endsAtMs)) {
+      return;
+    }
+
+    const dismissIfExpired = (): void => {
+      if (getTimerRemainingSeconds(session.activeTimerEndsAt) === 0) {
+        void syncNativeTimer(null);
+      }
+    };
+
+    const remainingMs = endsAtMs - Date.now();
+    if (remainingMs <= 0) {
+      dismissIfExpired();
+      return;
+    }
+
+    const timeout = window.setTimeout(dismissIfExpired, remainingMs + 100);
+    return () => window.clearTimeout(timeout);
+  }, [session.activeTimerEndsAt, syncNativeTimer]);
 
   useEffect(() => {
     return () => {

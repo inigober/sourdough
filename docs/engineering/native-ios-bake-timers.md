@@ -78,6 +78,8 @@ Apple restrictions and caveats:
 
 **Product intent:** On iOS 26+, bake step completion should feel like a real timer alarm: audible, persistent until dismissed, and visible on the Lock Screen — not a easy-to-miss notification ping.
 
+**Dismiss paths:** The baker can stop the ringing alert via the system **Stop** button, the **Open app** secondary button (same `AlarmManager.stop`), or by opening bake mode on the finished step (JS sync calls `cancelAll`, which `stop`s then `cancel`s tracked AlarmKit IDs).
+
 ### Notification fallback (pre–iOS 26)
 
 Implemented in `BakeTimerPlugin.scheduleNotificationTimer()` using `UNUserNotificationCenter` directly. Standard local notifications are **much more restricted**:

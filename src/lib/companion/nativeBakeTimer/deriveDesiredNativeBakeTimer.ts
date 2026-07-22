@@ -20,13 +20,15 @@ export function deriveDesiredNativeBakeTimer(
   }
 
   const remainingSeconds = getTimerRemainingSeconds(session.activeTimerEndsAt, now);
-  if (remainingSeconds === null) {
+  // Expired timers must not be rescheduled — Math.max(1, 0) previously created a
+  // 1-second native alarm on remount (e.g. exit bake mode → resume after time's up).
+  if (remainingSeconds === null || remainingSeconds <= 0) {
     return null;
   }
 
   return {
     timerId: createBakeTimerId(session, currentStep),
-    durationSeconds: Math.max(1, remainingSeconds),
+    durationSeconds: remainingSeconds,
     endsAtIso: session.activeTimerEndsAt,
     title: currentStep.label,
     recipeName: session.recipeName,

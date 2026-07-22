@@ -103,7 +103,7 @@ test('autolyse shifts levain build earlier so it ends at levain mix-in', () => {
   assert.match(autolyseBuild?.detail ?? '', /08:45/);
 });
 
-test('display timeline shows rest minutes on merged mix steps', () => {
+test('display timeline shows amount and rest minutes on merged mix steps', () => {
   const schedule = createDefaultScheduleInput(defaultRecipeInput);
   schedule.includeStarterPrep = false;
   schedule.restAfterLevainMinutes = 25;
@@ -113,8 +113,8 @@ test('display timeline shows rest minutes on merged mix steps', () => {
   const mixLevain = timeline.find((step) => step.label === 'Mix in levain and rest');
   const mixSalt = timeline.find((step) => step.label === 'Mix in salt and rest');
 
-  assert.equal(mixLevain?.detail, '25 min rest');
-  assert.equal(mixSalt?.detail, '35 min rest');
+  assert.equal(mixLevain?.detail, '94g levain · 25 min rest');
+  assert.equal(mixSalt?.detail, '10g salt · 35 min rest');
 });
 
 test('slap and folds are a single timed step including rest', () => {

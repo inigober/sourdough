@@ -280,6 +280,9 @@ public class BakeTimerPlugin: CAPPlugin, CAPBridgedPlugin {
             return
         }
 
+        // stop dismisses an alerting (ringing) alarm; cancel removes a still-scheduled one.
+        // Try both so bake-mode sync can silence a fired timer after unlock / remount.
+        try? AlarmManager.shared.stop(id: alarmUUID)
         try? AlarmManager.shared.cancel(id: alarmUUID)
         self.removeAlarmId(timerId: timerId)
     }

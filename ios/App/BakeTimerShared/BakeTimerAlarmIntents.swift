@@ -21,7 +21,13 @@ struct OpenBakeModeIntent: LiveActivityIntent {
     }
 
     func perform() async throws -> some IntentResult {
-        .result()
+        // Opening the app is the baker's acknowledgment — stop the ringing alert
+        // the same way the Stop button does. Otherwise sound continues after unlock.
+        guard let id = UUID(uuidString: alarmID) else {
+            return .result()
+        }
+        try AlarmManager.shared.stop(id: id)
+        return .result()
     }
 }
 

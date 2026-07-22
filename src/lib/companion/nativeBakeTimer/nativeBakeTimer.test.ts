@@ -71,6 +71,27 @@ test('deriveDesiredNativeBakeTimer returns null when no timer is running', () =>
   assert.equal(deriveDesiredNativeBakeTimer(session, step), null);
 });
 
+test('deriveDesiredNativeBakeTimer returns null when the timer has already expired', () => {
+  const schedule = createDefaultScheduleInput(defaultRecipeInput);
+  schedule.includeStarterPrep = false;
+
+  const session = createBakeSession({
+    savedRecipeId: null,
+    recipeName: 'Country loaf',
+    recipeInput: defaultRecipeInput,
+    scheduleInput: schedule,
+  });
+  const timeline = formatTimelineForDisplay(buildTimeline(schedule, defaultRecipeInput));
+  const autolyse = timeline.find((step) => step.id === 'autolyse');
+
+  assert.ok(autolyse);
+  const startedAt = Date.parse('2026-05-20T10:00:00.000Z');
+  const started = startTimedStep(session, autolyse, startedAt);
+  const afterExpiry = startedAt + (autolyse.durationMinutes + 1) * 60_000;
+
+  assert.equal(deriveDesiredNativeBakeTimer(started, autolyse, afterExpiry), null);
+});
+
 test('getNativeBakeTimerSyncKey changes when timer restarts', () => {
   const timer = {
     timerId: 'session:autolyse',

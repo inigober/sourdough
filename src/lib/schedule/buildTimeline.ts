@@ -1,9 +1,10 @@
+import { formatGrams } from '../../app/format.ts';
 import {
   formatEndOfBulkRiseGuidance,
   formatPreShapeRiseGuidance,
   getBulkRiseTargets,
 } from '../recipe/bulkRiseTargets.ts';
-import type { RecipeInput } from '../recipe/types.ts';
+import type { RecipeFormula, RecipeInput } from '../recipe/types.ts';
 import { calculateRecipe } from '../recipe/calculateRecipe.ts';
 import { getSlapAndFoldDurationMinutes } from './defaults.ts';
 import {
@@ -34,13 +35,24 @@ type MutableStep = {
   detail?: string;
 };
 
+function tryCalculateRecipe(recipeInput: RecipeInput): RecipeFormula | null {
+  try {
+    return calculateRecipe(recipeInput);
+  } catch {
+    return null;
+  }
+}
+
 export function buildTimeline(schedule: ScheduleInput, recipeInput: RecipeInput): TimelineStep[] {
   const riseTargets = getBulkRiseTargets(recipeInput);
+  const formula = tryCalculateRecipe(recipeInput);
+  const levainMixDetail = formula ? `${formatGrams(formula.levainGrams)} levain` : undefined;
+  const saltMixDetail = formula ? `${formatGrams(formula.saltGrams)} salt` : undefined;
   const steps: MutableStep[] = [];
   let offset = 0;
 
-  function appendMarker(id: string, label: string): void {
-    steps.push({ id, label, startOffsetMinutes: offset, durationMinutes: 0 });
+  function appendMarker(id: string, label: string, detail?: string): void {
+    steps.push({ id, label, startOffsetMinutes: offset, durationMinutes: 0, detail });
   }
 
   function appendStep(id: string, label: string, durationMinutes: number, detail?: string): void {
@@ -125,16 +137,16 @@ export function buildTimeline(schedule: ScheduleInput, recipeInput: RecipeInput)
   let foldCursor = bulkStartOffset;
 
   if (schedule.saltAfterLevain) {
-    appendMarker('mix-levain', 'Mix in levain');
+    appendMarker('mix-levain', 'Mix in levain', levainMixDetail);
     appendStep('rest-after-levain', 'Rest after mixing in levain', schedule.restAfterLevainMinutes);
-    appendMarker('mix-salt', 'Mix in salt');
+    appendMarker('mix-salt', 'Mix in salt', saltMixDetail);
     appendStep('rest-after-salt', 'Rest after mixing in salt', schedule.restAfterSaltMinutes);
     foldCursor = offset;
   } else {
-    appendMarker('mix-salt', 'Mix in salt');
+    appendMarker('mix-salt', 'Mix in salt', saltMixDetail);
     appendStep('rest-after-salt', 'Rest after mixing in salt', schedule.restAfterSaltMinutes);
     foldCursor = offset;
-    appendMarker('mix-levain', 'Mix in levain');
+    appendMarker('mix-levain', 'Mix in levain', levainMixDetail);
     appendStep('rest-after-levain', 'Rest after mixing in levain', schedule.restAfterLevainMinutes);
   }
 
@@ -303,11 +315,13 @@ export function formatTimelineForDisplay(steps: TimelineStep[]): TimelineStep[] 
 function mergeSteps(first: TimelineStep, second: TimelineStep, label: string): TimelineStep {
   const restDetail =
     second.durationMinutes > 0 ? `${second.durationMinutes} min rest` : undefined;
+  const detailParts = [first.detail, restDetail].filter(Boolean);
+  const detail = detailParts.length > 0 ? detailParts.join(' · ') : undefined;
 
   return {
     id: `${first.id}-${second.id}`,
     label,
-    detail: restDetail,
+    detail,
     startTime: first.startTime,
     endTime: second.endTime,
     durationMinutes: first.durationMinutes + second.durationMinutes,
