@@ -63,6 +63,6 @@ Refusing iOS build: ${TEST_MINUTES_KEY}=${raw} would be baked into the productio
 Fix:
   1. Comment out ${TEST_MINUTES_KEY} (and VITE_BAKE_TIMER_TEST_STEP_ID) in .env.local, then retry.
   2. Or, for intentional short-timer device testing only:
-       ${ALLOW_FLAG}=1 npm run build:ios
+       npm run build:ios:test
 `);
 process.exit(1);

@@ -55,10 +55,12 @@ Timer alerts can open bake mode via `sourdough://bake`. The URL scheme is declar
 
 ### Short timers (optional)
 
-`VITE_BAKE_TIMER_TEST_MINUTES` in `.env.local` shortens step timers for AlarmKit testing. Vite inlines that value on **every** `vite build`, including Capacitor — so a normal `npm run build:ios` **fails** if the var is set. Comment it out for release builds, or opt in for device testing only:
+`VITE_BAKE_TIMER_TEST_MINUTES` in `.env.local` shortens step timers for AlarmKit testing. Vite inlines that value on **every** `vite build`, including Capacitor — so a normal `npm run build:ios` **fails** if the var is set. Comment it out for release builds. For short-timer device testing:
 
 ```bash
-ALLOW_BAKE_TIMER_TEST=1 npm run build:ios
+# 1. Uncomment VITE_BAKE_TIMER_TEST_* in .env.local
+# 2. Sync a device build that allows the override:
+npm run build:ios:test
 ```
 
 ### Checklist
