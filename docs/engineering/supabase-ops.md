@@ -4,69 +4,92 @@ Notes for keeping the hosted Supabase project available between bakes.
 
 ## Free-tier inactivity
 
-Supabase may **pause** free-tier projects after a period without API activity. This app is not used every day, so we run a lightweight GitHub Actions workflow to ping the database on a schedule.
+Supabase may **pause** free-tier projects after a period without API activity. This app is not used every day, so we ping the database on a schedule from **[cron-job.org](https://cron-job.org)** (same place as the project’s other external pings).
 
-Workflow file: [`.github/workflows/supabase-keepalive.yml`](../../.github/workflows/supabase-keepalive.yml)
+The ping no longer runs via GitHub Actions `schedule`. Public repos auto-disable GitHub-scheduled workflows after ~60 days without repository activity, which made Actions an unreliable keepalive host.
 
 ## What the keepalive does
 
-Once per day (09:00 UTC), the workflow sends a single `GET` to the `saved_recipes` table via the Supabase REST API. It uses the **secret key** (server-only) so the request bypasses RLS and always hits Postgres — stronger than the publishable key the app uses in the browser.
+Once per day, cron-job.org sends a single `GET` to the `saved_recipes` table via the Supabase REST API. It uses the **secret key** (server-only) so the request bypasses RLS and always hits Postgres — stronger than the publishable key the app uses in the browser.
 
 No data is written.
 
-The schedule is **daily** rather than weekly because GitHub can skip or delay scheduled workflows on low-activity repositories; more frequent runs improve the chance that at least one ping lands before the inactivity window.
+## Setup walkthrough (cron-job.org)
 
-## Setup walkthrough
-
-### 1. Copy the secret key from Supabase
+### 1. Copy values from Supabase
 
 1. Open [Supabase Dashboard](https://supabase.com/dashboard) and select **this** project.
 2. Go to **Project Settings** → **API**.
-3. Under **Project API keys**, find the **secret** key:
-   - New projects: **Secret keys** → `sb_secret_...` (you may need **Create new API keys** first).
-   - Older projects: **service_role** → long JWT starting with `eyJ...`.
-4. Click **Reveal** / copy the value. Treat it like a password.
+3. Copy:
+   - **Project URL** — e.g. `https://xxxx.supabase.co`
+   - **Secret key** — `sb_secret_...` (or legacy `service_role` JWT). Treat it like a password.
 
-**Do not** put this key in `.env.local`, frontend code, or any `VITE_` variable. It bypasses Row Level Security and must stay server-side only.
+**Do not** put the secret key in `.env.local`, frontend code, Vercel `VITE_*` vars, or any client bundle. It bypasses Row Level Security.
 
-### 2. Add GitHub Actions secrets
+### 2. Create the cron job
 
-1. Open the repo on GitHub: `inigober/sourdough`.
-2. **Settings** → **Secrets and variables** → **Actions**.
-3. Confirm these secrets exist (add or update as needed):
+1. Sign in at [cron-job.org](https://cron-job.org) (same account used for your other pings).
+2. Create a new cron job with:
 
-| Secret name | Where to get the value | Notes |
-|-------------|------------------------|-------|
-| `VITE_SUPABASE_URL` | Supabase → Project Settings → API → **Project URL** | Same as `.env.local` |
-| `SUPABASE_SECRET_KEY` | Supabase → Project Settings → API → **Secret key** (`sb_secret_...`) | **New** — keepalive only |
+| Setting | Value |
+|---------|--------|
+| **URL** | `{Project URL}/rest/v1/saved_recipes?select=id&limit=1` |
+| **Schedule** | Daily (any quiet hour is fine) |
+| **Request method** | `GET` |
+| **Header** | `apikey: {Secret key}` |
 
-If your project still uses the legacy JWT, you can name the secret `SUPABASE_SERVICE_ROLE_KEY` instead; the workflow accepts either name.
+Example URL shape (not a real project):
 
-You can remove `VITE_SUPABASE_PUBLISHABLE_KEY` from Actions secrets if it was only there for keepalive — the app still needs it in `.env.local` for local dev, but the workflow no longer uses it.
+`https://abcdefghijklmnop.supabase.co/rest/v1/saved_recipes?select=id&limit=1`
 
-### 3. Merge the workflow change and run a manual ping
+Notes:
 
-After the updated workflow is on `main`:
+- Use the **apikey** header only. Do **not** put new `sb_secret_...` keys on `Authorization` (they are not JWTs).
+- Enable failure notifications in cron-job.org so a broken ping is obvious.
+- Store the secret key only in cron-job.org’s request config (same trust model as any other hosted secret).
 
-1. **Actions** → **Supabase keepalive** → **Run workflow** → **Run workflow**.
-2. Open the run; the job should succeed and log `Supabase keepalive ping succeeded.`
+### 3. Run once and verify
+
+1. Use cron-job.org’s **Run now** / test action for the job.
+2. Expect HTTP **200** (and a small JSON array body).
 3. In Supabase dashboard, confirm the project status is **Active**.
 
 ### 4. Ongoing checks
 
-- Scheduled runs appear under **Actions** roughly once per day (GitHub may delay cron by a few hours).
-- If a run fails with “Missing SUPABASE_SECRET_KEY”, the secret name or value was not set correctly in step 2.
+- Confirm the job still shows successful runs in cron-job.org history.
+- If the job starts failing with `401` / `403`, the secret key was rotated or mistyped — update the header value.
+- If Supabase pauses despite successful pings, check that the URL hits **this** project and that the schedule is at least daily.
 
-## Manual run
+## Manual ping (optional)
 
-**Actions → Supabase keepalive → Run workflow**
+From a machine that may hold the secret temporarily:
 
-Use this after first setting up secrets, or to confirm the project is still reachable.
+```bash
+curl -fsS -X GET \
+  "${SUPABASE_URL%/}/rest/v1/saved_recipes?select=id&limit=1" \
+  -H "apikey: ${SUPABASE_SECRET_KEY}"
+```
 
-## Verifying it works
+Success prints a JSON array (often one row or `[]`) and exits 0.
 
-1. Open **Actions** and find a recent **Supabase keepalive** run.
-2. The job should succeed and log `Supabase keepalive ping succeeded.`
-3. In Supabase dashboard, confirm the project is not paused.
+## Cleaning up old GitHub Actions keepalive
 
-If scheduled runs stop appearing, check that the default branch includes the workflow file and that repository activity has not caused GitHub to defer schedules — use **Run workflow** to test immediately.
+The former `.github/workflows/supabase-keepalive.yml` schedule is removed from this repo.
+
+1. GitHub will no longer schedule a ping (disable or ignore any leftover “Supabase keepalive” workflow entry in Actions if GitHub still lists it).
+2. You can delete Actions secrets that existed **only** for keepalive (`VITE_SUPABASE_URL`, `SUPABASE_SECRET_KEY` / `SUPABASE_SERVICE_ROLE_KEY` under **Settings → Secrets and variables → Actions**), unless something else still needs them.
+3. App/Vercel env vars (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`) are unrelated and must stay.
+
+## GitHub’s 60-day schedule policy (why we moved)
+
+On **public** repositories, GitHub automatically disables workflows that use the `schedule` (cron) event after ~60 days with no repository activity (pushes and similar). The workflow’s own scheduled runs **do not** count as activity.
+
+That policy targets **GitHub-owned schedules**, not external systems:
+
+| Trigger | Affected by 60-day inactivity disable? |
+|---------|----------------------------------------|
+| GitHub `schedule:` cron | Yes |
+| External ping (cron-job.org → Supabase) | No — never goes through GitHub |
+| GitHub `workflow_dispatch` / `repository_dispatch` only (no `schedule`) | No — not a scheduled workflow |
+
+So keepalive from cron-job.org keeps working with zero repo commits. You do not need dummy commits to keep Supabase awake.

@@ -18,7 +18,7 @@ Edit `.env.local` with your Supabase project URL and publishable (or anon) key. 
 
 For production, configure [Vercel environment variables](docs/engineering/vercel-deployment.md) (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`) and connect the repo so pushes to `main` deploy automatically.
 
-For the hosted Supabase project, also configure GitHub Actions secrets so the daily keepalive workflow can run — see [Supabase operations](docs/engineering/supabase-ops.md).
+For the hosted Supabase project, configure a daily keepalive ping on cron-job.org — see [Supabase operations](docs/engineering/supabase-ops.md).
 
 ## Scripts
 
@@ -59,4 +59,4 @@ supabase/       # Database migrations
 - [UI/UX practices](docs/product/ui-ux-practices.md)
 - [Phase 1 implementation plan](docs/engineering/phase-1-implementation-plan.md)
 - [Vercel deployment](docs/engineering/vercel-deployment.md) — production hosting, env vars, auto-deploy on `main`
-- [Supabase operations](docs/engineering/supabase-ops.md) — keepalive workflow and GitHub secrets
+- [Supabase operations](docs/engineering/supabase-ops.md) — free-tier keepalive via cron-job.org

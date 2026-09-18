@@ -90,4 +90,4 @@ Not recommended for now unless you want that guardrail: E2E browser tests agains
 
 ## Related docs
 
-- [Supabase operations](./supabase-ops.md) — database keepalive (GitHub Actions secrets; separate from Vercel env vars)
+- [Supabase operations](./supabase-ops.md) — database keepalive (cron-job.org; separate from Vercel env vars)
