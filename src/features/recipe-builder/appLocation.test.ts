@@ -33,6 +33,18 @@ test('resolveAppScreen maps welcome tab and history detail', () => {
   );
 });
 
+test('resolveAppScreen shows the recipe view for a recipe id on the home tab', () => {
+  assert.deepEqual(
+    resolveAppScreen({ tab: 'home', phase: 'wizard' }, 'welcome', null, 'recipe-1'),
+    { kind: 'recipe', recipeId: 'recipe-1' },
+  );
+  assert.deepEqual(
+    resolveAppScreen({ tab: 'home', phase: 'results' }, 'welcome', null, 'recipe-1'),
+    { kind: 'results' },
+  );
+  assert.equal(showWelcomeBottomNav({ kind: 'recipe', recipeId: 'recipe-1' }), false);
+});
+
 test('showWelcomeBottomNav is true only on welcome list screens', () => {
   assert.equal(showWelcomeBottomNav({ kind: 'welcome', tab: 'home' }), true);
   assert.equal(showWelcomeBottomNav({ kind: 'welcome', tab: 'history', historyId: null }), true);

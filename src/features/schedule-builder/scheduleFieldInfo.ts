@@ -1,7 +1,6 @@
 export const scheduleFieldInfo = {
   startTime:
-    'When the first mixing step begins on mix day — autolyse if enabled, otherwise levain mix. All later steps are calculated forward from this time.',
-  mixDate: 'The calendar day you mix the dough. Bake day is calculated from this date and your proofing choice.',
+    'When the first mixing step begins on mix day — autolyse if enabled, otherwise levain mix. All later steps are calculated forward from this time. You can change it when you start baking.',
   saltAfterLevain: 'Default order: levain first, then salt. Turn off only if you use a different incorporation order.',
   restAfterLevainMinutes:
     'Rest during bulk fermentation, right after levain is mixed in. Bulk starts as soon as levain is incorporated.',

@@ -15,40 +15,60 @@ test('parseAppRoute maps URLs to app location and wizard step', () => {
     location: { tab: 'home', phase: 'wizard' },
     wizardStep: 'welcome',
     historyDetailId: null,
+    recipeViewId: null,
   });
   assert.deepEqual(parseAppRoute('/history'), {
     location: { tab: 'history', phase: 'wizard' },
     wizardStep: 'welcome',
     historyDetailId: null,
+    recipeViewId: null,
   });
   assert.deepEqual(parseAppRoute('/history/bake-42'), {
     location: { tab: 'history', phase: 'wizard' },
     wizardStep: 'welcome',
     historyDetailId: 'bake-42',
+    recipeViewId: null,
   });
   assert.deepEqual(parseAppRoute('/build/dough-size'), {
     location: { tab: 'home', phase: 'wizard' },
     wizardStep: 'doughSize',
     historyDetailId: null,
+    recipeViewId: null,
   });
   assert.deepEqual(parseAppRoute('/build/summary'), {
     location: { tab: 'home', phase: 'results' },
     wizardStep: 'welcome',
     historyDetailId: null,
+    recipeViewId: null,
   });
   assert.deepEqual(parseAppRoute('/build/schedule'), {
     location: { tab: 'home', phase: 'schedule' },
     wizardStep: 'welcome',
     historyDetailId: null,
+    recipeViewId: null,
   });
   assert.deepEqual(parseAppRoute('/bake'), {
     location: { tab: 'home', phase: 'companion' },
     wizardStep: 'welcome',
     historyDetailId: null,
+    recipeViewId: null,
   });
 });
 
+test('parseAppRoute maps /recipe/:id to the read-only recipe view', () => {
+  assert.deepEqual(parseAppRoute('/recipe/abc-123'), {
+    location: { tab: 'home', phase: 'wizard' },
+    wizardStep: 'welcome',
+    historyDetailId: null,
+    recipeViewId: 'abc-123',
+  });
+  assert.equal(APP_ROUTES.recipe('abc 123'), '/recipe/abc%20123');
+  assert.equal(parseAppRoute(APP_ROUTES.recipe('abc 123')).recipeViewId, 'abc 123');
+});
+
 test('isKnownAppPath accepts canonical routes only', () => {
+  assert.equal(isKnownAppPath('/recipe/abc-123'), true);
+  assert.equal(isKnownAppPath('/recipe'), false);
   assert.equal(isKnownAppPath('/'), true);
   assert.equal(isKnownAppPath('/build/flour'), true);
   assert.equal(isKnownAppPath('/build/unknown-step'), false);

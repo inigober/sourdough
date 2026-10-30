@@ -32,7 +32,7 @@ function toSummary(recipe: SavedRecipe): SavedRecipeSummary {
     id: recipe.id,
     name: recipe.name,
     breadStyle: 'Test loaf',
-    bakeDateLabel: 'Tomorrow',
+    scheduleLabel: 'Mix on bake day −1',
     hasSchedule: false,
     savedAt: recipe.savedAt,
     updatedAt: recipe.updatedAt,

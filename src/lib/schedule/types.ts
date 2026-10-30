@@ -3,6 +3,10 @@ export type ProofingStyle = 'roomTemperature' | 'cold';
 export type BakeMethod = 'dutchOven' | 'open';
 
 export type ScheduleInput = {
+  /**
+   * Calendar day of mixing (YYYY-MM-DD). Empty on recipes: they use relative "bake day" labels.
+   * Set only when a bake starts, so it lives on bake sessions and history.
+   */
   mixDate: string;
   startTime: string;
   autolyseEnabled: boolean;
@@ -42,6 +46,8 @@ export type TimelineStep = {
   durationMinutes: number;
   startOffsetMinutes: number;
   dateLabel?: string;
+  /** Whole days from bake day: 0 is the day the oven goes on, -1 the day before, and so on. */
+  bakeDayOffset?: number;
   detail?: string;
 };
 

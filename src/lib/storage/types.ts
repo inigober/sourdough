@@ -14,7 +14,8 @@ export type SavedRecipeSummary = {
   id: string;
   name: string;
   breadStyle: string;
-  bakeDateLabel: string;
+  /** Relative timing for list cards, for example "Mix on bake day −1". */
+  scheduleLabel: string;
   hasSchedule: boolean;
   savedAt: string;
   updatedAt: string;

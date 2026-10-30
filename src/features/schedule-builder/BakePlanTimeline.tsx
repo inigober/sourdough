@@ -4,15 +4,13 @@ import { TimelineRow } from '../../components/TimelineRow.tsx';
 
 type BakePlanTimelineProps = {
   steps: TimelineStep[];
-  mixDateLabel?: string;
-  bakeDateLabel?: string;
+  caption?: string;
   embedded?: boolean;
 };
 
 export function BakePlanTimeline({
   steps,
-  mixDateLabel,
-  bakeDateLabel,
+  caption,
   embedded = false,
 }: BakePlanTimelineProps) {
   if (steps.length === 0) {
@@ -34,9 +32,7 @@ export function BakePlanTimeline({
     <>
       {!embedded ? <h2>Bake schedule</h2> : null}
       <p className="section-copy">
-        {mixDateLabel && bakeDateLabel
-          ? `Clock times on mix day (${mixDateLabel}). Oven-bake on ${bakeDateLabel}.`
-          : 'Times move forward from your start time. No calendar day is attached.'}
+        {caption ?? 'Times move forward from your start time. No calendar day is attached.'}
       </p>
       <ol className="timeline-list bake-plan__list">
         {steps.map((step, index) => (

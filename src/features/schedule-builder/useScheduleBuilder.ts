@@ -12,7 +12,12 @@ import {
   getTotalBakeMinutes,
 } from '../../lib/schedule/scheduleAdvice.ts';
 import { getColdRetardHours, roundColdRetardHoursUp } from '../../lib/schedule/scheduleTiming.ts';
-import { formatBakeDateLong, getBakeDateIso, getMixDateIso } from '../../lib/schedule/dates.ts';
+import {
+  formatBakeDayLabel,
+  formatMixAndBakeSentence,
+  getMixDayBakeOffset,
+  withBakeDayLabels,
+} from '../../lib/schedule/relativeDays.ts';
 import type { RecipeInput } from '../../lib/recipe/types.ts';
 import type { ScheduleInput } from '../../lib/schedule/types.ts';
 import {
@@ -42,7 +47,7 @@ export function useScheduleBuilder({ recipeInput, scheduleInput, recipeName }: U
   );
   const timeline = useMemo(() => {
     try {
-      return formatTimelineForDisplay(buildTimeline(scheduleInput, recipeInput));
+      return withBakeDayLabels(formatTimelineForDisplay(buildTimeline(scheduleInput, recipeInput)));
     } catch {
       return [];
     }
@@ -61,8 +66,10 @@ export function useScheduleBuilder({ recipeInput, scheduleInput, recipeName }: U
     () => getColdRetardAssessmentLevel(coldRetardHours),
     [coldRetardHours],
   );
-  const mixDateLabel = formatBakeDateLong(getMixDateIso(scheduleInput));
-  const bakeDateLabel = formatBakeDateLong(getBakeDateIso(scheduleInput, recipeInput));
+  const mixDayOffset = getMixDayBakeOffset(timeline) ?? 0;
+  const mixDayLabel = formatBakeDayLabel(mixDayOffset);
+  const bakeDayLabel = formatBakeDayLabel(0);
+  const mixAndBakeSentence = formatMixAndBakeSentence(mixDayOffset);
   const formula = useMemo(() => {
     try {
       return calculateRecipe(recipeInput);
@@ -119,13 +126,13 @@ export function useScheduleBuilder({ recipeInput, scheduleInput, recipeName }: U
   const copyScheduleText = useCallback(async (): Promise<void> => {
     const text = formatScheduleAsText({
       recipeName,
-      mixDateLabel,
-      bakeDateLabel,
+      mixDateLabel: mixDayLabel,
+      bakeDateLabel: bakeDayLabel,
       steps: timeline,
     });
     await copyToClipboard(text);
     setExportMessage('Schedule copied');
-  }, [bakeDateLabel, mixDateLabel, recipeName, timeline]);
+  }, [bakeDayLabel, mixDayLabel, recipeName, timeline]);
 
   const copyIngredientList = useCallback(async (): Promise<void> => {
     if (!formula) {
@@ -161,8 +168,7 @@ export function useScheduleBuilder({ recipeInput, scheduleInput, recipeName }: U
     coldRetardHoursRounded,
     coldRetardAssessment,
     coldRetardAssessmentLevel,
-    mixDateLabel,
-    bakeDateLabel,
+    mixAndBakeSentence,
     formula,
     ingredientRows,
     levainBuildRatioLabel,

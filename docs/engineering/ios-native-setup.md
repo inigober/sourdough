@@ -102,6 +102,8 @@ Permission is re-checked when the app returns to the foreground.
 | `xcodebuild requires Xcode` | Install Xcode from the App Store; run `xcode-select` command above. |
 | Pod install fails | `cd ios/App && pod install --repo-update` |
 | Multiple commands produce `.appex` | Stale widget extension product name. Run:<br>`cd ios/App && ruby repair_widget_extension.rb`<br>`rm -rf ~/Library/Developer/Xcode/DerivedData/App-*`<br>Then in Xcode: **Product → Clean Build Folder**, rebuild. |
+| `UIScene life cycle is required for apps built with this SDK` on launch | The app must use scenes (iOS 27 SDK). This repo has `SceneDelegate.swift` and a `UIApplicationSceneManifest` in `Info.plist`, which need `@capacitor/ios` 8.6.0+. If it returns, check both are still present and that pods are on 8.6+ (`pod install`). |
+| `pod install` crashes with `Unicode Normalization not appropriate for ASCII-8BIT` | Run with a UTF-8 locale: `LANG=en_US.UTF-8 pod install`. |
 | `[CP] Embed Pods Frameworks` warning | Harmless CocoaPods warning; safe to ignore. |
 | No AlarmKit behavior | Requires iOS 26+ device/simulator and Xcode 26 SDK; older OS uses notifications only. |
 | `Failed to show Widget` / `Failed to get descriptors for extensionBundleID` | Xcode tried to run the widget extension scheme. Use the shared **App** scheme only (not `BakeTimerWidgetExtension`). The repo disables auto-generated extension schemes in `App.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings`. If the error returns, confirm the scheme picker shows **App** and re-run `ruby configure_widget_extension.rb`. |

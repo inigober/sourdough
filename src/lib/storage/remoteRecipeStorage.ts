@@ -1,5 +1,5 @@
 import type { RecipeInput } from '../recipe/types.ts';
-import { getTodayIsoDate, getMixDateIso } from '../schedule/dates.ts';
+import { withoutCalendarDate } from '../schedule/relativeDays.ts';
 import { createDefaultScheduleInput } from '../schedule/defaults.ts';
 import type { ScheduleInput } from '../schedule/types.ts';
 import { getSupabaseClient } from '../auth/supabaseClient.ts';
@@ -25,24 +25,14 @@ function getClientOrThrow() {
   return client;
 }
 
-function normalizeScheduleInput(
-  scheduleInput: ScheduleInput | undefined,
-  recipeInput: RecipeInput,
-): ScheduleInput | undefined {
-  if (!scheduleInput) {
-    return undefined;
-  }
-
-  return {
-    ...scheduleInput,
-    mixDate: scheduleInput.mixDate || getMixDateIso(scheduleInput),
-  };
+function normalizeScheduleInput(scheduleInput: ScheduleInput | undefined): ScheduleInput | undefined {
+  return scheduleInput ? withoutCalendarDate(scheduleInput) : undefined;
 }
 
 function rowToSavedRecipe(row: SavedRecipeRow): SavedRecipe {
   const recipeInput = structuredClone(row.recipe_input);
   const scheduleInput = row.schedule_input
-    ? normalizeScheduleInput(row.schedule_input, recipeInput)
+    ? normalizeScheduleInput(row.schedule_input)
     : undefined;
 
   return {
@@ -97,7 +87,7 @@ export async function upsertRemoteSavedRecipe(
   const supabase = getClientOrThrow();
   const now = new Date().toISOString();
   const existing = input.id ? await getRemoteSavedRecipe(userId, input.id) : null;
-  const scheduleInput = normalizeScheduleInput(input.scheduleInput ?? existing?.scheduleInput, input.recipeInput);
+  const scheduleInput = normalizeScheduleInput(input.scheduleInput ?? existing?.scheduleInput);
 
   const payload = {
     id: existing?.id ?? input.id ?? crypto.randomUUID(),
@@ -124,7 +114,7 @@ export async function upsertRemoteSavedRecipe(
 
 export async function importRemoteSavedRecipe(userId: string, recipe: SavedRecipe): Promise<SavedRecipe> {
   const supabase = getClientOrThrow();
-  const scheduleInput = normalizeScheduleInput(recipe.scheduleInput, recipe.recipeInput);
+  const scheduleInput = normalizeScheduleInput(recipe.scheduleInput);
 
   const payload = {
     id: recipe.id,
@@ -158,9 +148,7 @@ export async function duplicateRemoteSavedRecipe(
     return null;
   }
 
-  const scheduleInput = source.scheduleInput
-    ? { ...source.scheduleInput, mixDate: getTodayIsoDate() }
-    : undefined;
+  const scheduleInput = source.scheduleInput ? withoutCalendarDate(source.scheduleInput) : undefined;
 
   return upsertRemoteSavedRecipe(userId, {
     name: generateDefaultRecipeName(source.recipeInput, scheduleInput),

@@ -13,6 +13,7 @@ import { ScheduleBuilderView } from '../schedule-builder/ScheduleBuilderView.tsx
 import { RecipeResultsView } from './RecipeResultsView.tsx';
 import { AuthModal } from '../auth/AuthModal.tsx';
 import { CompanionView } from '../companion/CompanionView.tsx';
+import { RecipeView } from '../recipe-view/RecipeView.tsx';
 import { useBakeSession } from '../../lib/companion/useBakeSession.ts';
 import { useBakeHistory } from '../../lib/history/useBakeHistory.ts';
 import { resolveAppScreen, showWelcomeBottomNav } from './appLocation.ts';
@@ -30,7 +31,8 @@ import { DevPanel } from '../dev/DevPanel.tsx';
 export function RecipeBuilder() {
   const { user, isConfigured, isLoading: isAuthLoading, signOut } = useAuth();
   const [isDevPanelOpen, setIsDevPanelOpen] = useState(false);
-  const { location, phase, tab, wizardStep, historyDetailId, routes, isKnownPath, pathname } = useAppRouter();
+  const { location, phase, tab, wizardStep, historyDetailId, recipeViewId, routes, isKnownPath, pathname } =
+    useAppRouter();
 
   useEffect(() => {
     if (!isKnownPath) {
@@ -70,7 +72,7 @@ export function RecipeBuilder() {
     user,
     isConfigured,
     isAuthLoading,
-    shouldPrompt: phase === 'wizard' && wizardStep === 'welcome' && tab === 'home',
+    shouldPrompt: phase === 'wizard' && wizardStep === 'welcome' && tab === 'home' && !recipeViewId,
   });
 
   const {
@@ -209,8 +211,8 @@ export function RecipeBuilder() {
   });
 
   const screen = useMemo(
-    () => resolveAppScreen(location, wizardStep, historyDetailId),
-    [historyDetailId, location, wizardStep],
+    () => resolveAppScreen(location, wizardStep, historyDetailId, recipeViewId),
+    [historyDetailId, location, recipeViewId, wizardStep],
   );
 
   const saveDialogSchedule =
@@ -231,6 +233,10 @@ export function RecipeBuilder() {
 
   const dialogs = (
     <RecipeBuilderDialogs
+      bakeStartRequest={bakeFlow.bakeStartRequest}
+      isStartingBake={isStartingBake}
+      onCancelBakeStart={bakeFlow.cancelBakeStart}
+      onConfirmBakeStart={(choice) => void bakeFlow.confirmBakeStart(choice)}
       leaveDialogMode={navigation.leaveDialogMode}
       isSavingExistingRecipe={navigation.isSavingExistingRecipe}
       unsavedSaveError={navigation.unsavedSaveError}
@@ -256,16 +262,6 @@ export function RecipeBuilder() {
       onConfirmDelete={() => void confirmDeleteRecipe()}
     />
   );
-
-  async function handleLoadSavedRecipe(id: string): Promise<void> {
-    const saved = await fetchSavedRecipe(id);
-    if (!saved) {
-      await loadSavedRecipes();
-      return;
-    }
-
-    wizard.loadSavedRecipe(saved);
-  }
 
   async function confirmDeleteRecipe(): Promise<void> {
     if (!navigation.pendingDeleteRecipeId) {
@@ -344,6 +340,22 @@ export function RecipeBuilder() {
     );
   }
 
+  if (screen.kind === 'recipe') {
+    return (
+      <>
+        <RecipeView
+          recipeId={screen.recipeId}
+          fetchSavedRecipe={fetchSavedRecipe}
+          onHome={routes.toHome}
+          onEdit={wizard.loadSavedRecipe}
+          onStartBake={bakeFlow.requestBakeStartForSavedRecipe}
+        />
+        {dialogs}
+        {devPanel}
+      </>
+    );
+  }
+
   if (screen.kind === 'schedule') {
     return (
       <>
@@ -403,7 +415,7 @@ export function RecipeBuilder() {
           onResumeDraft={() => void wizard.resumeDraft()}
           onResumeBake={bakeFlow.handleResumeBake}
           onLoadTemplate={wizard.loadTemplate}
-          onLoadRecipe={(id) => void handleLoadSavedRecipe(id)}
+          onLoadRecipe={routes.toRecipe}
           onDuplicateRecipe={(id) => void duplicateRecipe(id)}
           onDeleteRecipe={navigation.requestDeleteRecipe}
           onOpenAuth={openAuthModal}

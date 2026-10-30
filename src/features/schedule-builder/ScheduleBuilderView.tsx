@@ -40,7 +40,6 @@ export function ScheduleBuilderView({
   isStartingBake = false,
   isSavedRecipe = false,
 }: ScheduleBuilderViewProps) {
-  const mixDateInputId = useId();
   const startTimeInputId = useId();
   const desiredBakeTimeInputId = useId();
 
@@ -54,8 +53,7 @@ export function ScheduleBuilderView({
     coldRetardHoursRounded,
     coldRetardAssessment,
     coldRetardAssessmentLevel,
-    mixDateLabel,
-    bakeDateLabel,
+    mixAndBakeSentence,
     formula,
     levainBuildRatioLabel,
     starterPrepPlanDescription,
@@ -97,7 +95,8 @@ export function ScheduleBuilderView({
     >
       <section className="hero schedule-builder__hero">
         <p className="hero-copy">
-          Mix the dough on {mixDateLabel}. Oven-bake on {bakeDateLabel}. Times below follow your start time on mix day.
+          {mixAndBakeSentence} Days count back from bake day, so this plan works on any date. You will pick the
+          real date and time when you start baking.
         </p>
       </section>
 
@@ -144,23 +143,12 @@ export function ScheduleBuilderView({
 
       <section className="card">
         <SectionHeading
-          title="Mix day"
-          copy="Choose when mixing begins and which calendar day that falls on."
+          title="Start time"
+          copy="The usual time you begin mixing. Every step below is timed from it."
         />
-        <form className="field-grid field-grid--pair schedule-mix-form">
+        <form className="field-grid field-grid--stacked schedule-mix-form">
           <div className="field-card">
-            <FieldLabel label="Mix date" info={scheduleFieldInfo.mixDate} htmlFor={mixDateInputId} />
-            <input
-              id={mixDateInputId}
-              type="date"
-              value={scheduleInput.mixDate}
-              onChange={(event) => onScheduleChange({ mixDate: event.currentTarget.value })}
-            />
-          </div>
-          <div className="field-card">
-            <label htmlFor={startTimeInputId} className="field-label-row">
-              Start time
-            </label>
+            <FieldLabel label="Start time" info={scheduleFieldInfo.startTime} htmlFor={startTimeInputId} />
             <input
               id={startTimeInputId}
               type="time"
@@ -454,11 +442,7 @@ export function ScheduleBuilderView({
         </form>
       </section>
 
-      <BakePlanTimeline
-        steps={timeline}
-        mixDateLabel={mixDateLabel}
-        bakeDateLabel={bakeDateLabel}
-      />
+      <BakePlanTimeline steps={timeline} caption={`Times follow your start time. ${mixAndBakeSentence}`} />
 
       <CollapsibleSection title="Export" defaultOpen={false}>
         <p className="section-copy schedule-export__copy">

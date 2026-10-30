@@ -273,3 +273,36 @@ test('formatMinutesAsTime wraps within a day', () => {
   assert.equal(formatMinutesAsTime(25 * 60), '01:00');
   assert.equal(addMinutesToTime('23:30', 60), '00:30');
 });
+
+test('timeline counts days back from the first bake step', () => {
+  const schedule = createDefaultScheduleInput(defaultRecipeInput);
+  schedule.includeStarterPrep = true;
+  schedule.starterFromFridge = false;
+  schedule.autolyseEnabled = false;
+  schedule.startTime = '09:00';
+  schedule.proofingStyle = 'cold';
+  schedule.desiredBakeTime = '08:00';
+
+  const timeline = buildTimeline(schedule, defaultRecipeInput);
+  const dayOf = (id: string) => timeline.find((step) => step.id === id)?.bakeDayOffset;
+
+  // Levain build starts the evening before mix day, the dough is mixed a day before baking.
+  assert.equal(dayOf('build-levain'), -2);
+  assert.equal(dayOf('mix-levain'), -1);
+  assert.equal(dayOf('cold-retard'), -1);
+  assert.equal(dayOf('bake-closed'), 0);
+});
+
+test('same-day room proof keeps every step on bake day', () => {
+  const schedule = createDefaultScheduleInput(defaultRecipeInput);
+  schedule.includeStarterPrep = false;
+  schedule.autolyseEnabled = false;
+  schedule.startTime = '07:00';
+  schedule.proofingStyle = 'roomTemperature';
+  schedule.roomProofHours = 2;
+
+  const timeline = buildTimeline(schedule, defaultRecipeInput);
+
+  assert.ok(timeline.length > 0);
+  assert.ok(timeline.every((step) => step.bakeDayOffset === 0));
+});

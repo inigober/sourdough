@@ -1,7 +1,8 @@
 import { describeBreadStyle } from '../recipe/describeBreadStyle.ts';
 import type { RecipeInput } from '../recipe/types.ts';
-import { getBakeDateIso, getMixDateIso, getTodayIsoDate, formatBakeDateShort } from '../schedule/dates.ts';
+import { buildTimeline, formatTimelineForDisplay } from '../schedule/buildTimeline.ts';
 import { createDefaultScheduleInput } from '../schedule/defaults.ts';
+import { formatMixDaySummary, withoutCalendarDate } from '../schedule/relativeDays.ts';
 import type { ScheduleInput } from '../schedule/types.ts';
 import type { SavedRecipe, SavedRecipeSummary, UpsertSavedRecipeInput } from './types.ts';
 
@@ -60,7 +61,7 @@ export function upsertSavedRecipe(
   const recipes = readSavedRecipes(storage);
   const now = new Date().toISOString();
   const existing = input.id ? recipes.find((recipe) => recipe.id === input.id) : undefined;
-  const scheduleInput = normalizeScheduleInput(input.scheduleInput ?? existing?.scheduleInput, input.recipeInput);
+  const scheduleInput = normalizeScheduleInput(input.scheduleInput ?? existing?.scheduleInput);
 
   const savedRecipe: SavedRecipe = {
     id: existing?.id ?? crypto.randomUUID(),
@@ -88,9 +89,7 @@ export function duplicateSavedRecipe(
     return null;
   }
 
-  const scheduleInput = source.scheduleInput
-    ? { ...source.scheduleInput, mixDate: getTodayIsoDate() }
-    : undefined;
+  const scheduleInput = source.scheduleInput ? withoutCalendarDate(source.scheduleInput) : undefined;
 
   return upsertSavedRecipe(
     {
@@ -118,18 +117,8 @@ export function clearAllSavedRecipes(storage: StorageLike = getDefaultStorage())
   storage.removeItem(SAVED_RECIPES_STORAGE_KEY);
 }
 
-function normalizeScheduleInput(
-  scheduleInput: ScheduleInput | undefined,
-  recipeInput: RecipeInput,
-): ScheduleInput | undefined {
-  if (!scheduleInput) {
-    return undefined;
-  }
-
-  return {
-    ...scheduleInput,
-    mixDate: scheduleInput.mixDate || getMixDateIso(scheduleInput),
-  };
+function normalizeScheduleInput(scheduleInput: ScheduleInput | undefined): ScheduleInput | undefined {
+  return scheduleInput ? withoutCalendarDate(scheduleInput) : undefined;
 }
 
 function readSavedRecipes(storage: StorageLike): SavedRecipe[] {
@@ -146,9 +135,7 @@ function readSavedRecipes(storage: StorageLike): SavedRecipe[] {
 
     return parsed.filter(isSavedRecipe).map((recipe) => ({
       ...recipe,
-      scheduleInput: recipe.scheduleInput
-        ? normalizeScheduleInput(recipe.scheduleInput, recipe.recipeInput)
-        : undefined,
+      scheduleInput: normalizeScheduleInput(recipe.scheduleInput),
     }));
   } catch {
     return [];
@@ -160,17 +147,29 @@ function writeSavedRecipes(storage: StorageLike, recipes: SavedRecipe[]): void {
 }
 
 export function toSavedRecipeSummary(recipe: SavedRecipe): SavedRecipeSummary {
-  const schedule = recipe.scheduleInput ?? createDefaultScheduleInput(recipe.recipeInput);
-
   return {
     id: recipe.id,
     name: recipe.name,
     breadStyle: describeBreadStyle(recipe.recipeInput),
-    bakeDateLabel: formatBakeDateShort(getBakeDateIso(schedule, recipe.recipeInput)),
+    scheduleLabel: describeSavedSchedule(recipe),
     hasSchedule: Boolean(recipe.scheduleInput),
     savedAt: recipe.savedAt,
     updatedAt: recipe.updatedAt,
   };
+}
+
+function describeSavedSchedule(recipe: SavedRecipe): string {
+  if (!recipe.scheduleInput) {
+    return 'No schedule yet';
+  }
+
+  try {
+    return formatMixDaySummary(
+      formatTimelineForDisplay(buildTimeline(recipe.scheduleInput, recipe.recipeInput)),
+    );
+  } catch {
+    return 'Schedule saved';
+  }
 }
 
 function isSavedRecipe(value: unknown): value is SavedRecipe {

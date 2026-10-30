@@ -22,6 +22,7 @@ export function useAppRouter() {
     tab: parsed.location.tab,
     wizardStep: parsed.wizardStep,
     historyDetailId: parsed.historyDetailId,
+    recipeViewId: parsed.recipeViewId,
     routes,
     navigate,
     isKnownPath,

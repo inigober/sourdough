@@ -2438,6 +2438,91 @@ div.dialog-backdrop {
   color: #5f4c3d;
 }
 
+.recipe-view {
+  display: grid;
+  gap: 20px;
+}
+
+.recipe-view__hero {
+  margin-bottom: 0;
+}
+
+.recipe-view__amounts {
+  margin-top: 0;
+}
+
+@media (min-width: 640px) {
+  .recipe-view__amounts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.recipe-view__day {
+  margin-top: 16px;
+}
+
+.recipe-view__day-label {
+  margin: 0 0 4px;
+  color: var(--color-primary);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.recipe-view__steps {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recipe-view__step {
+  display: grid;
+  grid-template-columns: 3.25rem minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: baseline;
+  padding: 8px 0;
+  border-top: 1px solid var(--color-border-soft);
+}
+
+.recipe-view__step:first-child {
+  border-top: 0;
+}
+
+.recipe-view__step-time {
+  color: #7a695b;
+  font-size: 0.9rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.recipe-view__step-label {
+  color: var(--color-text);
+  line-height: 1.35;
+}
+
+.recipe-view__step-duration {
+  color: var(--color-text-subtle);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.bake-start__fields {
+  margin-top: 12px;
+}
+
+.bake-start__preview {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-card);
+  background: var(--color-surface-muted);
+}
+
+.bake-start__preview .recipe-list {
+  margin-top: 0;
+}
+
 .schedule-builder__hero {
   margin-bottom: 0;
 }

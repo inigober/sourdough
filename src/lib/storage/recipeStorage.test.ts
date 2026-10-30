@@ -123,3 +123,28 @@ test('readSavedRecipes ignores corrupt storage payloads', () => {
 
   assert.deepEqual(listSavedRecipeSummaries(storage), []);
 });
+
+test('saved recipes carry no calendar date and summaries use relative days', () => {
+  const storage = new MemoryStorage();
+  const schedule = createDefaultScheduleInput(defaultRecipeInput);
+  schedule.mixDate = '2026-05-20';
+  schedule.proofingStyle = 'cold';
+
+  const saved = upsertSavedRecipe(
+    { name: 'Weekend loaf', recipeInput: defaultRecipeInput, scheduleInput: schedule },
+    storage,
+  );
+  const [summary] = listSavedRecipeSummaries(storage);
+
+  assert.equal(saved.scheduleInput?.mixDate, '');
+  assert.equal(getSavedRecipe(saved.id, storage)?.scheduleInput?.mixDate, '');
+  assert.equal(summary.scheduleLabel, 'Mix on bake day −1');
+});
+
+test('recipes without a schedule say so in their summary', () => {
+  const storage = new MemoryStorage();
+  upsertSavedRecipe({ name: 'Draft loaf', recipeInput: defaultRecipeInput }, storage);
+
+  assert.equal(listSavedRecipeSummaries(storage)[0].hasSchedule, false);
+  assert.equal(listSavedRecipeSummaries(storage)[0].scheduleLabel, 'No schedule yet');
+});

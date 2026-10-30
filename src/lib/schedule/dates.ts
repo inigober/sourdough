@@ -1,6 +1,6 @@
 import type { RecipeInput } from '../recipe/types.ts';
 import type { ScheduleInput } from './types.ts';
-import { getShapeEndOffset, parseTimeToMinutes } from './scheduleTiming.ts';
+import { getColdRetardHours, getShapeEndOffset, parseTimeToMinutes } from './scheduleTiming.ts';
 
 export function getTomorrowIsoDate(referenceDate = new Date()): string {
   return formatIsoDate(addDays(referenceDate, 1));
@@ -57,14 +57,14 @@ export function getMixDateIso(schedule: ScheduleInput): string {
 
 export function getBakeDateIso(schedule: ScheduleInput, recipeInput: RecipeInput): string {
   const mixDate = parseIsoDate(getMixDateIso(schedule));
-
-  if (schedule.proofingStyle === 'cold') {
-    return formatIsoDate(addDays(mixDate, 1));
-  }
-
   const startMinutes = parseTimeToMinutes(schedule.startTime);
-  const bakeOffsetMinutes = getShapeEndOffset(schedule, recipeInput) + schedule.roomProofHours * 60;
-  const bakeDate = addMinutesFromMidnight(mixDate, startMinutes + bakeOffsetMinutes);
+  const shapeEndOffset = getShapeEndOffset(schedule, recipeInput);
+  // Same arithmetic as buildTimeline: the oven goes on right after cold retard or room proof.
+  const proofMinutes =
+    schedule.proofingStyle === 'cold'
+      ? Math.round(getColdRetardHours(schedule, recipeInput) * 60)
+      : schedule.roomProofHours * 60;
+  const bakeDate = addMinutesFromMidnight(mixDate, startMinutes + shapeEndOffset + proofMinutes);
 
   return formatIsoDate(bakeDate);
 }

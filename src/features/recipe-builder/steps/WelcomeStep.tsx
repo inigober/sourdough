@@ -101,7 +101,7 @@ export function WelcomeStep({
       <section className="card saved-recipes" aria-label="Saved recipes">
         <div className="welcome-section__header saved-recipes__header">
           <h2>Saved recipes</h2>
-          <p className="section-copy">Open a saved recipe or duplicate it as a starting point.</p>
+          <p className="section-copy">View a saved recipe, start a bake, or duplicate it as a starting point.</p>
         </div>
         {savedRecipesError ? (
           <div className="saved-recipes__error" role="alert">
@@ -122,7 +122,7 @@ export function WelcomeStep({
                 >
                   <strong>{recipe.name}</strong>
                   <span className="saved-recipe-card__meta">
-                    Bake on {recipe.bakeDateLabel}
+                    {recipe.scheduleLabel}
                     <span className="saved-recipe-card__meta-sep" aria-hidden="true">
                       ·
                     </span>

@@ -11,6 +11,7 @@ export type AppLocation = {
 export type AppScreen =
   | { kind: 'welcome'; tab: 'home' }
   | { kind: 'welcome'; tab: 'history'; historyId: string | null }
+  | { kind: 'recipe'; recipeId: string }
   | { kind: 'wizard'; step: InputWizardStep }
   | { kind: 'results' }
   | { kind: 'schedule' }
@@ -20,6 +21,7 @@ export function resolveAppScreen(
   location: AppLocation,
   currentStep: RecipeBuilderStep,
   historyDetailId: string | null,
+  recipeViewId: string | null = null,
 ): AppScreen {
   if (location.phase === 'companion') {
     return { kind: 'companion' };
@@ -34,6 +36,10 @@ export function resolveAppScreen(
   }
 
   if (currentStep === 'welcome') {
+    if (recipeViewId && location.tab === 'home') {
+      return { kind: 'recipe', recipeId: recipeViewId };
+    }
+
     if (location.tab === 'history') {
       return { kind: 'welcome', tab: 'history', historyId: historyDetailId };
     }

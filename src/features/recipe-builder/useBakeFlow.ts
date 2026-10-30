@@ -1,7 +1,8 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import type { BakeCompleteSaveInput } from '../../lib/companion/types.ts';
 import type { SavedRecipe } from '../../lib/storage/types.ts';
+import { applyBakeStart, type BakeStartChoice } from '../../lib/schedule/bakeStart.ts';
 import type { ScheduleInput } from '../../lib/schedule/types.ts';
 import type { RecipeInput } from '../../lib/recipe/types.ts';
 import {
@@ -17,6 +18,16 @@ type BeginBakeSessionOptions = {
   recipeName: string;
   recipe: RecipeInput;
   schedule: ScheduleInput;
+};
+
+/**
+ * A bake waiting for its real mix date and time. `savedRecipe` is set when the bake starts straight
+ * from a saved recipe; otherwise it starts from the recipe open in the builder (saved on confirm).
+ */
+type BakeStartRequest = {
+  recipeInput: RecipeInput;
+  scheduleInput: ScheduleInput;
+  savedRecipe: (SavedRecipe & { scheduleInput: ScheduleInput }) | null;
 };
 
 type BakeSessionActions = {
@@ -58,6 +69,8 @@ export function useBakeFlow({
   setPendingStartBakeAfterSave,
   bakeSession,
 }: UseBakeFlowOptions) {
+  const [bakeStartRequest, setBakeStartRequest] = useState<BakeStartRequest | null>(null);
+
   const enterCompanionBake = useCallback(
     (options: BeginBakeSessionOptions): boolean => {
       const started = bakeSession.tryBeginBakeSession(options);
@@ -73,17 +86,64 @@ export function useBakeFlow({
     return saveActiveRecipe(resolveRecipeSaveName(activeSavedRecipe, recipeInput, scheduleInput), true);
   }, [activeSavedRecipe, recipeInput, saveActiveRecipe, scheduleInput]);
 
-  const proceedWithStartBake = useCallback(async (): Promise<void> => {
-    await bakeSession.runStartBake(async () => {
-      const saved = await ensureRecipeSaved();
-      enterCompanionBake({
-        savedRecipeId: saved.id,
-        recipeName: saved.name,
-        recipe: saved.recipeInput,
-        schedule: saved.scheduleInput ?? scheduleInput,
+  // The saved recipe keeps relative days only; the chosen date and time live on the bake session.
+  const proceedWithStartBake = useCallback(
+    async (choice: BakeStartChoice): Promise<void> => {
+      await bakeSession.runStartBake(async () => {
+        const saved = await ensureRecipeSaved();
+        enterCompanionBake({
+          savedRecipeId: saved.id,
+          recipeName: saved.name,
+          recipe: saved.recipeInput,
+          schedule: applyBakeStart(saved.scheduleInput ?? scheduleInput, choice),
+        });
       });
-    });
-  }, [bakeSession, ensureRecipeSaved, enterCompanionBake, scheduleInput]);
+    },
+    [bakeSession, ensureRecipeSaved, enterCompanionBake, scheduleInput],
+  );
+
+  const requestBakeStartFromBuilder = useCallback((): void => {
+    setBakeStartRequest({ recipeInput, scheduleInput, savedRecipe: null });
+  }, [recipeInput, scheduleInput]);
+
+  const requestBakeStartForSavedRecipe = useCallback(
+    (saved: SavedRecipe & { scheduleInput: ScheduleInput }): void => {
+      setBakeStartRequest({
+        recipeInput: saved.recipeInput,
+        scheduleInput: saved.scheduleInput,
+        savedRecipe: saved,
+      });
+    },
+    [],
+  );
+
+  const cancelBakeStart = useCallback((): void => {
+    setBakeStartRequest(null);
+  }, []);
+
+  const confirmBakeStart = useCallback(
+    async (choice: BakeStartChoice): Promise<void> => {
+      const request = bakeStartRequest;
+      if (!request) {
+        return;
+      }
+
+      setBakeStartRequest(null);
+
+      if (request.savedRecipe) {
+        enterCompanionBake({
+          savedRecipeId: request.savedRecipe.id,
+          recipeName: request.savedRecipe.name,
+          recipe: request.savedRecipe.recipeInput,
+          schedule: applyBakeStart(request.savedRecipe.scheduleInput, choice),
+        });
+        return;
+      }
+
+      await proceedWithStartBake(choice);
+    },
+    [bakeStartRequest, enterCompanionBake, proceedWithStartBake],
+  );
 
   const handleResumeBake = useCallback((): void => {
     bakeSession.resumeBakeSession();
@@ -97,8 +157,8 @@ export function useBakeFlow({
       return;
     }
 
-    await proceedWithStartBake();
-  }, [activeSavedRecipeId, isDirty, openSaveDialog, proceedWithStartBake, setPendingStartBakeAfterSave]);
+    requestBakeStartFromBuilder();
+  }, [activeSavedRecipeId, isDirty, openSaveDialog, requestBakeStartFromBuilder, setPendingStartBakeAfterSave]);
 
   const startBakeFromSavedRecipe = useCallback(
     async (id: string): Promise<void> => {
@@ -107,14 +167,9 @@ export function useBakeFlow({
         return;
       }
 
-      enterCompanionBake({
-        savedRecipeId: saved.id,
-        recipeName: saved.name,
-        recipe: saved.recipeInput,
-        schedule: saved.scheduleInput,
-      });
+      requestBakeStartForSavedRecipe(saved);
     },
-    [enterCompanionBake, fetchSavedRecipe],
+    [fetchSavedRecipe, requestBakeStartForSavedRecipe],
   );
 
   const saveCompletedBake = useCallback(
@@ -151,13 +206,17 @@ export function useBakeFlow({
 
       if (action === 'startBake') {
         setPendingStartBakeAfterSave(false);
-        await proceedWithStartBake();
+        requestBakeStartFromBuilder();
       }
     },
-    [performGoHome, proceedWithStartBake, setPendingStartBakeAfterSave],
+    [performGoHome, requestBakeStartFromBuilder, setPendingStartBakeAfterSave],
   );
 
   return {
+    bakeStartRequest,
+    cancelBakeStart,
+    confirmBakeStart,
+    requestBakeStartForSavedRecipe,
     handleResumeBake,
     startBakeFromSchedule,
     startBakeFromSavedRecipe,

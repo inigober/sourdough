@@ -6,6 +6,7 @@ const router = createBrowserRouter([
   { path: '/', element: <RecipeBuilder /> },
   { path: '/history', element: <RecipeBuilder /> },
   { path: '/history/:bakeId', element: <RecipeBuilder /> },
+  { path: '/recipe/:recipeId', element: <RecipeBuilder /> },
   { path: '/build/:step', element: <RecipeBuilder /> },
   { path: '/bake', element: <RecipeBuilder /> },
   { path: '*', element: <Navigate to="/" replace /> },

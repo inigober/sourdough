@@ -18,6 +18,7 @@ export const APP_ROUTES = {
   home: '/',
   history: '/history',
   historyDetail: (id: string) => `/history/${encodeURIComponent(id)}`,
+  recipe: (id: string) => `/recipe/${encodeURIComponent(id)}`,
   buildSummary: '/build/summary',
   buildSchedule: '/build/schedule',
   bake: '/bake',
@@ -28,6 +29,8 @@ export type ParsedAppRoute = {
   location: AppLocation;
   wizardStep: RecipeBuilderStep;
   historyDetailId: string | null;
+  /** Saved recipe shown in the read-only view; null on every other route. */
+  recipeViewId: string | null;
 };
 
 function normalizePathname(pathname: string): string {
@@ -87,7 +90,7 @@ export function isKnownAppPath(pathname: string): boolean {
     return true;
   }
 
-  if (/^\/history\/[^/]+$/.test(path)) {
+  if (/^\/history\/[^/]+$/.test(path) || /^\/recipe\/[^/]+$/.test(path)) {
     return true;
   }
 
@@ -107,6 +110,7 @@ export function parseAppRoute(pathname: string): ParsedAppRoute {
       location: { tab: 'home', phase: 'wizard' },
       wizardStep: 'welcome',
       historyDetailId: null,
+      recipeViewId: null,
     };
   }
 
@@ -115,6 +119,7 @@ export function parseAppRoute(pathname: string): ParsedAppRoute {
       location: { tab: 'history', phase: 'wizard' },
       wizardStep: 'welcome',
       historyDetailId: null,
+      recipeViewId: null,
     };
   }
 
@@ -124,6 +129,17 @@ export function parseAppRoute(pathname: string): ParsedAppRoute {
       location: { tab: 'history', phase: 'wizard' },
       wizardStep: 'welcome',
       historyDetailId: decodeURIComponent(historyMatch[1]),
+      recipeViewId: null,
+    };
+  }
+
+  const recipeMatch = path.match(/^\/recipe\/([^/]+)$/);
+  if (recipeMatch) {
+    return {
+      location: { tab: 'home', phase: 'wizard' },
+      wizardStep: 'welcome',
+      historyDetailId: null,
+      recipeViewId: decodeURIComponent(recipeMatch[1]),
     };
   }
 
@@ -132,6 +148,7 @@ export function parseAppRoute(pathname: string): ParsedAppRoute {
       location: { tab: 'home', phase: 'results' },
       wizardStep: 'welcome',
       historyDetailId: null,
+      recipeViewId: null,
     };
   }
 
@@ -140,6 +157,7 @@ export function parseAppRoute(pathname: string): ParsedAppRoute {
       location: { tab: 'home', phase: 'schedule' },
       wizardStep: 'welcome',
       historyDetailId: null,
+      recipeViewId: null,
     };
   }
 
@@ -148,6 +166,7 @@ export function parseAppRoute(pathname: string): ParsedAppRoute {
       location: { tab: 'home', phase: 'companion' },
       wizardStep: 'welcome',
       historyDetailId: null,
+      recipeViewId: null,
     };
   }
 
@@ -159,6 +178,7 @@ export function parseAppRoute(pathname: string): ParsedAppRoute {
         location: { tab: 'home', phase: 'wizard' },
         wizardStep: step,
         historyDetailId: null,
+        recipeViewId: null,
       };
     }
   }
@@ -167,6 +187,7 @@ export function parseAppRoute(pathname: string): ParsedAppRoute {
     location: { tab: 'home', phase: 'wizard' },
     wizardStep: 'welcome',
     historyDetailId: null,
+    recipeViewId: null,
   };
 }
 
@@ -201,6 +222,7 @@ export type AppRouteNavigate = {
   toHome: () => void;
   toHistory: () => void;
   toHistoryDetail: (id: string) => void;
+  toRecipe: (id: string) => void;
   toWizardStep: (step: InputWizardStep) => void;
   toSummary: () => void;
   toSchedule: () => void;
@@ -213,6 +235,7 @@ export function createAppRouteNavigate(navigate: (path: string) => void): AppRou
     toHome: () => navigate(APP_ROUTES.home),
     toHistory: () => navigate(APP_ROUTES.history),
     toHistoryDetail: (id) => navigate(APP_ROUTES.historyDetail(id)),
+    toRecipe: (id) => navigate(APP_ROUTES.recipe(id)),
     toWizardStep: (step) => navigate(APP_ROUTES.buildStep(step)),
     toSummary: () => navigate(APP_ROUTES.buildSummary),
     toSchedule: () => navigate(APP_ROUTES.buildSchedule),

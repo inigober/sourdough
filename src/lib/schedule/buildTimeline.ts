@@ -23,9 +23,12 @@ import {
   getColdRetardHours,
   getBulkStartOffset,
   getLevainMixOffsetMinutes,
+  parseTimeToMinutes,
   roundColdRetardHoursUp,
 } from './scheduleTiming.ts';
 import type { ScheduleInput, TimelineStep } from './types.ts';
+
+const MINUTES_PER_DAY = 24 * 60;
 
 type MutableStep = {
   id: string;
@@ -265,26 +268,35 @@ export function buildTimeline(schedule: ScheduleInput, recipeInput: RecipeInput)
     );
   }
 
-  return steps
-    .sort((left, right) => left.startOffsetMinutes - right.startOffsetMinutes)
-    .map((step) => {
-      const start = formatOffsetDateTime(schedule, step.startOffsetMinutes);
-      const end = formatOffsetDateTime(
-        schedule,
-        step.startOffsetMinutes + step.durationMinutes,
-      );
+  const sortedSteps = steps.sort((left, right) => left.startOffsetMinutes - right.startOffsetMinutes);
 
-      return {
-        id: step.id,
-        label: step.label,
-        detail: step.detail,
-        durationMinutes: step.durationMinutes,
-        startOffsetMinutes: step.startOffsetMinutes,
-        startTime: start.timeLabel,
-        endTime: end.timeLabel,
-        dateLabel: start.dateLabel ?? undefined,
-      };
-    });
+  // Days are counted from mix start (which may sit late in the evening), then re-based so the
+  // first bake step is day 0.
+  const startMinutes = parseTimeToMinutes(schedule.startTime);
+  const getDayFromMixDay = (offsetMinutes: number): number =>
+    Math.floor((startMinutes + offsetMinutes) / MINUTES_PER_DAY);
+  const firstBakeStep = sortedSteps.find((step) => step.id.startsWith('bake-'));
+  const bakeDayFromMixDay = getDayFromMixDay(firstBakeStep?.startOffsetMinutes ?? 0);
+
+  return sortedSteps.map((step) => {
+    const start = formatOffsetDateTime(schedule, step.startOffsetMinutes);
+    const end = formatOffsetDateTime(
+      schedule,
+      step.startOffsetMinutes + step.durationMinutes,
+    );
+
+    return {
+      id: step.id,
+      label: step.label,
+      detail: step.detail,
+      durationMinutes: step.durationMinutes,
+      startOffsetMinutes: step.startOffsetMinutes,
+      startTime: start.timeLabel,
+      endTime: end.timeLabel,
+      dateLabel: start.dateLabel ?? undefined,
+      bakeDayOffset: getDayFromMixDay(step.startOffsetMinutes) - bakeDayFromMixDay,
+    };
+  });
 }
 
 export function formatTimelineForDisplay(steps: TimelineStep[]): TimelineStep[] {
@@ -327,5 +339,6 @@ function mergeSteps(first: TimelineStep, second: TimelineStep, label: string): T
     durationMinutes: first.durationMinutes + second.durationMinutes,
     startOffsetMinutes: first.startOffsetMinutes,
     dateLabel: first.dateLabel,
+    bakeDayOffset: first.bakeDayOffset,
   };
 }

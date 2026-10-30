@@ -1,5 +1,4 @@
 import type { RecipeInput } from '../recipe/types.ts';
-import { getTomorrowIsoDate } from './dates.ts';
 import { getDefaultLevainBuildHours } from './levainPrep.ts';
 import type { FoldDefaults, ScheduleInput } from './types.ts';
 
@@ -80,7 +79,7 @@ export function createDefaultScheduleInput(recipeInput: RecipeInput): ScheduleIn
   const autolyseRecommendation = recipeInput.hydrationPercent >= 72;
 
   return {
-    mixDate: getTomorrowIsoDate(),
+    mixDate: '',
     startTime: '09:00',
     autolyseEnabled: autolyseRecommendation,
     autolyseMinutes: 45,

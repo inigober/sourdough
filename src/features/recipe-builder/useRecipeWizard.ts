@@ -21,6 +21,7 @@ import type {
 } from '../../lib/recipe/types.ts';
 import { createDefaultScheduleInput } from '../../lib/schedule/defaults.ts';
 import { normalizeScheduleInput } from '../../lib/schedule/normalizeScheduleInput.ts';
+import { withoutCalendarDate } from '../../lib/schedule/relativeDays.ts';
 import { scaleScheduleBakeParamsForDoughSize } from '../../lib/schedule/scaleScheduleBakeParams.ts';
 import type { ScheduleInput } from '../../lib/schedule/types.ts';
 import {
@@ -147,7 +148,9 @@ export function useRecipeWizard({
   const restoreFromSavedRecipe = useCallback((saved: SavedRecipe): void => {
     setRecipeInput(saved.recipeInput);
     setScheduleInput(
-      saved.scheduleInput ?? createDefaultScheduleInput(saved.recipeInput),
+      saved.scheduleInput
+        ? withoutCalendarDate(saved.scheduleInput)
+        : createDefaultScheduleInput(saved.recipeInput),
     );
     setHasOpenedSchedule(Boolean(saved.scheduleInput));
     setHasCompletedWizard(true);
@@ -174,7 +177,7 @@ export function useRecipeWizard({
     }
 
     setRecipeInput(draft.recipeInput);
-    setScheduleInput(draft.scheduleInput);
+    setScheduleInput(withoutCalendarDate(draft.scheduleInput));
     setActiveSavedRecipeId(draft.activeSavedRecipeId);
     setActiveSavedRecipe(savedRecipe);
     setHasCompletedWizard(draft.hasCompletedWizard);
@@ -189,7 +192,7 @@ export function useRecipeWizard({
       setRecipeInput(saved.recipeInput);
       setScheduleInput(
         saved.scheduleInput
-          ? normalizeScheduleInput(saved.scheduleInput, saved.recipeInput)
+          ? withoutCalendarDate(normalizeScheduleInput(saved.scheduleInput, saved.recipeInput))
           : createDefaultScheduleInput(saved.recipeInput),
       );
       setActiveSavedRecipeId(saved.id);

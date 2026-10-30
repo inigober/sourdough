@@ -179,8 +179,7 @@ export function BakeHistoryDetailView({
         </p>
         <BakePlanTimeline
           steps={plannedTimeline}
-          mixDateLabel={mixDateLabel}
-          bakeDateLabel={bakeDateLabel}
+          caption={`Clock times on mix day (${mixDateLabel}). Oven-bake on ${bakeDateLabel}.`}
           embedded
         />
       </section>

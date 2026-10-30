@@ -1,9 +1,17 @@
+import { BakeStartDialog } from '../../components/BakeStartDialog.tsx';
 import { ConfirmDialog } from '../../components/ConfirmDialog.tsx';
 import { SaveRecipeDialog } from '../../components/SaveRecipeDialog.tsx';
 import { LeaveRecipeDialog } from './LeaveRecipeDialog.tsx';
+import type { RecipeInput } from '../../lib/recipe/types.ts';
+import type { BakeStartChoice } from '../../lib/schedule/bakeStart.ts';
+import type { ScheduleInput } from '../../lib/schedule/types.ts';
 import type { SavedRecipeSummary } from '../../lib/storage/types.ts';
 
 type RecipeBuilderDialogsProps = {
+  bakeStartRequest: { recipeInput: RecipeInput; scheduleInput: ScheduleInput } | null;
+  isStartingBake: boolean;
+  onCancelBakeStart: () => void;
+  onConfirmBakeStart: (choice: BakeStartChoice) => void;
   leaveDialogMode: 'unsaved' | 'save' | null;
   isSavingExistingRecipe: boolean;
   unsavedSaveError: string | null;
@@ -27,6 +35,10 @@ type RecipeBuilderDialogsProps = {
 };
 
 export function RecipeBuilderDialogs({
+  bakeStartRequest,
+  isStartingBake,
+  onCancelBakeStart,
+  onConfirmBakeStart,
   leaveDialogMode,
   isSavingExistingRecipe,
   unsavedSaveError,
@@ -50,6 +62,15 @@ export function RecipeBuilderDialogs({
 }: RecipeBuilderDialogsProps) {
   return (
     <>
+      {bakeStartRequest ? (
+        <BakeStartDialog
+          recipeInput={bakeStartRequest.recipeInput}
+          scheduleInput={bakeStartRequest.scheduleInput}
+          isStarting={isStartingBake}
+          onCancel={onCancelBakeStart}
+          onConfirm={onConfirmBakeStart}
+        />
+      ) : null}
       {leaveDialogMode ? (
         <LeaveRecipeDialog
           mode={leaveDialogMode}
