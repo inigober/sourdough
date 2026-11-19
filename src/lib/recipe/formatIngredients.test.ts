@@ -21,6 +21,27 @@ test('buildIngredientRows uses separate flour rows for blends', () => {
   assert.equal(rows.some(([label]) => label === 'Added flour'), false);
 });
 
+test('ingredient rows add up to the dough weight, for a single flour and for a blend', () => {
+  const blendInput = {
+    ...defaultRecipeInput,
+    doughFlours: [
+      { ...defaultRecipeInput.doughFlours[0], id: 'a', flourType: 'wheatType1050' as const, percent: 70 },
+      { ...defaultRecipeInput.doughFlours[0], id: 'b', flourType: 'wholeWheat' as const, percent: 30 },
+    ],
+  };
+
+  for (const recipeInput of [defaultRecipeInput, blendInput]) {
+    const rows = buildIngredientRows(recipeInput, calculateRecipe(recipeInput));
+    const sum = rows.reduce((total, [, value]) => total + (typeof value === 'number' ? value : 0), 0);
+
+    // Each row is rounded to a whole gram, so allow a few grams of rounding.
+    assert.ok(
+      Math.abs(sum - recipeInput.finalDoughWeightGrams) <= 3,
+      `rows sum to ${sum}g but the dough weight is ${recipeInput.finalDoughWeightGrams}g`,
+    );
+  }
+});
+
 test('formatIngredientListAsText renders a copy-friendly ingredient block', () => {
   const formula = calculateRecipe(defaultRecipeInput);
   const rows = buildIngredientRows(defaultRecipeInput, formula);

@@ -129,7 +129,7 @@ The calculator produces (`RecipeFormula`):
 The summary shows an **Ingredient list** and a **Formula breakdown**:
 
 - Ingredient list, single flour: Added flour, Added water, Salt, Levain.
-- Ingredient list, flour blend: one row per flour (its share of total flour), then Added water, Salt, Levain.
+- Ingredient list, flour blend: one row per flour (its share of the flour added on top of the levain, so the levain's own flour is not counted twice), then Added water, Salt, Levain. The rows add up to the dough weight (within rounding).
 - Formula breakdown: Total flour, Total water, Levain flour, Levain water, Prefermented flour, Estimated baked loaf (midpoint, rounded to 50 g).
 
 The read-only recipe view names the flour on the ingredient rows and adds a totals line (see [Recipe view and relative days](./recipe-view-and-relative-days.md)). The schedule builder can copy the ingredient list, the schedule text, or the full recipe as JSON.

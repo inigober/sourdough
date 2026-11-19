@@ -8,7 +8,9 @@ export function buildIngredientRows(
   recipeInput: RecipeInput,
   formula: RecipeFormula,
 ): IngredientRow[] {
-  const flourRows = getFlourIngredientRows(recipeInput.doughFlours, formula.totalFlourGrams);
+  // The blend splits the flour added on top of the levain. The levain row already holds its own flour,
+  // so splitting the total flour here would count the levain's flour twice.
+  const flourRows = getFlourIngredientRows(recipeInput.doughFlours, formula.addedFlourGrams);
 
   if (flourRows.length > 1) {
     return [
