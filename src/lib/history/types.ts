@@ -26,6 +26,8 @@ export type BakeHistorySession = {
   completedAt: string;
   savedAt: string;
   updatedAt: string;
+  /** Loaf photo in the private `bake-photos` bucket. Absent on older bakes and signed-out bakes. */
+  photoPath?: string;
   steps: BakeHistoryStep[];
 };
 
@@ -38,6 +40,8 @@ export type BakeHistorySessionSummary = {
   savedAt: string;
   overallAssessment?: BakeSessionAssessment;
   overallNotePreview?: string;
+  /** Loaf photo in the private `bake-photos` bucket. Absent when the bake has no uploaded photo. */
+  photoPath?: string;
 };
 
 export type UpdateBakeHistorySessionInput = {

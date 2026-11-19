@@ -93,3 +93,43 @@ That policy targets **GitHub-owned schedules**, not external systems:
 | GitHub `workflow_dispatch` / `repository_dispatch` only (no `schedule`) | No — not a scheduled workflow |
 
 So keepalive from cron-job.org keeps working with zero repo commits. You do not need dummy commits to keep Supabase awake.
+
+## Bake photos (Supabase Storage)
+
+Loaf photos for finished bakes live in a **private** Storage bucket, `bake-photos`. The migration is [`supabase/migrations/20260601120000_bake_photos.sql`](../../supabase/migrations/20260601120000_bake_photos.sql). It:
+
+- adds a nullable `photo_path text` column to `public.bake_sessions`;
+- creates the bucket `bake-photos` as private, JPEG only, 1 MB maximum per file (the app compresses photos to roughly 250 KB first);
+- adds Row Level Security policies on `storage.objects` so a signed-in user can read, add, replace and delete only objects whose first folder is their own user id (`<user_id>/<bake_session_id>.jpg`).
+
+It is safe to run more than once.
+
+### Apply the migration (once, before shipping the app update)
+
+The app update reads `photo_path` from `bake_sessions`, so **apply the migration first**. Until then, loading History while signed in fails with a database error about the missing column.
+
+Option A, Supabase CLI (the repo's `supabase/migrations` folder is the source):
+
+1. Install the CLI and sign in: `supabase login`.
+2. From the repo root, link the project once: `supabase link --project-ref <your-project-ref>` (the ref is in the dashboard URL and under Project Settings, General).
+3. Run `supabase db push`. It lists the migrations it will apply; confirm that `20260601120000_bake_photos.sql` is in the list.
+
+Option B, SQL editor (no CLI needed):
+
+1. Open the Supabase Dashboard, select this project, then **SQL Editor** and **New query**.
+2. Paste the full contents of `supabase/migrations/20260601120000_bake_photos.sql` and press **Run**. It should finish with "Success".
+
+### Verify
+
+1. **Storage**: a bucket named `bake-photos` exists and is marked **Private**; its settings show a 1 MB file size limit and `image/jpeg` as the allowed type.
+2. **Table Editor**: `bake_sessions` has a `photo_path` column.
+3. **Policies**: under Authentication, Policies, the `storage.objects` table lists four "Users ... own bake photos" policies.
+4. In the app, signed in, finish a bake with a photo. The object appears in the bucket under a folder named after your user id, and the bake's `photo_path` is filled in.
+
+### Free-tier limits
+
+Storage space, download traffic (egress) and project pausing are limited on the free plan. The exact limits change over time, so **check your dashboard** (Settings, Usage, and the plan details under Billing) rather than relying on numbers written here. As a rough guide, the 250 KB per photo budget means each GB of storage holds a few thousand photos. Photos are viewed through signed links that expire after an hour, and every view downloads the image again, so very heavy browsing of a large history counts towards egress.
+
+### Cleaning up
+
+Deleting a bake in the app also deletes its photo. If a photo is ever left behind (for example the delete request failed), you can remove it from the dashboard under Storage, `bake-photos`.

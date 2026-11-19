@@ -14,6 +14,7 @@ import {
   isHistoryBackupNudgeDismissed,
 } from '../../lib/history/historyBackupNudgeStorage.ts';
 import type { BakeHistorySessionSummary } from '../../lib/history/types.ts';
+import { useBakePhotoUrls } from '../../lib/history/useBakePhotoUrls.ts';
 
 type BakeHistoryViewProps = {
   isSignedIn: boolean;
@@ -41,6 +42,8 @@ export function BakeHistoryView({
     isHistoryBackupNudgeDismissed(),
   );
   const showBackupNudge = !isSignedIn && canSignIn && entries.length > 0 && !isBackupNudgeDismissed;
+
+  const photoUrls = useBakePhotoUrls(entries);
 
   const filteredEntries = useMemo(
     () => filterBakeHistoryEntries(entries, searchQuery, assessmentFilter),
@@ -129,31 +132,43 @@ export function BakeHistoryView({
           <ul className="saved-recipes__list">
             {filteredEntries.map((entry) => {
               const assessmentLabel = getLoafAssessmentLabel(entry.overallAssessment);
+              const photoUrl = photoUrls.get(entry.id);
 
               return (
                 <li key={entry.id} className="saved-recipe-card">
                   <button
                     type="button"
-                    className="saved-recipe-card__open"
+                    className="saved-recipe-card__open bake-history__entry-open"
                     onClick={() => onOpenEntry(entry.id)}
                   >
-                    <strong>{entry.recipeName}</strong>
-                    <span className="saved-recipe-card__meta">
-                      Baked {formatHistoryDate(entry.completedAt)}
-                      {assessmentLabel ? (
-                        <>
-                          <span className="saved-recipe-card__meta-sep" aria-hidden="true">
-                            ·
-                          </span>
-                          <span className="bake-history__assessment-badge">
-                            Assessment · {assessmentLabel}
-                          </span>
-                        </>
+                    {photoUrl ? (
+                      <img
+                        src={photoUrl}
+                        alt=""
+                        className="bake-history__thumb"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    ) : null}
+                    <span className="bake-history__entry-text">
+                      <strong>{entry.recipeName}</strong>
+                      <span className="saved-recipe-card__meta">
+                        Baked {formatHistoryDate(entry.completedAt)}
+                        {assessmentLabel ? (
+                          <>
+                            <span className="saved-recipe-card__meta-sep" aria-hidden="true">
+                              ·
+                            </span>
+                            <span className="bake-history__assessment-badge">
+                              Assessment · {assessmentLabel}
+                            </span>
+                          </>
+                        ) : null}
+                      </span>
+                      {entry.overallNotePreview ? (
+                        <span className="bake-history__note-preview">{entry.overallNotePreview}</span>
                       ) : null}
                     </span>
-                    {entry.overallNotePreview ? (
-                      <span className="bake-history__note-preview">{entry.overallNotePreview}</span>
-                    ) : null}
                   </button>
                 </li>
               );

@@ -1,3 +1,5 @@
+import { moveLocalPhotoToAccount, type UploadRemoteBakePhoto } from './bakePhotos.ts';
+import type { BakePhotoStore } from './localBakePhotoStorage.ts';
 import {
   deleteLocalBakeHistorySession,
   listLocalBakeHistorySessions,
@@ -11,14 +13,19 @@ export type ImportLocalBakeHistoryOptions = {
   listRemoteSummaries: (userId: string) => Promise<BakeHistorySessionSummary[]>;
   /** Ids of recipes that exist remotely; a history row may only link to one of these. */
   listRemoteRecipeIds: (userId: string) => Promise<string[]>;
-  createRemote: (userId: string, input: CreateBakeHistorySessionInput) => Promise<unknown>;
+  /** Resolves with the created bake (its `id` is needed to attach a photo). */
+  createRemote: (userId: string, input: CreateBakeHistorySessionInput) => Promise<{ id: string } | void>;
+  /** When given, loaf photos kept on this device are moved to the account along with their bakes. */
+  photos?: { store: BakePhotoStore; uploadRemote: UploadRemoteBakePhoto };
 };
 
 /**
  * Copies bakes saved on this device (while signed out) to the signed-in account, then removes
  * each local copy once its upload succeeded. A bake already present remotely (same recipe name
  * and completion time, e.g. after an interrupted earlier import) is not uploaded twice.
- * Throws at the first failure, so the bakes not yet uploaded stay on this device.
+ * Loaf photos follow their bake: the on-device photo is deleted only after its upload succeeded,
+ * and a failed photo upload never blocks the bake import (see `moveLocalPhotoToAccount`).
+ * Throws at the first bake failure, so the bakes not yet uploaded stay on this device.
  */
 export async function importLocalBakeHistoryIfNeeded(
   userId: string,
@@ -31,13 +38,16 @@ export async function importLocalBakeHistoryIfNeeded(
 
   const remoteSummaries = await options.listRemoteSummaries(userId);
   const remoteRecipeIds = new Set(await options.listRemoteRecipeIds(userId));
-  const remoteKeys = new Set(remoteSummaries.map(buildDuplicateKey));
+  const remoteByKey = new Map(remoteSummaries.map((summary) => [buildDuplicateKey(summary), summary]));
 
   let imported = 0;
 
   for (const session of localSessions) {
-    if (!remoteKeys.has(buildDuplicateKey(session))) {
-      await options.createRemote(userId, {
+    const existingRemote = remoteByKey.get(buildDuplicateKey(session));
+    let remoteBakeId = existingRemote?.id;
+
+    if (!existingRemote) {
+      const created = await options.createRemote(userId, {
         savedRecipeId:
           session.savedRecipeId && remoteRecipeIds.has(session.savedRecipeId)
             ? session.savedRecipeId
@@ -59,7 +69,19 @@ export async function importLocalBakeHistoryIfNeeded(
           actualCompletedAt: step.actualCompletedAt,
         })),
       });
+      remoteBakeId = created?.id;
       imported += 1;
+    }
+
+    if (options.photos && remoteBakeId) {
+      await moveLocalPhotoToAccount({
+        userId,
+        localBakeId: session.id,
+        remoteBakeId,
+        remoteHasPhoto: Boolean(existingRemote?.photoPath),
+        store: options.photos.store,
+        uploadRemote: options.photos.uploadRemote,
+      });
     }
 
     deleteLocalBakeHistorySession(session.id, options.storage);

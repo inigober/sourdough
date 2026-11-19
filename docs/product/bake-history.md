@@ -42,7 +42,23 @@ When a signed-in user opens the app, bakes saved on this device are uploaded (`i
 - **Bake again** (history detail) opens the "When are you mixing?" dialog with the recipe and schedule exactly as that bake was done (`buildBakeAgainStart`). If the original saved recipe was deleted, the new bake is not linked to it.
 - Saved recipe cards show "Baked Nx · last: <assessment>" from history (`buildRecipeBakeStats`).
 
+## Loaf photo
+
+An optional photo of the finished loaf, added in the Bake complete dialog ("Add a photo of your loaf").
+
+- The photo is compressed on the device when chosen (JPEG, longest side about 1280 px, under about 250 KB; `compressBakePhoto.ts`) and the dialog previews exactly what will be saved. It is held in the dialog until **Save bake** and is not written into the bake session, so closing the dialog drops it.
+- **Signed out:** the photo is stored in IndexedDB on this device (`localBakePhotoStorage.ts`), keyed by the local bake id.
+- **Signed in:** the photo is uploaded to the private Supabase Storage bucket `bake-photos` at `<user_id>/<bake_id>.jpg`, and the path is stored in `bake_sessions.photo_path`. It is shown through short-lived signed links.
+- **The bake is saved first.** If the photo upload fails, the bake is still saved, a short message appears, and the photo is kept on this device and retried each time History loads (`retryPendingPhotoUploads`).
+- **Import after sign-in** moves each local photo to the account. The on-device copy is deleted only after its upload succeeded; if the upload fails, the photo stays on this device under the account bake's id and is retried later.
+- **Deleting a bake** deletes its photo (on this device, and in the bucket).
+- Old bakes and bakes without a photo have no `photoPath` and show no photo.
+- Photos show as a small thumbnail in the History list and full width on the bake detail screen (tap to enlarge). Adding or replacing a photo on an existing bake is not built yet.
+
+Needs the `bake_photos` migration on the Supabase project before the app update ships; see [Supabase operations](../engineering/supabase-ops.md#bake-photos-supabase-storage).
+
 ## Ideas not built yet
 
-- Loaf photo on a saved bake.
 - "Tweak recipe from notes": prefill recipe changes from a bake's notes.
+- Photo comparison between bakes.
+- Adding, replacing or removing a photo from the history detail screen.

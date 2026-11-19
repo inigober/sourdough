@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 
 import { ConfirmDialog } from '../../components/ConfirmDialog.tsx';
+import { DialogCard } from '../../components/DialogCard.tsx';
 import { ChromeBackButton } from '../../components/ChromeBackButton.tsx';
 import { LoafAssessmentPicker } from '../../components/LoafAssessmentPicker.tsx';
 import { PageShell } from '../../components/PageShell.tsx';
@@ -16,6 +17,7 @@ import {
   getStartDriftMinutes,
 } from '../../lib/history/formatHistory.ts';
 import type { BakeHistorySession, BakeSessionAssessment, UpdateBakeHistorySessionInput } from '../../lib/history/types.ts';
+import { useBakePhotoUrls } from '../../lib/history/useBakePhotoUrls.ts';
 import { calculateRecipe } from '../../lib/recipe/calculateRecipe.ts';
 import { buildIngredientRows, type IngredientRow } from '../../lib/recipe/formatIngredients.ts';
 import { buildTimeline, formatTimelineForDisplay } from '../../lib/schedule/buildTimeline.ts';
@@ -42,6 +44,8 @@ export function BakeHistoryDetailView({
 }: BakeHistoryDetailViewProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isPhotoOpen, setIsPhotoOpen] = useState(false);
+  const photoUrl = useBakePhotoUrls([{ id: session.id, photoPath: session.photoPath }]).get(session.id);
   const [draftNote, setDraftNote] = useState(session.overallNote ?? '');
   const [draftAssessment, setDraftAssessment] = useState<BakeSessionAssessment | undefined>(
     session.overallAssessment,
@@ -124,6 +128,19 @@ export function BakeHistoryDetailView({
           Bake again
         </button>
       </section>
+
+      {photoUrl ? (
+        <section className="card bake-history-detail__photo" aria-label="Loaf photo">
+          <button
+            type="button"
+            className="bake-photo-button"
+            aria-label="View loaf photo larger"
+            onClick={() => setIsPhotoOpen(true)}
+          >
+            <img src={photoUrl} alt={`Your ${session.recipeName} loaf`} className="bake-photo-button__image" />
+          </button>
+        </section>
+      ) : null}
 
       <section className="card bake-history-detail__note" aria-label="Bake notes">
         <h2 className="bake-history-detail__section-title">Notes & assessment</h2>
@@ -242,10 +259,35 @@ export function BakeHistoryDetailView({
         </button>
       </div>
 
+      {isPhotoOpen && photoUrl ? (
+        <DialogCard
+          title="Your loaf"
+          titleId="bake-photo-dialog-title"
+          onClose={() => setIsPhotoOpen(false)}
+          actions={
+            <div className="dialog-card__actions">
+              <button
+                type="button"
+                className="wizard-button wizard-button--secondary"
+                onClick={() => setIsPhotoOpen(false)}
+              >
+                Close
+              </button>
+            </div>
+          }
+        >
+          <img src={photoUrl} alt={`Your ${session.recipeName} loaf`} className="bake-photo-large" />
+        </DialogCard>
+      ) : null}
+
       {isDeleteDialogOpen ? (
         <ConfirmDialog
           title="Delete this bake?"
-          message="This bake and its step timings will be removed from your history."
+          message={
+            photoUrl
+              ? 'This bake, its step timings and its photo will be removed from your history.'
+              : 'This bake and its step timings will be removed from your history.'
+          }
           confirmLabel="Delete bake"
           onCancel={() => setIsDeleteDialogOpen(false)}
           onConfirm={() => {

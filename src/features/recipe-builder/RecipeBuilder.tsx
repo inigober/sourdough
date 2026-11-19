@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { AppHeader } from '../../components/AppHeader.tsx';
 import { HomeIcon } from '../../components/icons.tsx';
+import { Toast } from '../../components/Toast.tsx';
 import { useAuth } from '../../lib/auth/useAuth.ts';
 import { useAuthPrompt } from '../../lib/auth/useAuthPrompt.ts';
 import { loadBakeSession } from '../../lib/storage/bakeSessionStorage.ts';
@@ -113,6 +114,7 @@ export function RecipeBuilder() {
     isStartingBake,
     isSavingBakeHistory,
     saveBakeHistoryError,
+    photoNotice,
     tryBeginBakeSession,
     confirmPendingBeginBakeSession,
     cancelPendingBeginBakeSession,
@@ -292,11 +294,7 @@ export function RecipeBuilder() {
   }
 
   function handleOpenHistoryEntry(id: string): void {
-    if (!user) {
-      openAuthModal();
-      return;
-    }
-
+    // History is local-first, so signed-out users open their on-device bakes too.
     routes.toHistoryDetail(id);
   }
 
@@ -446,6 +444,7 @@ export function RecipeBuilder() {
           {dialogs}
           {devPanel}
           {isAuthModalOpen ? <AuthModal onClose={closeAuthModal} /> : null}
+          {photoNotice ? <Toast message={photoNotice} /> : null}
         </WelcomeScreen>
       </>
     );

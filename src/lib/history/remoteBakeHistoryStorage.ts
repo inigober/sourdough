@@ -1,4 +1,5 @@
 import { getSupabaseClient } from '../auth/supabaseClient.ts';
+import { deleteRemoteBakePhoto } from './remoteBakePhotoStorage.ts';
 import type {
   BakeHistorySession,
   BakeHistorySessionSummary,
@@ -18,6 +19,8 @@ type BakeSessionRow = {
   completed_at: string;
   saved_at: string;
   updated_at: string;
+  /** Null (or missing, before the bake_photos migration) when the bake has no photo. */
+  photo_path?: string | null;
 };
 
 type BakeSessionStepRow = {
@@ -30,6 +33,9 @@ type BakeSessionStepRow = {
   actual_started_at: string;
   actual_completed_at: string;
 };
+
+const BAKE_SESSION_COLUMNS =
+  'id, saved_recipe_id, recipe_name, recipe_input, schedule_input, overall_note, overall_assessment, started_at, completed_at, saved_at, updated_at, photo_path';
 
 function getClientOrThrow() {
   const client = getSupabaseClient();
@@ -65,7 +71,7 @@ export async function createRemoteBakeHistorySession(
     .from('bake_sessions')
     .insert(sessionPayload)
     .select(
-      'id, saved_recipe_id, recipe_name, recipe_input, schedule_input, overall_note, overall_assessment, started_at, completed_at, saved_at, updated_at',
+      BAKE_SESSION_COLUMNS,
     )
     .single();
 
@@ -123,6 +129,7 @@ export async function createRemoteBakeHistorySession(
     completedAt: bakeSession.completed_at,
     savedAt: bakeSession.saved_at,
     updatedAt: bakeSession.updated_at,
+    photoPath: bakeSession.photo_path ?? undefined,
     steps,
   };
 }
@@ -135,7 +142,7 @@ export async function getRemoteBakeHistorySession(
   const { data: sessionData, error: sessionError } = await supabase
     .from('bake_sessions')
     .select(
-      'id, saved_recipe_id, recipe_name, recipe_input, schedule_input, overall_note, overall_assessment, started_at, completed_at, saved_at, updated_at',
+      BAKE_SESSION_COLUMNS,
     )
     .eq('user_id', userId)
     .eq('id', sessionId)
@@ -185,6 +192,7 @@ export async function getRemoteBakeHistorySession(
     completedAt: bakeSession.completed_at,
     savedAt: bakeSession.saved_at,
     updatedAt: bakeSession.updated_at,
+    photoPath: bakeSession.photo_path ?? undefined,
     steps,
   };
 }
@@ -197,6 +205,7 @@ function rowToSummary(row: {
   saved_at: string;
   overall_assessment: BakeHistorySession['overallAssessment'] | null;
   overall_note: string | null;
+  photo_path?: string | null;
 }): BakeHistorySessionSummary {
   const note = row.overall_note?.trim() ?? '';
 
@@ -208,6 +217,7 @@ function rowToSummary(row: {
     savedAt: row.saved_at,
     overallAssessment: row.overall_assessment ?? undefined,
     overallNotePreview: note ? truncateNotePreview(note) : undefined,
+    photoPath: row.photo_path ?? undefined,
   };
 }
 
@@ -225,7 +235,9 @@ export async function listRemoteBakeHistorySummaries(
   const supabase = getClientOrThrow();
   const { data, error } = await supabase
     .from('bake_sessions')
-    .select('id, saved_recipe_id, recipe_name, completed_at, saved_at, overall_assessment, overall_note')
+    .select(
+      'id, saved_recipe_id, recipe_name, completed_at, saved_at, overall_assessment, overall_note, photo_path',
+    )
     .eq('user_id', userId)
     .order('completed_at', { ascending: false });
 
@@ -241,6 +253,7 @@ export async function listRemoteBakeHistorySummaries(
     saved_at: string;
     overall_assessment: BakeHistorySession['overallAssessment'] | null;
     overall_note: string | null;
+    photo_path: string | null;
   }> | null) ?? []).map(rowToSummary);
 }
 
@@ -294,5 +307,13 @@ export async function deleteRemoteBakeHistorySession(userId: string, sessionId: 
     throw new Error(error.message);
   }
 
-  return (data?.length ?? 0) > 0;
+  const wasDeleted = (data?.length ?? 0) > 0;
+  if (wasDeleted) {
+    // The bake row is already gone, so a failed photo cleanup must not fail the delete.
+    // The photo path is derived from the ids, so this also covers a photo that was uploaded
+    // but never recorded on the row.
+    await deleteRemoteBakePhoto(userId, sessionId).catch(() => undefined);
+  }
+
+  return wasDeleted;
 }

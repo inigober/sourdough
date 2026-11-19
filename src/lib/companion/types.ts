@@ -5,6 +5,8 @@ import type { ScheduleInput } from '../schedule/types.ts';
 export type BakeCompleteSaveInput = {
   note: string;
   assessment?: BakeSessionAssessment;
+  /** Optional compressed loaf photo. Held in the dialog until saving; never stored in the session. */
+  photo?: Blob;
 };
 
 export type BakeSessionStepLog = {

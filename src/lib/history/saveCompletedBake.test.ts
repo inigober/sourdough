@@ -6,6 +6,7 @@ import { defaultRecipeInput } from '../recipe/defaults.ts';
 import { createDefaultScheduleInput } from '../schedule/defaults.ts';
 import { clearBakeSession, loadBakeSession, saveBakeSession } from '../storage/bakeSessionStorage.ts';
 import { listLocalBakeHistorySessions } from './localBakeHistoryStorage.ts';
+import { createMemoryBakePhotoStore } from './localBakePhotoStorage.ts';
 import { saveCompletedBake } from './saveCompletedBake.ts';
 import type { BakeHistorySession, CreateBakeHistorySessionInput } from './types.ts';
 
@@ -41,7 +42,7 @@ const remoteNever = async (): Promise<BakeHistorySession> => {
 test('signed out: the bake is saved on this device with its recipe link and notes', async () => {
   const storage = new MemoryStorage();
 
-  const destination = await saveCompletedBake({
+  const { destination } = await saveCompletedBake({
     session: buildSession(),
     input: { note: 'Great crumb', assessment: 'great' },
     userId: null,
@@ -64,7 +65,7 @@ test('signed in: the bake goes to the remote store and not to this device', asyn
   const storage = new MemoryStorage();
   const received: Array<{ userId: string; input: CreateBakeHistorySessionInput }> = [];
 
-  const destination = await saveCompletedBake({
+  const { destination } = await saveCompletedBake({
     session: buildSession(),
     input: { note: '', assessment: 'ok' },
     userId: 'user-1',
@@ -146,4 +147,104 @@ test('saving does not clear the bake session itself; only the caller does, after
   clearBakeSession(storage);
   assert.equal(loadBakeSession(storage), null);
   assert.equal(listLocalBakeHistorySessions(storage).length, 1);
+});
+
+const photo = new Blob(['jpeg-bytes'], { type: 'image/jpeg' });
+
+test('no photo chosen: the photo store is never touched', async () => {
+  const photoStore = createMemoryBakePhotoStore();
+
+  const result = await saveCompletedBake({
+    session: buildSession(),
+    input: { note: '' },
+    userId: null,
+    storage: new MemoryStorage(),
+    photoStore,
+    createRemote: remoteNever,
+  });
+
+  assert.equal(result.photo, 'none');
+  assert.deepEqual(await photoStore.keys(), []);
+});
+
+test('signed out: the photo is kept on this device under the local bake id', async () => {
+  const storage = new MemoryStorage();
+  const photoStore = createMemoryBakePhotoStore();
+
+  const result = await saveCompletedBake({
+    session: buildSession(),
+    input: { note: '' },
+    userId: null,
+    storage,
+    photo,
+    photoStore,
+    createRemote: remoteNever,
+  });
+
+  const [saved] = listLocalBakeHistorySessions(storage);
+  assert.equal(result.photo, 'kept-on-device');
+  assert.deepEqual(await photoStore.keys(), [saved?.id]);
+});
+
+test('signed in: the photo is uploaded to the remote bake id and not kept on this device', async () => {
+  const photoStore = createMemoryBakePhotoStore();
+  const uploads: Array<{ userId: string; bakeId: string }> = [];
+
+  const result = await saveCompletedBake({
+    session: buildSession(),
+    input: { note: '' },
+    userId: 'user-1',
+    storage: new MemoryStorage(),
+    photo,
+    photoStore,
+    createRemote: async () => ({ id: 'remote-bake' }) as BakeHistorySession,
+    uploadRemotePhoto: async (userId, bakeId) => {
+      uploads.push({ userId, bakeId });
+    },
+  });
+
+  assert.equal(result.photo, 'uploaded');
+  assert.deepEqual(uploads, [{ userId: 'user-1', bakeId: 'remote-bake' }]);
+  assert.deepEqual(await photoStore.keys(), []);
+});
+
+test('signed in: a failed photo upload still saves the bake and keeps the photo for a retry', async () => {
+  const photoStore = createMemoryBakePhotoStore();
+
+  const result = await saveCompletedBake({
+    session: buildSession(),
+    input: { note: '' },
+    userId: 'user-1',
+    storage: new MemoryStorage(),
+    photo,
+    photoStore,
+    createRemote: async () => ({ id: 'remote-bake' }) as BakeHistorySession,
+    uploadRemotePhoto: async () => {
+      throw new Error('storage down');
+    },
+  });
+
+  assert.equal(result.destination, 'remote');
+  assert.equal(result.photo, 'kept-on-device');
+  assert.deepEqual(await photoStore.keys(), ['remote-bake']);
+});
+
+test('a photo that cannot be stored anywhere is reported as lost, not thrown', async () => {
+  const photoStore = createMemoryBakePhotoStore();
+  photoStore.put = async () => {
+    throw new Error('IndexedDB unavailable');
+  };
+
+  const result = await saveCompletedBake({
+    session: buildSession(),
+    input: { note: '' },
+    userId: null,
+    storage: new MemoryStorage(),
+    photo,
+    photoStore,
+    createRemote: remoteNever,
+  });
+
+  assert.equal(result.destination, 'local');
+  assert.equal(result.photo, 'lost');
 });

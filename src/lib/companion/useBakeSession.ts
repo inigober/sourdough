@@ -1,8 +1,9 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 
 import { createBakeSession } from './bakeSession.ts';
 import type { BakeSession } from './types.ts';
+import { describePhotoOutcome } from '../history/bakePhotos.ts';
 import { createRemoteBakeHistorySession } from '../history/remoteBakeHistoryStorage.ts';
 import { saveCompletedBake as persistCompletedBake } from '../history/saveCompletedBake.ts';
 import type { RecipeInput } from '../recipe/types.ts';
@@ -47,6 +48,17 @@ export function useBakeSession({ user, onBakeSavedToHistory }: UseBakeSessionOpt
   const [isStartingBake, setIsStartingBake] = useState(false);
   const [isSavingBakeHistory, setIsSavingBakeHistory] = useState(false);
   const [saveBakeHistoryError, setSaveBakeHistoryError] = useState<string | null>(null);
+  /** Shown after the bake was saved but its photo needs attention. Clears itself. */
+  const [photoNotice, setPhotoNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!photoNotice) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => setPhotoNotice(null), 8000);
+    return () => window.clearTimeout(timeoutId);
+  }, [photoNotice]);
 
   const refreshResumableBakeSession = useCallback((): void => {
     setResumableBakeSession(loadBakeSession());
@@ -133,13 +145,15 @@ export function useBakeSession({ user, onBakeSavedToHistory }: UseBakeSessionOpt
       try {
         // Signed in: saved to the account. Signed out: saved on this device. The bake session
         // is only cleared below, after this resolves, so a failed save never loses the bake.
-        await persistCompletedBake({
+        const result = await persistCompletedBake({
           session: bakeSession,
           input,
           userId: user?.id ?? null,
           createRemote: createRemoteBakeHistorySession,
+          photo: input.photo,
         });
 
+        setPhotoNotice(describePhotoOutcome(result.photo, Boolean(user)));
         onBakeSavedToHistory();
         clearSessionAfterFinish();
         return true;
@@ -171,6 +185,7 @@ export function useBakeSession({ user, onBakeSavedToHistory }: UseBakeSessionOpt
     isSavingBakeHistory,
     saveBakeHistoryError,
     setSaveBakeHistoryError,
+    photoNotice,
     beginBakeSession,
     tryBeginBakeSession,
     confirmPendingBeginBakeSession,

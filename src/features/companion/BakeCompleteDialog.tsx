@@ -4,6 +4,7 @@ import { ConfirmDialog } from '../../components/ConfirmDialog.tsx';
 import { DialogCard } from '../../components/DialogCard.tsx';
 import { LoafAssessmentPicker } from '../../components/LoafAssessmentPicker.tsx';
 import type { BakeCompleteSaveInput } from '../../lib/companion/types.ts';
+import { BakePhotoPicker } from './BakePhotoPicker.tsx';
 import type { BakeSessionAssessment } from '../../lib/history/types.ts';
 
 export type { BakeCompleteSaveInput };
@@ -29,6 +30,8 @@ export function BakeCompleteDialog({
 }: BakeCompleteDialogProps) {
   const [note, setNote] = useState('');
   const [assessment, setAssessment] = useState<BakeSessionAssessment | undefined>();
+  const [photo, setPhoto] = useState<Blob | null>(null);
+  const [isPreparingPhoto, setIsPreparingPhoto] = useState(false);
   const [isDiscardConfirmOpen, setIsDiscardConfirmOpen] = useState(false);
 
   function handleAction(event: MouseEvent<HTMLButtonElement>, action: () => void): void {
@@ -56,8 +59,8 @@ export function BakeCompleteDialog({
           <button
             type="button"
             className="wizard-button wizard-button--primary"
-            onClick={(event) => handleAction(event, () => void onSave({ note, assessment }))}
-            disabled={isSaving}
+            onClick={(event) => handleAction(event, () => void onSave({ note, assessment, photo: photo ?? undefined }))}
+            disabled={isSaving || isPreparingPhoto}
           >
             {isSaving ? 'Saving…' : 'Save bake'}
           </button>
@@ -81,6 +84,7 @@ export function BakeCompleteDialog({
             placeholder="What went well? Anything to adjust next time?"
           />
         </label>
+        <BakePhotoPicker onChange={setPhoto} onBusyChange={setIsPreparingPhoto} disabled={isSaving} />
       </div>
       {saveError ? <p className="auth-modal__error">{saveError}</p> : null}
       <p className="dialog-card__message">

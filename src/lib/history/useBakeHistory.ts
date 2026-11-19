@@ -4,7 +4,9 @@ import type { User } from '@supabase/supabase-js';
 import type { AppMainTab } from '../../components/AppBottomNav.tsx';
 import { importLocalRecipesIfNeeded } from '../storage/importLocalRecipes.ts';
 import { listRemoteRecipeSummaries } from '../storage/remoteRecipeStorage.ts';
+import { retryPendingPhotoUploads } from './bakePhotos.ts';
 import { importLocalBakeHistoryIfNeeded } from './importLocalBakeHistory.ts';
+import { getDefaultBakePhotoStore } from './localBakePhotoStorage.ts';
 import {
   deleteLocalBakeHistorySession,
   getLocalBakeHistorySession,
@@ -19,6 +21,7 @@ import {
   listRemoteBakeHistorySummaries,
   updateRemoteBakeHistorySession,
 } from './remoteBakeHistoryStorage.ts';
+import { uploadRemoteBakePhoto } from './remoteBakePhotoStorage.ts';
 import type {
   BakeHistorySession,
   BakeHistorySessionSummary,
@@ -59,7 +62,18 @@ export function useBakeHistory({
     try {
       setBakeHistoryLoadError(null);
       const importError = await importLocalBakesAfterSignIn(user.id);
-      setBakeHistory(await listRemoteBakeHistorySummaries(user.id));
+      let summaries = await listRemoteBakeHistorySummaries(user.id);
+      // Photos whose upload failed earlier are retried whenever History loads.
+      const retried = await retryPendingPhotoUploads({
+        userId: user.id,
+        remoteBakes: summaries,
+        store: getDefaultBakePhotoStore(),
+        uploadRemote: uploadRemoteBakePhoto,
+      });
+      if (retried > 0) {
+        summaries = await listRemoteBakeHistorySummaries(user.id);
+      }
+      setBakeHistory(summaries);
       // Shown with "Try again", which retries the import. The bakes stay on this device meanwhile.
       setBakeHistoryLoadError(importError);
     } catch (error) {
@@ -143,6 +157,10 @@ export function useBakeHistory({
         await deleteRemoteBakeHistorySession(user.id, historyDetailId);
       } else {
         deleteLocalBakeHistorySession(historyDetailId);
+        // Best effort: a leftover photo only wastes space on this device.
+        await getDefaultBakePhotoStore()
+          .remove(historyDetailId)
+          .catch(() => undefined);
       }
 
       await loadBakeHistory();
@@ -203,6 +221,7 @@ async function importLocalBakesAfterSignIn(userId: string): Promise<string | nul
       listRemoteSummaries: listRemoteBakeHistorySummaries,
       listRemoteRecipeIds: async (id) => (await listRemoteRecipeSummaries(id)).map((recipe) => recipe.id),
       createRemote: createRemoteBakeHistorySession,
+      photos: { store: getDefaultBakePhotoStore(), uploadRemote: uploadRemoteBakePhoto },
     });
     return null;
   } catch (error) {

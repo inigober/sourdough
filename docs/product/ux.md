@@ -162,7 +162,7 @@ The sparkles button opens an AI baking coach for the current step (a Supabase ed
 
 ### 11. Bake Complete
 
-Finishing the last step opens "Bake complete" with an optional loaf assessment (Great loaf, OK, Needs work) and notes. **Save bake** saves it and only then clears the bake session. Closing the dialog (X, Escape, backdrop) keeps the bake so it shows as "Resume baking" on Home. **Don't save** asks for confirmation and is the only path that deletes an unsaved bake. See [Bake history](./bake-history.md).
+Finishing the last step opens "Bake complete" with an optional loaf assessment (Great loaf, OK, Needs work) notes and an optional loaf photo (compressed on the device). **Save bake** saves it and only then clears the bake session. Closing the dialog (X, Escape, backdrop) keeps the bake so it shows as "Resume baking" on Home. **Don't save** asks for confirmation and is the only path that deletes an unsaved bake. See [Bake history](./bake-history.md).
 
 ### 12. History
 
@@ -194,5 +194,5 @@ Network and storage failures (saving a recipe or a bake, loading history, the co
 
 - Tap a timeline step in the schedule builder to edit it.
 - Choose the oven time instead of the mix time when starting a bake (working backward).
-- Loaf photo on a saved bake, and "tweak recipe from notes" after a bake.
+- "Tweak recipe from notes" after a bake.
 - Streaming coach replies.

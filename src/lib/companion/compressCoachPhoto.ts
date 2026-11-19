@@ -16,8 +16,9 @@ export const COACH_PHOTO_BAKE_JPEG_QUALITY = 0.88;
 
 export const COACH_PHOTO_BAKE_MAX_BYTES = 500_000;
 
-const MIN_JPEG_QUALITY = 0.55;
-const QUALITY_STEP = 0.07;
+/** Lowest JPEG quality we step down to; also used by bake (loaf) photos. */
+export const MIN_JPEG_QUALITY = 0.55;
+export const QUALITY_STEP = 0.07;
 
 export type CompressCoachPhotoOptions = {
   maxDimension?: number;
@@ -62,7 +63,7 @@ export function computeScaledDimensions(
   };
 }
 
-function loadImageFromFile(file: Blob): Promise<HTMLImageElement> {
+export function loadImageFromFile(file: Blob): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const objectUrl = URL.createObjectURL(file);
     const image = new Image();
@@ -81,7 +82,7 @@ function loadImageFromFile(file: Blob): Promise<HTMLImageElement> {
   });
 }
 
-function canvasToJpegBlob(canvas: HTMLCanvasElement, quality: number): Promise<Blob> {
+export function canvasToJpegBlob(canvas: HTMLCanvasElement, quality: number): Promise<Blob> {
   return new Promise((resolve, reject) => {
     canvas.toBlob(
       (blob) => {
