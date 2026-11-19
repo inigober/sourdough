@@ -1,6 +1,7 @@
 import { NumberField } from '../../components/NumberField.tsx';
 import { SectionHeading } from '../../components/SectionHeading.tsx';
 import type { RecipeInput, RecipeValidationIssue } from '../../lib/recipe/types.ts';
+import { DOUGH_WEIGHT_LIMITS } from '../../lib/recipe/validation.ts';
 import { fieldInfo } from './fieldInfo.ts';
 import { getFieldValidationProps } from './validationView.ts';
 
@@ -29,11 +30,13 @@ export function DoughSizeSection({
           label="Final dough weight"
           suffix="g"
           value={recipeInput.finalDoughWeightGrams}
-          min={50}
+          min={DOUGH_WEIGHT_LIMITS.min}
+          max={DOUGH_WEIGHT_LIMITS.max}
           step={50}
           showSteppers
           info={fieldInfo.finalDoughWeightGrams}
           onChange={(value) => onNumberChange('finalDoughWeightGrams', value)}
+          keepOutOfRange
           {...getFieldValidationProps(validationIssues, 'finalDoughWeightGrams')}
         />
         <NumberField
@@ -43,6 +46,7 @@ export function DoughSizeSection({
           step={1}
           info={fieldInfo.numberOfLoaves}
           onChange={(value) => onNumberChange('numberOfLoaves', value)}
+          keepOutOfRange
           {...getFieldValidationProps(validationIssues, 'numberOfLoaves')}
         />
       </form>

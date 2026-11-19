@@ -55,6 +55,7 @@ export function FermentationSection({
           step={0.5}
           info={fieldInfo.targetBulkHours}
           onChange={(value) => onNumberChange('targetBulkHours', value)}
+          keepOutOfRange
           {...getFieldValidationProps(validationIssues, 'targetBulkHours')}
         />
         <NumberField
@@ -66,6 +67,7 @@ export function FermentationSection({
           step={1}
           info={fieldInfo.roomTemperatureCelsius}
           onChange={(value) => onNumberChange('roomTemperatureCelsius', value)}
+          keepOutOfRange
           {...getFieldValidationProps(validationIssues, 'roomTemperatureCelsius')}
         />
         <SelectField
@@ -93,6 +95,7 @@ export function FermentationSection({
             step={1}
             info={fieldInfo.levainHydrationPercent}
             onChange={onLevainHydrationChange}
+            keepOutOfRange
             {...getFieldValidationProps(validationIssues, 'levainHydrationPercent')}
           />
         ) : null}

@@ -101,6 +101,7 @@ That flags an intentional product choice so we can discuss tradeoffs once instea
 | Labels stay visible; placeholders are not a substitute for labels. | Accessibility and clarity when values are filled. |
 | Validation messages appear next to the affected field. | User knows what to fix without scanning the whole form. |
 | Blocking errors prevent Continue only when calculation or the step's required input is impossible. | Warnings inform; errors gate. |
+| Never silently clamp or revert what the user typed. Keep their text, show the message next to the field once they leave it, and gate Continue. | Silent rewrites hide mistakes (150% hydration became 110%). |
 | Numeric fields use appropriate `min`, `max`, `step`, and suffix (`g`, `%`, `h`, `°C`). | Reduces garbage input and ambiguity. |
 
 ---
@@ -146,3 +147,4 @@ Add a line here when a practice is added or changed after a product discussion.
 
 - 2026-05-20: Initial doc from wizard, info bubbles, flour step, and responsive field patterns.
 - 2026-05-20: Removed header preview chips; live previews belong in step content with labels.
+- 2026-11-19: Forms never silently clamp or revert typed numbers; messages show on blur.

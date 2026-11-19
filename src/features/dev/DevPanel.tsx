@@ -145,7 +145,7 @@ export function DevPanel({ isSignedIn, onClose, onSignOut }: DevPanelProps) {
       }
     >
       <p id="dev-panel-message" className="dialog-card__message dev-panel__hint">
-        Unlocked by tapping the home title or Home tab {DEV_PANEL_UNLOCK_TAP_COUNT} times within{' '}
+        Unlocked by tapping the Home tab on the home screen {DEV_PANEL_UNLOCK_TAP_COUNT} times within{' '}
         {DEV_PANEL_UNLOCK_WINDOW_MS / 1000} seconds.
       </p>
       <section className="dev-panel__storage" aria-label="Local app state">

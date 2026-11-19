@@ -1,3 +1,4 @@
+import { normalizeCoachTranscript } from '../companion/coachTranscript.ts';
 import { migrateBakeSession } from '../companion/migrateBakeSession.ts';
 import type { BakeSession } from '../companion/types.ts';
 import { normalizeScheduleInput } from '../schedule/normalizeScheduleInput.ts';
@@ -33,6 +34,7 @@ export function loadBakeSession(storage: StorageLike = getDefaultStorage()): Bak
       currentStepStartedAt: parsed.currentStepStartedAt ?? null,
       stepLogs: parsed.stepLogs ?? [],
       coachQuestionsAsked: parsed.coachQuestionsAsked ?? 0,
+      coachTranscript: normalizeCoachTranscript(parsed.coachTranscript),
     });
   } catch {
     return null;

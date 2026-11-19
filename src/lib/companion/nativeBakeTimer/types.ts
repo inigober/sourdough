@@ -24,6 +24,8 @@ export type NativeBakeTimerClient = {
   cancel(timerId: string): Promise<void>;
   cancelAll(): Promise<void>;
   openSettings(): Promise<void>;
+  /** Stops the screen auto-locking (iOS idle timer). No-op on web. */
+  setKeepAwake(enabled: boolean): Promise<void>;
 };
 
 export type DesiredNativeBakeTimer = NativeBakeTimerRequest;

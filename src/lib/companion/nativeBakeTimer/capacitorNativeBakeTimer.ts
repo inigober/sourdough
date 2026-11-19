@@ -22,6 +22,7 @@ type BakeTimerPlugin = {
   cancel(options: { timerId: string }): Promise<void>;
   cancelAll(): Promise<void>;
   openSettings(): Promise<void>;
+  setKeepAwake(options: { enabled: boolean }): Promise<void>;
 };
 
 const BakeTimer = registerPlugin<BakeTimerPlugin>('BakeTimer');
@@ -86,5 +87,13 @@ export const capacitorNativeBakeTimer: NativeBakeTimerClient = {
     }
 
     await BakeTimer.openSettings();
+  },
+
+  async setKeepAwake(enabled: boolean) {
+    if (!isNativePlatform()) {
+      return;
+    }
+
+    await BakeTimer.setKeepAwake({ enabled });
   },
 };

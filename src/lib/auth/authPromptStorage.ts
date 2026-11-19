@@ -36,3 +36,21 @@ export function setAuthPromptDismissed(dismissed: boolean, storage?: StorageLike
 
   resolved.removeItem(AUTH_PROMPT_DISMISSED_KEY);
 }
+
+type AuthOfferContext = {
+  isSignedIn: boolean;
+  isConfigured: boolean;
+};
+
+/**
+ * Whether to offer the "Sync your recipes" modal on our own initiative (after a recipe is saved).
+ * Only when cloud sync exists, the baker is signed out, and they have not already dismissed it.
+ * Explicit sign-in taps (top bar, history) skip this check and always open the modal.
+ */
+export function shouldOfferAuthPrompt(context: AuthOfferContext, storage?: StorageLike): boolean {
+  if (!context.isConfigured || context.isSignedIn) {
+    return false;
+  }
+
+  return !isAuthPromptDismissed(storage);
+}

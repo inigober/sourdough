@@ -20,6 +20,7 @@ public class BakeTimerPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "cancel", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "cancelAll", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "openSettings", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "setKeepAwake", returnType: CAPPluginReturnPromise),
     ]
 
     private let storageKey = "sourdough.activeBakeTimerIds"
@@ -44,6 +45,22 @@ public class BakeTimerPlugin: CAPPlugin, CAPBridgedPlugin {
                 "status": status,
                 "alertMode": alertMode,
             ])
+        }
+    }
+
+    /// Keeps the screen from auto-locking while bake mode is open.
+    /// JS must call this with `enabled: false` when leaving bake mode; `deinit` is a safety net.
+    @objc func setKeepAwake(_ call: CAPPluginCall) {
+        let enabled = call.getBool("enabled") ?? false
+        DispatchQueue.main.async {
+            UIApplication.shared.isIdleTimerDisabled = enabled
+            call.resolve()
+        }
+    }
+
+    deinit {
+        DispatchQueue.main.async {
+            UIApplication.shared.isIdleTimerDisabled = false
         }
     }
 

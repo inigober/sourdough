@@ -2,7 +2,18 @@ import { useCallback, useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 
 import type { AppMainTab } from '../../components/AppBottomNav.tsx';
+import { importLocalRecipesIfNeeded } from '../storage/importLocalRecipes.ts';
+import { listRemoteRecipeSummaries } from '../storage/remoteRecipeStorage.ts';
+import { importLocalBakeHistoryIfNeeded } from './importLocalBakeHistory.ts';
 import {
+  deleteLocalBakeHistorySession,
+  getLocalBakeHistorySession,
+  listLocalBakeHistorySessions,
+  listLocalBakeHistorySummaries,
+  updateLocalBakeHistorySession,
+} from './localBakeHistoryStorage.ts';
+import {
+  createRemoteBakeHistorySession,
   deleteRemoteBakeHistorySession,
   getRemoteBakeHistorySession,
   listRemoteBakeHistorySummaries,
@@ -19,7 +30,6 @@ type UseBakeHistoryOptions = {
   isConfigured: boolean;
   mainTab: AppMainTab;
   historyDetailId: string | null;
-  onRequireAuth: () => void;
 };
 
 export function useBakeHistory({
@@ -27,7 +37,6 @@ export function useBakeHistory({
   isConfigured,
   mainTab,
   historyDetailId,
-  onRequireAuth,
 }: UseBakeHistoryOptions) {
   const useCloudHistory = Boolean(user && isConfigured);
 
@@ -41,14 +50,18 @@ export function useBakeHistory({
 
   const loadBakeHistory = useCallback(async (): Promise<void> => {
     if (!useCloudHistory || !user) {
-      setBakeHistory([]);
+      // Signed out: history lives on this device.
       setBakeHistoryLoadError(null);
+      setBakeHistory(listLocalBakeHistorySummaries());
       return;
     }
 
     try {
       setBakeHistoryLoadError(null);
+      const importError = await importLocalBakesAfterSignIn(user.id);
       setBakeHistory(await listRemoteBakeHistorySummaries(user.id));
+      // Shown with "Try again", which retries the import. The bakes stay on this device meanwhile.
+      setBakeHistoryLoadError(importError);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load bake history.';
       setBakeHistoryLoadError(message);
@@ -64,17 +77,15 @@ export function useBakeHistory({
 
   const loadHistoryDetail = useCallback(
     async (id: string): Promise<void> => {
-      if (!user) {
-        onRequireAuth();
-        return;
-      }
-
       setIsLoadingHistoryDetail(true);
       setActiveHistorySession(null);
       setHistoryDetailLoadError(null);
 
       try {
-        const session = await getRemoteBakeHistorySession(user.id, id);
+        const session =
+          useCloudHistory && user
+            ? await getRemoteBakeHistorySession(user.id, id)
+            : getLocalBakeHistorySession(id);
         if (!session) {
           clearHistoryDetailState();
           await loadBakeHistory();
@@ -89,12 +100,12 @@ export function useBakeHistory({
         setIsLoadingHistoryDetail(false);
       }
     },
-    [clearHistoryDetailState, loadBakeHistory, onRequireAuth, user],
+    [clearHistoryDetailState, loadBakeHistory, useCloudHistory, user],
   );
 
   const updateHistoryDetail = useCallback(
     async (input: UpdateBakeHistorySessionInput): Promise<void> => {
-      if (!user || !historyDetailId) {
+      if (!historyDetailId) {
         return;
       }
 
@@ -102,7 +113,10 @@ export function useBakeHistory({
       setHistoryDetailError(null);
 
       try {
-        const updated = await updateRemoteBakeHistorySession(user.id, historyDetailId, input);
+        const updated =
+          useCloudHistory && user
+            ? await updateRemoteBakeHistorySession(user.id, historyDetailId, input)
+            : updateLocalBakeHistorySession(historyDetailId, input);
         setActiveHistorySession(updated);
         await loadBakeHistory();
       } catch (error) {
@@ -113,11 +127,11 @@ export function useBakeHistory({
         setIsSavingHistoryDetail(false);
       }
     },
-    [historyDetailId, loadBakeHistory, user],
+    [historyDetailId, loadBakeHistory, useCloudHistory, user],
   );
 
   const deleteHistoryDetail = useCallback(async (): Promise<void> => {
-    if (!user || !historyDetailId) {
+    if (!historyDetailId) {
       return;
     }
 
@@ -125,7 +139,12 @@ export function useBakeHistory({
     setHistoryDetailError(null);
 
     try {
-      await deleteRemoteBakeHistorySession(user.id, historyDetailId);
+      if (useCloudHistory && user) {
+        await deleteRemoteBakeHistorySession(user.id, historyDetailId);
+      } else {
+        deleteLocalBakeHistorySession(historyDetailId);
+      }
+
       await loadBakeHistory();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to delete bake history.';
@@ -133,14 +152,14 @@ export function useBakeHistory({
     } finally {
       setIsSavingHistoryDetail(false);
     }
-  }, [historyDetailId, loadBakeHistory, user]);
+  }, [historyDetailId, loadBakeHistory, useCloudHistory, user]);
 
   useEffect(() => {
     void loadBakeHistory();
   }, [loadBakeHistory]);
 
   useEffect(() => {
-    if (mainTab === 'history' && user) {
+    if (mainTab === 'history') {
       void loadBakeHistory();
     }
   }, [loadBakeHistory, mainTab, user?.id]);
@@ -166,4 +185,28 @@ export function useBakeHistory({
     updateHistoryDetail,
     deleteHistoryDetail,
   };
+}
+
+/**
+ * Moves bakes saved on this device while signed out into the account. Recipes are imported
+ * first so a bake can keep its link to its recipe. Returns an error message instead of throwing,
+ * so the account's own history still loads when the import fails.
+ */
+async function importLocalBakesAfterSignIn(userId: string): Promise<string | null> {
+  if (listLocalBakeHistorySessions().length === 0) {
+    return null;
+  }
+
+  try {
+    await importLocalRecipesIfNeeded(userId);
+    await importLocalBakeHistoryIfNeeded(userId, {
+      listRemoteSummaries: listRemoteBakeHistorySummaries,
+      listRemoteRecipeIds: async (id) => (await listRemoteRecipeSummaries(id)).map((recipe) => recipe.id),
+      createRemote: createRemoteBakeHistorySession,
+    });
+    return null;
+  } catch (error) {
+    const reason = error instanceof Error && error.message ? ` (${error.message})` : '';
+    return `Bakes saved on this device could not be backed up yet${reason}. They are still on this device.`;
+  }
 }

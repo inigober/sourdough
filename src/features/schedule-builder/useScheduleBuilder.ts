@@ -11,6 +11,14 @@ import {
   getProofingStyleAdvice,
   getTotalBakeMinutes,
 } from '../../lib/schedule/scheduleAdvice.ts';
+import {
+  findMatchingSchedulePresetId,
+  getSchedulePresetChanges,
+  getSchedulePresetPatch,
+  hasEditedScheduleValues,
+  SCHEDULE_PRESET_INFO,
+  type SchedulePresetId,
+} from '../../lib/schedule/presets.ts';
 import { getColdRetardHours, roundColdRetardHoursUp } from '../../lib/schedule/scheduleTiming.ts';
 import {
   formatBakeDayLabel,
@@ -34,10 +42,17 @@ type UseScheduleBuilderOptions = {
   recipeInput: RecipeInput;
   scheduleInput: ScheduleInput;
   recipeName: string;
+  onScheduleChange: (patch: Partial<ScheduleInput>) => void;
 };
 
-export function useScheduleBuilder({ recipeInput, scheduleInput, recipeName }: UseScheduleBuilderOptions) {
+export function useScheduleBuilder({
+  recipeInput,
+  scheduleInput,
+  recipeName,
+  onScheduleChange,
+}: UseScheduleBuilderOptions) {
   const [exportMessage, setExportMessage] = useState<string | null>(null);
+  const [pendingPresetId, setPendingPresetId] = useState<SchedulePresetId | null>(null);
 
   const autolyseAdvice = useMemo(() => getAutolyseRecommendation(recipeInput), [recipeInput]);
   const autolyseTimeAdvice = useMemo(() => getAutolyseTimeAdvice(recipeInput), [recipeInput]);
@@ -158,8 +173,59 @@ export function useScheduleBuilder({ recipeInput, scheduleInput, recipeName }: U
     setExportMessage('Recipe JSON copied');
   }, [recipeInput, recipeName, scheduleInput, timeline]);
 
+  const matchedPresetId = useMemo(
+    () => findMatchingSchedulePresetId(scheduleInput, recipeInput),
+    [scheduleInput, recipeInput],
+  );
+
+  const applyPreset = useCallback(
+    (presetId: SchedulePresetId): void => {
+      onScheduleChange(getSchedulePresetPatch(presetId, recipeInput));
+    },
+    [onScheduleChange, recipeInput],
+  );
+
+  // Choosing a preset never overwrites silently: if the user has changed the plan by hand, ask first.
+  const choosePreset = useCallback(
+    (presetId: SchedulePresetId): void => {
+      if (!hasEditedScheduleValues(scheduleInput, recipeInput)) {
+        applyPreset(presetId);
+        return;
+      }
+
+      setPendingPresetId(presetId);
+    },
+    [applyPreset, recipeInput, scheduleInput],
+  );
+
+  const pendingPreset = useMemo(() => {
+    const info = SCHEDULE_PRESET_INFO.find((preset) => preset.id === pendingPresetId);
+    if (!info) {
+      return null;
+    }
+
+    return {
+      info,
+      changes: getSchedulePresetChanges(scheduleInput, info.id, recipeInput),
+    };
+  }, [pendingPresetId, recipeInput, scheduleInput]);
+
+  const confirmPendingPreset = useCallback((): void => {
+    if (pendingPresetId) {
+      applyPreset(pendingPresetId);
+    }
+    setPendingPresetId(null);
+  }, [applyPreset, pendingPresetId]);
+
+  const cancelPendingPreset = useCallback((): void => setPendingPresetId(null), []);
+
   return {
     exportMessage,
+    matchedPresetId,
+    pendingPreset,
+    choosePreset,
+    confirmPendingPreset,
+    cancelPendingPreset,
     autolyseAdvice,
     autolyseTimeAdvice,
     proofingAdvice,

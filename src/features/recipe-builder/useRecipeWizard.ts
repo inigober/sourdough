@@ -12,7 +12,11 @@ import {
   updateFlourType as setFlourTypeInBlend,
 } from '../../lib/recipe/flourBlend.ts';
 import { cloneTemplateRecipeInput, getRecipeTemplate } from '../../lib/recipe/templates.ts';
-import { hasBlockingValidationIssue, validateRecipeInput } from '../../lib/recipe/validation.ts';
+import {
+  hasBlockingValidationIssue,
+  hasMissingNumber,
+  validateRecipeInput,
+} from '../../lib/recipe/validation.ts';
 import type {
   FlourType,
   LevainActivity,
@@ -106,6 +110,11 @@ export function useRecipeWizard({
 
   useEffect(() => {
     if (phase === 'companion') {
+      return;
+    }
+
+    // A cleared field is not a recipe worth resuming. Keep the last complete draft instead.
+    if (hasMissingNumber(recipeInput)) {
       return;
     }
 
@@ -302,7 +311,14 @@ export function useRecipeWizard({
       return nextInput;
     });
 
-    if (field === 'finalDoughWeightGrams' || field === 'numberOfLoaves') {
+    // While a size field is cleared or at 0, there is no per-loaf weight to scale the bake from.
+    const canScaleBake =
+      nextInput !== undefined &&
+      Number.isFinite(nextInput.finalDoughWeightGrams) &&
+      Number.isFinite(nextInput.numberOfLoaves) &&
+      nextInput.numberOfLoaves > 0;
+
+    if ((field === 'finalDoughWeightGrams' || field === 'numberOfLoaves') && canScaleBake) {
       setScheduleInput((currentSchedule) =>
         scaleScheduleBakeParamsForDoughSize(nextInput!, currentSchedule),
       );

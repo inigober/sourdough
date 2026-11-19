@@ -20,7 +20,7 @@ Phase 1 should prioritize clarity, trust, and learning over speed.
 - Use a guided multi-step flow for first-time clarity.
 - End with an editable summary where the user can adjust key parameters and immediately see the impact.
 - Keep explanations hidden by default behind info buttons.
-- Use friendly expert language, not beginner simplification.
+- Use friendly expert language, not beginner simplification. **Exception: the schedule builder** (see below), which deliberately starts from simple presets.
 - Show calculated values transparently, especially levain amount and prefermented flour percentage.
 - Avoid full scheduling in Phase 1.
 
@@ -237,6 +237,28 @@ Deferred actions:
 - Generate full schedule
 - Start timers
 - Ask AI coach
+
+## Schedule Builder: Presets First
+
+Decision (owner, from the UX review in `ux-review-commercial-viability.md`, section 2.7): the "no beginner simplification" principle does **not** apply to the schedule builder. A 25-field expert form was too much for a first-time baker, so the screen now leads with simple choices and keeps the expert controls one tap away.
+
+Layout, top to bottom:
+
+1. **Choose a plan**: three presets, each with a one-sentence plain-language description.
+   - *Simple overnight*: mix and fold during the day, about 14 hours in the fridge, bake at 08:00 the next morning. Stretch-and-folds only.
+   - *Same day*: start at 07:00, proof at room temperature, bake the same evening. Stretch-and-folds only.
+   - *Weekend deep ferment*: about 20 hours in the fridge, bake around midday the next day. Full fold plan for the dough's hydration, 60-minute autolyse.
+2. **Bake schedule**: the resulting timeline directly beneath the presets, updating as soon as a plan is chosen.
+3. **Customise** (collapsed): the existing fields, grouped into collapsed sections (Starter prep, Start time and mixing, Folding and shaping, Proofing, Baking). Jargon fields carry a visible one-line explanation (for example "Coil fold: a gentle fold done in the bowl").
+
+How presets behave:
+
+- A preset sets only the shape of the day: start time, autolyse, mixing rests, folds, pre-shape, and cold vs room-temperature proofing. Oven method and temperatures, starter prep and the (absent) calendar date are never touched.
+- Cold presets keep the bake time and fridge time fixed and work out the start time from the recipe's bulk length, so a 4-hour and a 10-hour bulk both get a sensible overnight.
+- Nothing about the chosen preset is stored. The builder compares the current values with each preset: a match shows that plan as selected, anything else shows **Custom**. Saved recipes and bake sessions keep exactly the shape they have today.
+- Opening the builder never changes existing values. Choosing a preset over values the user has edited asks for confirmation and lists what will be reset.
+
+Not built yet: tapping a timeline step to edit it, and warnings for night-time steps.
 
 ## Navigation
 

@@ -28,6 +28,7 @@ type BakeHistoryDetailViewProps = {
   onBack: () => void;
   onUpdate: (input: UpdateBakeHistorySessionInput) => Promise<void>;
   onDelete: () => Promise<void>;
+  onBakeAgain: () => void;
 };
 
 export function BakeHistoryDetailView({
@@ -37,6 +38,7 @@ export function BakeHistoryDetailView({
   onBack,
   onUpdate,
   onDelete,
+  onBakeAgain,
 }: BakeHistoryDetailViewProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -114,6 +116,13 @@ export function BakeHistoryDetailView({
             ) : null}
           </div>
         </div>
+        <button
+          type="button"
+          className="wizard-button wizard-button--primary bake-history-detail__bake-again"
+          onClick={onBakeAgain}
+        >
+          Bake again
+        </button>
       </section>
 
       <section className="card bake-history-detail__note" aria-label="Bake notes">

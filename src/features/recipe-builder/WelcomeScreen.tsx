@@ -12,6 +12,7 @@ import type {
 } from '../../lib/history/types.ts';
 import type { BuilderDraftSummary } from '../../lib/storage/draftStorage.ts';
 import type { SavedRecipeSummary } from '../../lib/storage/types.ts';
+import type { RecipeBakeStats } from '../../lib/history/recipeBakeStats.ts';
 import { BakeHistoryDetailView } from '../history/BakeHistoryDetailView.tsx';
 import { BakeHistoryView } from '../history/BakeHistoryView.tsx';
 import { WelcomeStep } from './steps/WelcomeStep.tsx';
@@ -36,6 +37,7 @@ type WelcomeScreenProps = {
   onStartBake: (id: string) => void;
   onRetrySavedRecipes: () => void;
   isSignedIn: boolean;
+  isAuthConfigured: boolean;
   bakeHistory: BakeHistorySessionSummary[];
   bakeHistoryLoadError: string | null;
   historyDetailId: string | null;
@@ -48,6 +50,8 @@ type WelcomeScreenProps = {
   onRetryHistoryLoad: () => void;
   onCloseHistoryDetail: () => void;
   onUpdateHistoryDetail: (input: UpdateBakeHistorySessionInput) => Promise<void>;
+  onBakeAgainFromHistory: (session: BakeHistorySession) => void;
+  recipeBakeStats: Record<string, RecipeBakeStats>;
   onDeleteHistoryDetail: () => Promise<void>;
   onDevPanelUnlock: () => void;
   children?: ReactNode;
@@ -73,6 +77,7 @@ export function WelcomeScreen({
   onStartBake,
   onRetrySavedRecipes,
   isSignedIn,
+  isAuthConfigured,
   bakeHistory,
   bakeHistoryLoadError,
   historyDetailId,
@@ -86,6 +91,8 @@ export function WelcomeScreen({
   onCloseHistoryDetail,
   onUpdateHistoryDetail,
   onDeleteHistoryDetail,
+  onBakeAgainFromHistory,
+  recipeBakeStats,
   onDevPanelUnlock,
   children,
 }: WelcomeScreenProps) {
@@ -109,13 +116,14 @@ export function WelcomeScreen({
           onDeleteRecipe={onDeleteRecipe}
           onOpenAuth={onOpenAuth}
           onStartBake={onStartBake}
+          recipeBakeStats={recipeBakeStats}
           onRetrySavedRecipes={onRetrySavedRecipes}
-          onDevUnlockTap={() => registerUnlockTap()}
         />
       ) : null}
       {mainTab === 'history' && !historyDetailId ? (
         <BakeHistoryView
           isSignedIn={isSignedIn}
+          canSignIn={isAuthConfigured}
           entries={bakeHistory}
           loadError={bakeHistoryLoadError}
           onOpenAuth={onOpenAuth}
@@ -142,6 +150,7 @@ export function WelcomeScreen({
             onBack={onCloseHistoryDetail}
             onUpdate={onUpdateHistoryDetail}
             onDelete={onDeleteHistoryDetail}
+            onBakeAgain={() => onBakeAgainFromHistory(activeHistorySession)}
           />
         ) : historyDetailLoadError ? (
           <>

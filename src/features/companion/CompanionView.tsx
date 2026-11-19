@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 
+import { ConfirmDialog } from '../../components/ConfirmDialog.tsx';
 import { PageShell } from '../../components/PageShell.tsx';
+import { Toast } from '../../components/Toast.tsx';
 import { buildTimeline, formatTimelineForDisplay } from '../../lib/schedule/buildTimeline.ts';
 import { formatBakeDateLong, getBakeDateIso, getMixDateIso } from '../../lib/schedule/dates.ts';
 import {
@@ -10,10 +13,13 @@ import {
 import {
   advanceBakeSession,
   getCurrentTimelineStep,
+  getForwardStepSkipCount,
+  getNextTimelineStep,
   getPreviousTimelineStep,
   isBakeSessionComplete,
   jumpToBakeStep,
   restartStepTimer,
+  restoreBakeSessionSnapshot,
   retreatBakeSession,
   startTimedStep,
   updateBakeSessionSchedule,
@@ -21,8 +27,12 @@ import {
 import {
   applyScheduleDriftToTimeline,
   canStartTimedStep,
+  formatDurationMinutes,
   getDisplayStepTimes,
+  getEarlyStartMinutes,
+  getMinutesUntilStep,
   isTimedStepRunning,
+  shouldConfirmEarlyStart,
 } from '../../lib/companion/liveSchedule.ts';
 import { getStepScheduleEdit } from '../../lib/companion/stepScheduleEdits.ts';
 import { finalizeBakeSessionForHistory } from '../../lib/history/buildBakeHistorySteps.ts';
@@ -36,8 +46,20 @@ import { BakeCompleteDialog, type BakeCompleteSaveInput } from './BakeCompleteDi
 import { CompanionCoachPanel } from './CompanionCoachPanel.tsx';
 import { CompanionStepEditDialog } from './CompanionStepEditDialog.tsx';
 import { CompanionBakeTimerPermissionNotice } from './CompanionBakeTimerPermissionNotice.tsx';
-import { getBakeTimerTestOverrideMinutes } from '../../lib/companion/bakeTimerTestOverride.ts';
+import {
+  getBakeTimerTestOverrideMinutes,
+  getBakeTimerTestOverrideNotice,
+} from '../../lib/companion/bakeTimerTestOverride.ts';
+import { useBakeKeepAwake } from '../../lib/companion/useBakeKeepAwake.ts';
 import { useBakeNativeTimer } from '../../lib/companion/nativeBakeTimer/useBakeNativeTimer.ts';
+
+/** How long the Undo toast stays after Next step / Jump. */
+const UNDO_TOAST_MS = 8000;
+
+type UndoAction = {
+  message: string;
+  snapshot: BakeSession;
+};
 
 type CompanionViewProps = {
   session: BakeSession;
@@ -45,7 +67,8 @@ type CompanionViewProps = {
   onSaveBake: (input: BakeCompleteSaveInput) => Promise<void>;
   isSavingBake: boolean;
   saveBakeError: string | null;
-  onExit: (finished: boolean) => void;
+  /** `discardBake: true` deletes the bake session; false keeps it so the bake can be resumed. */
+  onExit: (discardBake: boolean) => void;
 };
 
 export function CompanionView({
@@ -60,6 +83,14 @@ export function CompanionView({
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [isCoachOpen, setIsCoachOpen] = useState(false);
   const [timerNow, setTimerNow] = useState(() => Date.now());
+  // Minute-level clock for "Starts in" / "Next up" labels (the timer clock above only ticks while a timer runs).
+  const [clockNow, setClockNow] = useState(() => Date.now());
+  const [undoAction, setUndoAction] = useState<UndoAction | null>(null);
+  const [pendingJumpIndex, setPendingJumpIndex] = useState<number | null>(null);
+  const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
+  const [pendingEarlyStartMinutes, setPendingEarlyStartMinutes] = useState<number | null>(null);
+
+  useBakeKeepAwake();
 
   const timeline = useMemo(() => {
     const baseTimeline = formatTimelineForDisplay(
@@ -78,6 +109,7 @@ export function CompanionView({
     currentStep ?? null,
   );
   const previousStep = getPreviousTimelineStep(timeline, session);
+  const nextStep = getNextTimelineStep(timeline, session);
   const isComplete = isBakeSessionComplete(session, timeline.length);
   const timerTestOverrideMinutes = currentStep
     ? getBakeTimerTestOverrideMinutes(currentStep)
@@ -87,6 +119,11 @@ export function CompanionView({
   const stepCanStart = currentStep ? canStartTimedStep(session, currentStep) : false;
   const coachTopic = currentStep ? getCoachTopicForStepId(currentStep.id) : null;
   const currentStepTimes = currentStep ? getDisplayStepTimes(session, currentStep) : null;
+  const currentStepStartsInMinutes =
+    currentStep && !stepIsRunning ? getMinutesUntilStep(session, currentStep, clockNow) : 0;
+  const nextStepStartsInMinutes = nextStep ? getMinutesUntilStep(session, nextStep, clockNow) : 0;
+  // Web build only: the browser cannot ring with the screen off, native iOS can.
+  const isWebBuild = !Capacitor.isNativePlatform();
   const mixDateLabel = formatBakeDateLong(getMixDateIso(session.scheduleInput));
   const bakeDateLabel = formatBakeDateLong(
     getBakeDateIso(session.scheduleInput, session.recipeInput),
@@ -116,7 +153,35 @@ export function CompanionView({
     return () => window.clearInterval(interval);
   }, [session.activeTimerEndsAt]);
 
+  useEffect(() => {
+    setClockNow(Date.now());
+    const interval = window.setInterval(() => setClockNow(Date.now()), 30_000);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (!undoAction) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => setUndoAction(null), UNDO_TOAST_MS);
+    return () => window.clearTimeout(timeout);
+  }, [undoAction]);
+
   const timerRemainingSeconds = getTimerRemainingSeconds(session.activeTimerEndsAt, timerNow);
+
+  function offerUndo(message: string): void {
+    setUndoAction({ message, snapshot: session });
+  }
+
+  function handleUndo(): void {
+    if (!undoAction) {
+      return;
+    }
+
+    onSessionChange(restoreBakeSessionSnapshot(session, undoAction.snapshot));
+    setUndoAction(null);
+  }
 
   function handleNextStep(): void {
     if (!currentStep) {
@@ -129,27 +194,64 @@ export function CompanionView({
       return;
     }
 
+    offerUndo(`Finished “${currentStep.label}”.`);
     onSessionChange(advanceBakeSession(session, timeline.length, currentStep));
   }
 
   function handlePrevious(): void {
+    setUndoAction(null);
     onSessionChange(retreatBakeSession(session));
   }
 
-  function handleJumpToStep(index: number): void {
+  // A forward jump of more than one step discards the running timer and logs steps as
+  // skipped, so it asks first. Everything else applies and offers Undo.
+  function handleRequestJump(index: number): void {
+    if (getForwardStepSkipCount(session, index) > 1) {
+      setPendingJumpIndex(index);
+      return;
+    }
+
+    performJump(index);
+  }
+
+  function performJump(index: number): void {
+    const target = timeline[index];
+    if (!target) {
+      return;
+    }
+
+    offerUndo(`Jumped to “${target.label}”.`);
+    setSelectedRowIndex(null);
+    setPendingJumpIndex(null);
     onSessionChange(jumpToBakeStep(session, index, timeline));
   }
 
   function handleSaveStepEdit(scheduleInput: ScheduleInput): void {
+    setUndoAction(null);
     onSessionChange(updateBakeSessionSchedule(session, scheduleInput));
     setIsEditingStep(false);
   }
 
-  async function handleStartStep(): Promise<void> {
+  function handleStartStep(): void {
     if (!currentStep) {
       return;
     }
 
+    if (shouldConfirmEarlyStart(session, currentStep)) {
+      setPendingEarlyStartMinutes(getEarlyStartMinutes(session, currentStep));
+      return;
+    }
+
+    void startStepNow();
+  }
+
+  async function startStepNow(): Promise<void> {
+    if (!currentStep) {
+      return;
+    }
+
+    setPendingEarlyStartMinutes(null);
+    setUndoAction(null);
     await ensurePermissionForStartTimer();
     onSessionChange(startTimedStep(session, currentStep));
     setTimerNow(Date.now());
@@ -160,6 +262,7 @@ export function CompanionView({
       return;
     }
 
+    setUndoAction(null);
     onSessionChange(restartStepTimer(session, currentStep));
     setTimerNow(Date.now());
   }
@@ -199,13 +302,22 @@ export function CompanionView({
       }
     >
       <section className="hero companion__hero">
-        <p className="hero-copy">
-          Mix the dough on {mixDateLabel}. Oven-bake on {bakeDateLabel}. Stuck on a step? Tap the
-          sparkles button to ask the AI baking coach for help.
-        </p>
         <p className="companion__progress">
           Step {session.currentStepIndex + 1} of {timeline.length}
         </p>
+        <details className="companion__about">
+          <summary>About this bake</summary>
+          <p className="hero-copy">
+            Mix the dough on {mixDateLabel}. Oven-bake on {bakeDateLabel}. Stuck on a step? Tap the
+            sparkles button to ask the AI baking coach for help.
+          </p>
+        </details>
+        {isWebBuild ? (
+          <p className="companion__web-banner" role="note">
+            This web version can&apos;t alert you with the screen off. Use the iOS app or keep this
+            screen open.
+          </p>
+        ) : null}
         {session.scheduleDriftMinutes !== 0 ? (
           <p className="companion__drift" role="status">
             Remaining schedule shifted by {formatDriftLabel(session.scheduleDriftMinutes)} based on actual timing.
@@ -221,9 +333,7 @@ export function CompanionView({
         ) : null}
         {timerTestOverrideMinutes !== null ? (
           <p className="companion__drift" role="status">
-            Test mode: this step&apos;s timer runs for {timerTestOverrideMinutes} minute
-            {timerTestOverrideMinutes === 1 ? '' : 's'}. Remove <code>VITE_BAKE_TIMER_TEST_MINUTES</code>{' '}
-            from <code>.env.local</code> to use the real duration.
+            {getBakeTimerTestOverrideNotice(timerTestOverrideMinutes)}
           </p>
         ) : null}
       </section>
@@ -263,6 +373,9 @@ export function CompanionView({
             <SparklesIcon />
           </button>
         </div>
+        {currentStepStartsInMinutes > 0 ? (
+          <p className="companion__starts-in">Starts in {formatDurationMinutes(currentStepStartsInMinutes)}</p>
+        ) : null}
         {currentStep.detail ? <p className="companion__step-detail">{currentStep.detail}</p> : null}
 
         {stepCanStart || (canEditStep && !stepIsRunning) ? (
@@ -309,6 +422,14 @@ export function CompanionView({
             </div>
           </div>
         ) : null}
+
+        {nextStep ? (
+          <p className="companion__next-up">
+            Next up: <strong>{nextStep.label}</strong> at{' '}
+            {formatStepTimeLabel(nextStep.startTime, nextStep.dateLabel)}
+            {nextStepStartsInMinutes > 0 ? ` (in ${formatDurationMinutes(nextStepStartsInMinutes)})` : ''}
+          </p>
+        ) : null}
       </section>
 
       <section className="card companion__overview" aria-label="Full schedule">
@@ -324,6 +445,10 @@ export function CompanionView({
                   ? 'done'
                   : 'default';
             const showDateLabel = shouldShowTimelineDateLabel(timeline, index);
+            const isCurrent = index === session.currentStepIndex;
+            const isSelected = selectedRowIndex === index && !isCurrent;
+            const startsInMinutes =
+              index > session.currentStepIndex ? getMinutesUntilStep(session, step, clockNow) : 0;
 
             return (
               <li key={step.id} className="companion__overview-item">
@@ -332,14 +457,34 @@ export function CompanionView({
                   className={`timeline-row timeline-row--interactive timeline-row--${variant}${
                     showDateLabel && stepTimes.dateLabel ? ' timeline-row--dated-interactive' : ''
                   }`}
-                  onClick={() => handleJumpToStep(index)}
+                  aria-current={isCurrent ? 'step' : undefined}
+                  aria-expanded={isCurrent ? undefined : isSelected}
+                  onClick={() => setSelectedRowIndex(isCurrent || isSelected ? null : index)}
                 >
                   {showDateLabel && stepTimes.dateLabel ? (
                     <span className="timeline-row__date">{stepTimes.dateLabel}</span>
                   ) : null}
                   <span className="timeline-row__time-compact">{stepTimes.startTime}</span>
-                  <span className="timeline-row__label-compact">{step.label}</span>
+                  <span className="timeline-row__label-compact">
+                    {step.label}
+                    {startsInMinutes > 0 ? (
+                      <span className="timeline-row__starts-in">
+                        Starts in {formatDurationMinutes(startsInMinutes)}
+                      </span>
+                    ) : null}
+                  </span>
                 </button>
+                {isSelected ? (
+                  <div className="companion__row-actions">
+                    <button
+                      type="button"
+                      className="wizard-button wizard-button--secondary"
+                      onClick={() => handleRequestJump(index)}
+                    >
+                      Jump to this step
+                    </button>
+                  </div>
+                ) : null}
               </li>
             );
           })}
@@ -368,7 +513,40 @@ export function CompanionView({
           isSaving={isSavingBake}
           saveError={saveBakeError}
           onSave={onSaveBake}
-          onClose={() => onExit(true)}
+          onNotNow={() => onExit(false)}
+          onDiscard={() => onExit(true)}
+        />
+      ) : null}
+
+      {pendingJumpIndex !== null ? (
+        <ConfirmDialog
+          title={`Skip ${getForwardStepSkipCount(session, pendingJumpIndex)} steps?`}
+          message={`${stepIsRunning ? 'Your running timer will stop. ' : ''}The steps in between will be logged as skipped.`}
+          confirmLabel="Skip steps"
+          onCancel={() => setPendingJumpIndex(null)}
+          onConfirm={() => performJump(pendingJumpIndex)}
+        />
+      ) : null}
+
+      {pendingEarlyStartMinutes !== null ? (
+        <ConfirmDialog
+          title="Start this step early?"
+          message={`This step is planned for ${formatStepTimeLabel(
+            currentStep.startTime,
+            currentStep.dateLabel,
+          )}. Start now and shift the plan by -${formatDurationMinutes(pendingEarlyStartMinutes)}?`}
+          confirmLabel="Start now"
+          onCancel={() => setPendingEarlyStartMinutes(null)}
+          onConfirm={() => void startStepNow()}
+        />
+      ) : null}
+
+      {undoAction && !showCompleteDialog ? (
+        <Toast
+          message={undoAction.message}
+          actionLabel="Undo"
+          onAction={handleUndo}
+          placement="above-footer"
         />
       ) : null}
 
@@ -389,17 +567,5 @@ function formatStepTimeLabel(time: string, dateLabel?: string): string {
 }
 
 function formatDriftLabel(driftMinutes: number): string {
-  const absolute = Math.abs(driftMinutes);
-  const hours = Math.floor(absolute / 60);
-  const minutes = absolute % 60;
-
-  if (hours > 0 && minutes > 0) {
-    return `${driftMinutes > 0 ? '+' : '-'}${hours}h ${minutes}m`;
-  }
-
-  if (hours > 0) {
-    return `${driftMinutes > 0 ? '+' : '-'}${hours}h`;
-  }
-
-  return `${driftMinutes > 0 ? '+' : '-'}${minutes}m`;
+  return `${driftMinutes > 0 ? '+' : '-'}${formatDurationMinutes(driftMinutes)}`;
 }

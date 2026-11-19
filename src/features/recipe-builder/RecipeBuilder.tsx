@@ -15,6 +15,7 @@ import { AuthModal } from '../auth/AuthModal.tsx';
 import { CompanionView } from '../companion/CompanionView.tsx';
 import { RecipeView } from '../recipe-view/RecipeView.tsx';
 import { useBakeSession } from '../../lib/companion/useBakeSession.ts';
+import { buildRecipeBakeStats } from '../../lib/history/recipeBakeStats.ts';
 import { useBakeHistory } from '../../lib/history/useBakeHistory.ts';
 import { resolveAppScreen, showWelcomeBottomNav } from './appLocation.ts';
 import { RecipeBuilderDialogs } from './RecipeBuilderDialogs.tsx';
@@ -68,11 +69,11 @@ export function RecipeBuilder() {
     useCloudRecipes,
   });
 
-  const { isAuthModalOpen, openAuthModal, closeAuthModal } = useAuthPrompt({
+  const { isAuthModalOpen, openAuthModal, closeAuthModal, offerAuthAfterSave } = useAuthPrompt({
     user,
     isConfigured,
     isAuthLoading,
-    shouldPrompt: phase === 'wizard' && wizardStep === 'welcome' && tab === 'home' && !recipeViewId,
+    isOnHome: phase === 'wizard' && wizardStep === 'welcome' && tab === 'home' && !recipeViewId,
   });
 
   const {
@@ -91,8 +92,9 @@ export function RecipeBuilder() {
     isConfigured,
     mainTab: tab,
     historyDetailId,
-    onRequireAuth: openAuthModal,
   });
+
+  const recipeBakeStats = useMemo(() => buildRecipeBakeStats(bakeHistory), [bakeHistory]);
 
   const handleBakeSavedToHistory = useCallback((): void => {
     void loadBakeHistory();
@@ -101,7 +103,6 @@ export function RecipeBuilder() {
 
   const bakeSessionState = useBakeSession({
     user,
-    onRequireAuth: openAuthModal,
     onBakeSavedToHistory: handleBakeSavedToHistory,
   });
 
@@ -154,15 +155,17 @@ export function RecipeBuilder() {
       includeSchedule: boolean,
       recipeId?: string | null,
     ): Promise<SavedRecipe> => {
-      return persistRecipe({
+      const saved = await persistRecipe({
         name,
         recipeInput: wizard.recipeInput,
         scheduleInput: wizard.scheduleInput,
         includeSchedule,
         recipeId,
       });
+      offerAuthAfterSave();
+      return saved;
     },
-    [persistRecipe, wizard.recipeInput, wizard.scheduleInput],
+    [offerAuthAfterSave, persistRecipe, wizard.recipeInput, wizard.scheduleInput],
   );
 
   const navigation = useAppNavigation({
@@ -331,7 +334,7 @@ export function RecipeBuilder() {
           onSaveBake={bakeFlow.saveCompletedBake}
           isSavingBake={isSavingBakeHistory}
           saveBakeError={saveBakeHistoryError}
-          onExit={(finished) => bakeFlow.exitCompanion({ finished })}
+          onExit={(discardBake) => bakeFlow.exitCompanion({ discardBake })}
         />
         {dialogs}
         {devPanel}
@@ -422,6 +425,7 @@ export function RecipeBuilder() {
           onStartBake={(id) => void bakeFlow.startBakeFromSavedRecipe(id)}
           onRetrySavedRecipes={() => void loadSavedRecipes()}
           isSignedIn={Boolean(user)}
+          isAuthConfigured={isConfigured}
           bakeHistory={bakeHistory}
           bakeHistoryLoadError={bakeHistoryLoadError}
           historyDetailId={historyDetailId}
@@ -435,6 +439,8 @@ export function RecipeBuilder() {
           onCloseHistoryDetail={() => routes.toHistory()}
           onUpdateHistoryDetail={updateHistoryDetail}
           onDeleteHistoryDetail={handleDeleteHistoryDetail}
+          onBakeAgainFromHistory={(session) => void bakeFlow.startBakeAgainFromHistory(session)}
+          recipeBakeStats={recipeBakeStats}
           onDevPanelUnlock={() => setIsDevPanelOpen(true)}
         >
           {dialogs}

@@ -14,11 +14,12 @@ export function formatCoachQuestionsRemaining(questionsAsked: number): string {
     return 'No coach questions left this bake';
   }
 
-  if (remaining === 1) {
-    return '1 coach question left this bake';
-  }
+  return `${remaining} of ${COACH_MAX_QUESTIONS_PER_BAKE} questions left`;
+}
 
-  return `${remaining} coach questions left this bake`;
+/** True when the next question is the last one, so the sheet can say so before it bites. */
+export function isLastCoachQuestion(questionsAsked: number): boolean {
+  return getCoachQuestionsRemaining(questionsAsked) === 1;
 }
 
 export function coachQuestionLimitMessage(): string {

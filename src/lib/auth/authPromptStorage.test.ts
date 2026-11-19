@@ -5,6 +5,7 @@ import {
   AUTH_PROMPT_DISMISSED_KEY,
   isAuthPromptDismissed,
   setAuthPromptDismissed,
+  shouldOfferAuthPrompt,
 } from './authPromptStorage.ts';
 
 class MemoryStorage {
@@ -42,4 +43,24 @@ test('setAuthPromptDismissed clears the flag when reopened', () => {
 
   assert.equal(isAuthPromptDismissed(storage), false);
   assert.equal(storage.getItem(AUTH_PROMPT_DISMISSED_KEY), null);
+});
+
+test('shouldOfferAuthPrompt offers sync to a signed-out baker who has not dismissed it', () => {
+  const storage = new MemoryStorage();
+
+  assert.equal(shouldOfferAuthPrompt({ isSignedIn: false, isConfigured: true }, storage), true);
+});
+
+test('shouldOfferAuthPrompt stays quiet after a dismissal', () => {
+  const storage = new MemoryStorage();
+  setAuthPromptDismissed(true, storage);
+
+  assert.equal(shouldOfferAuthPrompt({ isSignedIn: false, isConfigured: true }, storage), false);
+});
+
+test('shouldOfferAuthPrompt stays quiet when signed in or when cloud sync is not configured', () => {
+  const storage = new MemoryStorage();
+
+  assert.equal(shouldOfferAuthPrompt({ isSignedIn: true, isConfigured: true }, storage), false);
+  assert.equal(shouldOfferAuthPrompt({ isSignedIn: false, isConfigured: false }, storage), false);
 });

@@ -34,6 +34,7 @@ export function RecipeTargetsSection({
           step={1}
           info={fieldInfo.hydrationPercent}
           onChange={(value) => onNumberChange('hydrationPercent', value)}
+          keepOutOfRange
           {...getFieldValidationProps(validationIssues, 'hydrationPercent')}
         />
         <NumberField
@@ -45,6 +46,7 @@ export function RecipeTargetsSection({
           step={0.1}
           info={fieldInfo.saltPercent}
           onChange={(value) => onNumberChange('saltPercent', value)}
+          keepOutOfRange
           {...getFieldValidationProps(validationIssues, 'saltPercent')}
         />
       </form>

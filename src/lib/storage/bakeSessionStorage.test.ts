@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { createBakeSession } from '../companion/bakeSession.ts';
+import { recordCoachExchange } from '../companion/coachTranscript.ts';
 import { CURRENT_BAKE_SESSION_TIMELINE_VERSION } from '../companion/migrateBakeSession.ts';
 import { defaultRecipeInput } from '../recipe/defaults.ts';
 import { buildTimeline, formatTimelineForDisplay } from '../schedule/buildTimeline.ts';
@@ -69,6 +70,70 @@ test('clearBakeSession removes stored session', () => {
 
   clearBakeSession(storage);
   assert.equal(loadBakeSession(storage), null);
+});
+
+test('coach transcript survives a save and load round trip', () => {
+  const storage = new MemoryStorage();
+  const session = recordCoachExchange(
+    createBakeSession({
+      savedRecipeId: null,
+      recipeName: 'Chatty loaf',
+      recipeInput: defaultRecipeInput,
+      scheduleInput: createDefaultScheduleInput(defaultRecipeInput),
+    }),
+    {
+      question: 'Is my dough ready?',
+      hadPhoto: false,
+      reply: 'Look for a domed surface.',
+      stepId: 'autolyse',
+      stepLabel: 'Autolyse',
+    },
+  );
+
+  saveBakeSession(session, storage);
+  const loaded = loadBakeSession(storage);
+
+  assert.ok(loaded);
+  assert.equal(loaded.coachQuestionsAsked, 1);
+  assert.deepEqual(loaded.coachTranscript, session.coachTranscript);
+});
+
+test('loadBakeSession accepts an older session saved without a coach transcript', () => {
+  const storage = new MemoryStorage();
+  const session = createBakeSession({
+    savedRecipeId: null,
+    recipeName: 'Older loaf',
+    recipeInput: defaultRecipeInput,
+    scheduleInput: createDefaultScheduleInput(defaultRecipeInput),
+  });
+  const legacySession = { ...session, coachQuestionsAsked: 2 };
+  delete (legacySession as { coachTranscript?: unknown }).coachTranscript;
+
+  storage.setItem(BAKE_SESSION_STORAGE_KEY, JSON.stringify(legacySession));
+  const loaded = loadBakeSession(storage);
+
+  assert.ok(loaded);
+  assert.deepEqual(loaded.coachTranscript, []);
+  assert.equal(loaded.coachQuestionsAsked, 2);
+});
+
+test('loadBakeSession ignores a malformed coach transcript instead of failing', () => {
+  const storage = new MemoryStorage();
+  const session = createBakeSession({
+    savedRecipeId: null,
+    recipeName: 'Odd loaf',
+    recipeInput: defaultRecipeInput,
+    scheduleInput: createDefaultScheduleInput(defaultRecipeInput),
+  });
+
+  storage.setItem(
+    BAKE_SESSION_STORAGE_KEY,
+    JSON.stringify({ ...session, coachTranscript: 'not an array' }),
+  );
+  const loaded = loadBakeSession(storage);
+
+  assert.ok(loaded);
+  assert.deepEqual(loaded.coachTranscript, []);
 });
 
 test('loadBakeSession migrates old slap-and-fold rest step index', () => {

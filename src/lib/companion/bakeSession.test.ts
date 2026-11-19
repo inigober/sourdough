@@ -9,6 +9,8 @@ import {
   createBakeSession,
   isBakeSessionComplete,
   jumpToBakeStep,
+  getForwardStepSkipCount,
+  restoreBakeSessionSnapshot,
   restartStepTimer,
   retreatBakeSession,
   startTimedStep,
@@ -188,4 +190,86 @@ test('toBakeSessionSummary exposes resume card fields', () => {
     currentStepIndex: 0,
     updatedAt: session.updatedAt,
   });
+});
+
+function createStepLogTestSession() {
+  const schedule = {
+    ...createDefaultScheduleInput(defaultRecipeInput),
+    includeStarterPrep: false,
+  };
+  const session = createBakeSession({
+    savedRecipeId: null,
+    recipeName: 'Step log loaf',
+    recipeInput: defaultRecipeInput,
+    scheduleInput: schedule,
+  });
+
+  return { session, timeline: buildTestTimeline(session) };
+}
+
+test('Previous removes the step log of the step you return to', () => {
+  const { session, timeline } = createStepLogTestSession();
+  const first = timeline[0];
+  assert.ok(first);
+
+  // Review bug: after Next then Previous the step stayed logged as completed while current.
+  const advanced = advanceBakeSession(session, timeline.length, first);
+  assert.equal(advanced.stepLogs.some((entry) => entry.stepId === first.id), true);
+
+  const retreated = retreatBakeSession(advanced);
+  assert.equal(retreated.currentStepIndex, 0);
+  assert.equal(retreated.stepLogs.some((entry) => entry.stepId === first.id), false);
+});
+
+test('Previous keeps logs of steps before the one you return to', () => {
+  const { session, timeline } = createStepLogTestSession();
+  const jumped = jumpToBakeStep(session, 3, timeline);
+  assert.deepEqual(
+    jumped.stepLogs.map((entry) => entry.stepIndex),
+    [0, 1, 2],
+  );
+
+  const retreated = retreatBakeSession(jumped);
+  assert.equal(retreated.currentStepIndex, 2);
+  assert.deepEqual(
+    retreated.stepLogs.map((entry) => entry.stepIndex),
+    [0, 1],
+  );
+});
+
+test('jumping backward also removes logs from the target step onward', () => {
+  const { session, timeline } = createStepLogTestSession();
+  const jumped = jumpToBakeStep(session, 4, timeline);
+  const back = jumpToBakeStep(jumped, 1, timeline);
+
+  assert.equal(back.currentStepIndex, 1);
+  assert.deepEqual(
+    back.stepLogs.map((entry) => entry.stepIndex),
+    [0],
+  );
+});
+
+test('getForwardStepSkipCount counts steps left behind by a forward jump only', () => {
+  const { session } = createStepLogTestSession();
+  const atStepTwo = { ...session, currentStepIndex: 2 };
+
+  assert.equal(getForwardStepSkipCount(atStepTwo, 3), 1);
+  assert.equal(getForwardStepSkipCount(atStepTwo, 5), 3);
+  assert.equal(getForwardStepSkipCount(atStepTwo, 2), 0);
+  assert.equal(getForwardStepSkipCount(atStepTwo, 0), 0);
+});
+
+test('restoreBakeSessionSnapshot undoes a step change but keeps the coach question count', () => {
+  const { session, timeline } = createStepLogTestSession();
+  const first = timeline[0];
+  assert.ok(first);
+
+  const snapshot = session;
+  const advanced = advanceBakeSession(session, timeline.length, first);
+  const afterCoach = { ...advanced, coachQuestionsAsked: 2 };
+
+  const restored = restoreBakeSessionSnapshot(afterCoach, snapshot);
+  assert.equal(restored.currentStepIndex, 0);
+  assert.equal(restored.stepLogs.length, 0);
+  assert.equal(restored.coachQuestionsAsked, 2);
 });

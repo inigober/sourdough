@@ -31,4 +31,8 @@ export const webNativeBakeTimer: NativeBakeTimerClient = {
   async openSettings() {
     // No-op on web.
   },
+
+  async setKeepAwake() {
+    // No-op on web; the web wake lock lives in src/lib/companion/screenWakeLock.ts.
+  },
 };

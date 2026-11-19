@@ -1,8 +1,10 @@
-import { useId, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 
 import type { RecipeInput } from '../lib/recipe/types.ts';
 import {
+  getBakeStartPastWarning,
   getDefaultBakeStart,
+  getStartNowChoice,
   isBakeStartChoiceValid,
   previewBakeStart,
   type BakeStartChoice,
@@ -33,6 +35,14 @@ export function BakeStartDialog({
     getDefaultBakeStart(scheduleInput.startTime),
   );
   const isValid = isBakeStartChoiceValid(choice);
+
+  // Re-check every 30s so a time that was fine on open can become "in the past" while the dialog waits.
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 30_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const pastWarning = getBakeStartPastWarning(choice, now);
 
   const previewRows = useMemo(() => {
     if (!isValid) {
@@ -104,6 +114,24 @@ export function BakeStartDialog({
             onChange={(event) => setChoice({ ...choice, startTime: event.currentTarget.value })}
           />
         </div>
+      </div>
+      <div className="bake-start__timing">
+        {pastWarning ? (
+          <p className="field-message field-message--warning" role="status">
+            {pastWarning}
+          </p>
+        ) : null}
+        <button
+          type="button"
+          className="wizard-button wizard-button--secondary bake-start__now"
+          onClick={() => {
+            const startNow = new Date();
+            setNow(startNow);
+            setChoice(getStartNowChoice(startNow));
+          }}
+        >
+          Start now
+        </button>
       </div>
       {previewRows.length > 0 ? (
         <div className="bake-start__preview" role="status" aria-live="polite">

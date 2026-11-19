@@ -85,12 +85,27 @@ export function advanceBakeSession(
   };
 }
 
+/**
+ * Going back makes `fromIndex` and later steps "not done yet" again, so their log
+ * entries must go. Otherwise history shows the step you are redoing as completed.
+ */
+function removeStepLogsFromIndex(
+  stepLogs: BakeSession['stepLogs'],
+  fromIndex: number,
+): BakeSession['stepLogs'] {
+  return stepLogs.filter((entry) => entry.stepIndex < fromIndex);
+}
+
 export function retreatBakeSession(session: BakeSession): BakeSession {
   const nextIndex = Math.max(session.currentStepIndex - 1, 0);
   const now = new Date().toISOString();
 
   return {
     ...session,
+    stepLogs:
+      nextIndex < session.currentStepIndex
+        ? removeStepLogsFromIndex(session.stepLogs, nextIndex)
+        : session.stepLogs,
     currentStepIndex: nextIndex,
     updatedAt: now,
     currentStepStartedAt: null,
@@ -123,12 +138,37 @@ export function jumpToBakeStep(
     }
   }
 
+  if (clampedIndex < session.currentStepIndex) {
+    next = { ...next, stepLogs: removeStepLogsFromIndex(next.stepLogs, clampedIndex) };
+  }
+
   return {
     ...next,
     currentStepIndex: clampedIndex,
     updatedAt: nowIso,
     currentStepStartedAt: null,
     activeTimerEndsAt: null,
+  };
+}
+
+/** How many steps a jump to `targetIndex` leaves behind (0 for backward or same-step jumps). */
+export function getForwardStepSkipCount(session: BakeSession, targetIndex: number): number {
+  return Math.max(0, targetIndex - session.currentStepIndex);
+}
+
+/**
+ * Undo support: go back to a session captured before a Next step / Jump.
+ * Keeps the newest coach question count, because a coach reply spent a quota slot
+ * that undoing a step should not hand back.
+ */
+export function restoreBakeSessionSnapshot(
+  current: BakeSession,
+  snapshot: BakeSession,
+): BakeSession {
+  return {
+    ...snapshot,
+    coachQuestionsAsked: Math.max(current.coachQuestionsAsked, snapshot.coachQuestionsAsked),
+    updatedAt: new Date().toISOString(),
   };
 }
 

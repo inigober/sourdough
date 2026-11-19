@@ -1,5 +1,6 @@
 import { useState, type MouseEvent } from 'react';
 
+import { ConfirmDialog } from '../../components/ConfirmDialog.tsx';
 import { DialogCard } from '../../components/DialogCard.tsx';
 import { LoafAssessmentPicker } from '../../components/LoafAssessmentPicker.tsx';
 import type { BakeCompleteSaveInput } from '../../lib/companion/types.ts';
@@ -12,7 +13,10 @@ type BakeCompleteDialogProps = {
   isSaving: boolean;
   saveError: string | null;
   onSave: (input: BakeCompleteSaveInput) => Promise<void>;
-  onClose: () => void;
+  /** X, Escape and backdrop: leave without saving but keep the bake so it can be resumed. */
+  onNotNow: () => void;
+  /** Explicit "Don't save" after confirmation: the only path that deletes the bake. */
+  onDiscard: () => void;
 };
 
 export function BakeCompleteDialog({
@@ -20,10 +24,12 @@ export function BakeCompleteDialog({
   isSaving,
   saveError,
   onSave,
-  onClose,
+  onNotNow,
+  onDiscard,
 }: BakeCompleteDialogProps) {
   const [note, setNote] = useState('');
   const [assessment, setAssessment] = useState<BakeSessionAssessment | undefined>();
+  const [isDiscardConfirmOpen, setIsDiscardConfirmOpen] = useState(false);
 
   function handleAction(event: MouseEvent<HTMLButtonElement>, action: () => void): void {
     event.stopPropagation();
@@ -36,16 +42,16 @@ export function BakeCompleteDialog({
       titleId="bake-complete-title"
       messageId="bake-complete-message"
       variant="success"
-      onClose={onClose}
+      onClose={onNotNow}
       actions={
         <div className="dialog-card__actions">
           <button
             type="button"
             className="wizard-button wizard-button--secondary"
-            onClick={(event) => handleAction(event, onClose)}
+            onClick={(event) => handleAction(event, () => setIsDiscardConfirmOpen(true))}
             disabled={isSaving}
           >
-            Back to home
+            Don&apos;t save
           </button>
           <button
             type="button"
@@ -77,6 +83,21 @@ export function BakeCompleteDialog({
         </label>
       </div>
       {saveError ? <p className="auth-modal__error">{saveError}</p> : null}
+      <p className="dialog-card__message">
+        Closing this window keeps your bake, and you can finish saving it later from Home.
+      </p>
+      {isDiscardConfirmOpen ? (
+        <ConfirmDialog
+          title="Don't save this bake?"
+          message="This bake and its step timings will be deleted. This cannot be undone."
+          confirmLabel="Delete bake"
+          onCancel={() => setIsDiscardConfirmOpen(false)}
+          onConfirm={() => {
+            setIsDiscardConfirmOpen(false);
+            onDiscard();
+          }}
+        />
+      ) : null}
     </DialogCard>
   );
 }

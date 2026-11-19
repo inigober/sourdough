@@ -3,7 +3,13 @@ import test from 'node:test';
 
 import { createFlourBlendEntry } from './flourBlend.ts';
 import { defaultRecipeInput } from './defaults.ts';
-import { hasBlockingValidationIssue, validateRecipeInput } from './validation.ts';
+import { recipeTemplates } from './templates.ts';
+import {
+  DOUGH_WEIGHT_LIMITS,
+  hasBlockingValidationIssue,
+  hasMissingNumber,
+  validateRecipeInput,
+} from './validation.ts';
 
 function issueMessages(
   input: typeof defaultRecipeInput,
@@ -85,4 +91,76 @@ test('hasBlockingValidationIssue ignores warnings', () => {
   ];
 
   assert.equal(hasBlockingValidationIssue(issues), false);
+});
+
+// Symptom: 50g was accepted silently and produced 1g salt / 5g levain.
+test('very small dough weights warn but do not block', () => {
+  const issues = validateRecipeInput({ ...defaultRecipeInput, finalDoughWeightGrams: 50 });
+  const weightIssues = issues.filter((issue) => issue.field === 'finalDoughWeightGrams');
+
+  assert.equal(hasBlockingValidationIssue(issues), false);
+  assert.equal(weightIssues.length, 1);
+  assert.equal(weightIssues[0].level, 'warning');
+  assert.match(weightIssues[0].message, /Under about 300g/);
+});
+
+test('very large dough weights warn but do not block', () => {
+  const issues = validateRecipeInput({ ...defaultRecipeInput, finalDoughWeightGrams: 4000 });
+
+  assert.equal(hasBlockingValidationIssue(issues), false);
+  assert.ok(
+    issues.some(
+      (issue) =>
+        issue.field === 'finalDoughWeightGrams' && issue.level === 'warning' && /3kg/.test(issue.message),
+    ),
+  );
+});
+
+test('dough weight is clean inside the reliable range, including both edges', () => {
+  for (const grams of [DOUGH_WEIGHT_LIMITS.warnBelow, 900, DOUGH_WEIGHT_LIMITS.warnAbove]) {
+    const issues = validateRecipeInput({ ...defaultRecipeInput, finalDoughWeightGrams: grams });
+    assert.equal(
+      issues.some((issue) => issue.field === 'finalDoughWeightGrams'),
+      false,
+      `${grams}g should have no weight message`,
+    );
+  }
+});
+
+test('dough weight outside the hard limits blocks with the range in the message', () => {
+  const tooSmall = validateRecipeInput({
+    ...defaultRecipeInput,
+    finalDoughWeightGrams: DOUGH_WEIGHT_LIMITS.min - 1,
+  });
+  const tooBig = validateRecipeInput({
+    ...defaultRecipeInput,
+    finalDoughWeightGrams: DOUGH_WEIGHT_LIMITS.max + 1,
+  });
+
+  assert.equal(hasBlockingValidationIssue(tooSmall), true);
+  assert.equal(hasBlockingValidationIssue(tooBig), true);
+  assert.match(tooSmall[0].message, /between 50g and 10,000g/);
+});
+
+test('every built-in template sits inside the reliable dough weight range', () => {
+  for (const template of recipeTemplates) {
+    const issues = validateRecipeInput(template.recipeInput);
+    assert.equal(
+      issues.some((issue) => issue.field === 'finalDoughWeightGrams'),
+      false,
+      `${template.id} should not trigger a weight message`,
+    );
+  }
+});
+
+test('a cleared number field blocks with a message that says what to enter', () => {
+  const issues = validateRecipeInput({ ...defaultRecipeInput, hydrationPercent: Number.NaN });
+
+  assert.equal(hasBlockingValidationIssue(issues), true);
+  assert.match(issues[0].message, /Enter a hydration/);
+});
+
+test('hasMissingNumber spots a cleared field so it is never saved into a draft', () => {
+  assert.equal(hasMissingNumber(defaultRecipeInput), false);
+  assert.equal(hasMissingNumber({ ...defaultRecipeInput, finalDoughWeightGrams: Number.NaN }), true);
 });

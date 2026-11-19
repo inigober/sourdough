@@ -40,7 +40,7 @@ test('resolveRecipeSaveName keeps an existing saved name or falls back to bread 
   assert.match(resolveRecipeSaveName(null, defaultRecipeInput, scheduleInput), /1050|Wheat/i);
 });
 
-test('getCompanionExitSessionAction clears finished bakes and stashes interrupted ones', () => {
+test('getCompanionExitSessionAction only clears the bake session when the user discards it', () => {
   assert.equal(getCompanionExitSessionAction(true), 'clear');
   assert.equal(getCompanionExitSessionAction(false), 'stash');
 });

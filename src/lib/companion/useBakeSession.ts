@@ -3,8 +3,8 @@ import type { User } from '@supabase/supabase-js';
 
 import { createBakeSession } from './bakeSession.ts';
 import type { BakeSession } from './types.ts';
-import { buildBakeHistoryStepsFromSession } from '../history/buildBakeHistorySteps.ts';
 import { createRemoteBakeHistorySession } from '../history/remoteBakeHistoryStorage.ts';
+import { saveCompletedBake as persistCompletedBake } from '../history/saveCompletedBake.ts';
 import type { RecipeInput } from '../recipe/types.ts';
 import type { ScheduleInput } from '../schedule/types.ts';
 import {
@@ -23,7 +23,6 @@ export type BeginBakeSessionOptions = {
 
 type UseBakeSessionOptions = {
   user: User | null;
-  onRequireAuth: () => void;
   onBakeSavedToHistory: () => void;
 };
 
@@ -39,7 +38,7 @@ function applyBeginBakeSession(options: BeginBakeSessionOptions): BakeSession {
   return session;
 }
 
-export function useBakeSession({ user, onRequireAuth, onBakeSavedToHistory }: UseBakeSessionOptions) {
+export function useBakeSession({ user, onBakeSavedToHistory }: UseBakeSessionOptions) {
   const [bakeSession, setBakeSession] = useState<BakeSession | null>(null);
   const [resumableBakeSession, setResumableBakeSession] = useState<BakeSession | null>(() =>
     loadBakeSession(),
@@ -128,29 +127,17 @@ export function useBakeSession({ user, onRequireAuth, onBakeSavedToHistory }: Us
         return false;
       }
 
-      if (!user) {
-        setSaveBakeHistoryError('Sign in to save this bake to your history.');
-        onRequireAuth();
-        return false;
-      }
-
       setIsSavingBakeHistory(true);
       setSaveBakeHistoryError(null);
 
       try {
-        const completedAt = new Date().toISOString();
-        const steps = buildBakeHistoryStepsFromSession(bakeSession, completedAt);
-
-        await createRemoteBakeHistorySession(user.id, {
-          savedRecipeId: bakeSession.savedRecipeId ?? undefined,
-          recipeName: bakeSession.recipeName,
-          recipeInput: bakeSession.recipeInput,
-          scheduleInput: bakeSession.scheduleInput,
-          overallNote: input.note,
-          overallAssessment: input.assessment,
-          startedAt: bakeSession.startedAt,
-          completedAt,
-          steps,
+        // Signed in: saved to the account. Signed out: saved on this device. The bake session
+        // is only cleared below, after this resolves, so a failed save never loses the bake.
+        await persistCompletedBake({
+          session: bakeSession,
+          input,
+          userId: user?.id ?? null,
+          createRemote: createRemoteBakeHistorySession,
         });
 
         onBakeSavedToHistory();
@@ -164,7 +151,7 @@ export function useBakeSession({ user, onRequireAuth, onBakeSavedToHistory }: Us
         setIsSavingBakeHistory(false);
       }
     },
-    [bakeSession, clearSessionAfterFinish, onBakeSavedToHistory, onRequireAuth, user],
+    [bakeSession, clearSessionAfterFinish, onBakeSavedToHistory, user],
   );
 
   const runStartBake = useCallback(async (start: () => Promise<void>): Promise<void> => {

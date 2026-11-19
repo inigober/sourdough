@@ -191,6 +191,7 @@ export async function getRemoteBakeHistorySession(
 
 function rowToSummary(row: {
   id: string;
+  saved_recipe_id: string | null;
   recipe_name: string;
   completed_at: string;
   saved_at: string;
@@ -201,6 +202,7 @@ function rowToSummary(row: {
 
   return {
     id: row.id,
+    savedRecipeId: row.saved_recipe_id,
     recipeName: row.recipe_name,
     completedAt: row.completed_at,
     savedAt: row.saved_at,
@@ -223,7 +225,7 @@ export async function listRemoteBakeHistorySummaries(
   const supabase = getClientOrThrow();
   const { data, error } = await supabase
     .from('bake_sessions')
-    .select('id, recipe_name, completed_at, saved_at, overall_assessment, overall_note')
+    .select('id, saved_recipe_id, recipe_name, completed_at, saved_at, overall_assessment, overall_note')
     .eq('user_id', userId)
     .order('completed_at', { ascending: false });
 
@@ -233,6 +235,7 @@ export async function listRemoteBakeHistorySummaries(
 
   return ((data as Array<{
     id: string;
+    saved_recipe_id: string | null;
     recipe_name: string;
     completed_at: string;
     saved_at: string;

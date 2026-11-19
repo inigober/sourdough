@@ -125,10 +125,13 @@ function RecipeViewContent({ recipe, onHome, onEdit, onStartBake }: RecipeViewCo
         </section>
 
         {overview.ingredientRows.length > 0 ? (
-          <div className="summary-grid recipe-view__amounts">
-            <RecipeCard title="Ingredients" rows={overview.ingredientRows} />
-            <RecipeCard title="Starter and levain" rows={overview.levainRows} />
-          </div>
+          <>
+            <div className="summary-grid recipe-view__amounts">
+              <RecipeCard title="Ingredients" rows={overview.ingredientRows} />
+              <RecipeCard title="Starter and levain" rows={overview.levainRows} />
+            </div>
+            {overview.totalsSummary ? <p className="section-copy recipe-view__totals">{overview.totalsSummary}</p> : null}
+          </>
         ) : (
           <section className="card card--notice">
             <h2>Ingredients unavailable</h2>

@@ -27,8 +27,13 @@ export function resolveRecipeSaveName(
 
 export type CompanionExitSessionAction = 'clear' | 'stash';
 
-export function getCompanionExitSessionAction(finished: boolean): CompanionExitSessionAction {
-  return finished ? 'clear' : 'stash';
+/**
+ * A bake session is only destroyed when the user explicitly discards it (or after it was saved).
+ * Every other way out of bake mode, including closing the "Bake complete" dialog, keeps it
+ * resumable.
+ */
+export function getCompanionExitSessionAction(discardBake: boolean): CompanionExitSessionAction {
+  return discardBake ? 'clear' : 'stash';
 }
 
 export type PostSaveBakeFlowAction = 'goHome' | 'startBake' | 'none';

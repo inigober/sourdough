@@ -6,6 +6,7 @@ import {
   COACH_MAX_QUESTIONS_PER_BAKE,
   formatCoachQuestionsRemaining,
   getCoachQuestionsRemaining,
+  isLastCoachQuestion,
 } from './coachLimits.ts';
 import { createBakeSession, incrementCoachQuestionsAsked } from './bakeSession.ts';
 import { defaultRecipeInput } from '../recipe/defaults.ts';
@@ -17,7 +18,12 @@ test('coach question limit allows five asks per bake', () => {
   assert.equal(canAskCoachQuestion(4), true);
   assert.equal(canAskCoachQuestion(5), false);
   assert.equal(getCoachQuestionsRemaining(3), 2);
-  assert.equal(formatCoachQuestionsRemaining(4), '1 coach question left this bake');
+  assert.equal(formatCoachQuestionsRemaining(0), '5 of 5 questions left');
+  assert.equal(formatCoachQuestionsRemaining(2), '3 of 5 questions left');
+  assert.equal(formatCoachQuestionsRemaining(4), '1 of 5 questions left');
+  assert.equal(isLastCoachQuestion(4), true);
+  assert.equal(isLastCoachQuestion(3), false);
+  assert.equal(isLastCoachQuestion(5), false);
   assert.equal(formatCoachQuestionsRemaining(5), 'No coach questions left this bake');
 });
 

@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import { createDefaultScheduleInput } from '../schedule/defaults.ts';
 import { buildRecipeOverview, formatStepDuration } from './buildRecipeOverview.ts';
+import { calculateRecipe } from './calculateRecipe.ts';
 import { defaultRecipeInput } from './defaults.ts';
 
 test('overview lists ingredients and levain amounts for the in-dough levain', () => {
@@ -13,6 +14,43 @@ test('overview lists ingredients and levain amounts for the in-dough levain', ()
   assert.equal(levainLabels[0], 'Levain in the dough');
   assert.ok(levainLabels.some((label) => label.startsWith('Build levain (1:')));
   assert.match(overview.doughSummary, /loaf/);
+});
+
+test('overview names the flour instead of "Added flour"', () => {
+  const overview = buildRecipeOverview(defaultRecipeInput, undefined);
+  const labels = overview.ingredientRows.map(([label]) => label);
+
+  assert.equal(labels[0], 'Wheat Type 1050 flour');
+  assert.ok(!labels.includes('Added flour'));
+});
+
+test('overview names every flour in a blend and does not double the word flour', () => {
+  const recipeInput = {
+    ...defaultRecipeInput,
+    doughFlours: [
+      { ...defaultRecipeInput.doughFlours[0], id: 'a', flourType: 'wheatType1050' as const, percent: 60 },
+      { ...defaultRecipeInput.doughFlours[0], id: 'b', flourType: 'wholeWheat' as const, percent: 30 },
+      { ...defaultRecipeInput.doughFlours[0], id: 'c', flourType: 'pizzaFlour' as const, percent: 10 },
+    ],
+  };
+  const labels = buildRecipeOverview(recipeInput, undefined).ingredientRows.map(([label]) => label);
+
+  assert.deepEqual(labels.slice(0, 3), [
+    'Wheat Type 1050 flour',
+    'Whole wheat flour',
+    'Pizza flour (Tipo 00 style)',
+  ]);
+});
+
+test('overview totals include flour and water that sit in the levain', () => {
+  const overview = buildRecipeOverview(defaultRecipeInput, undefined);
+  const formula = calculateRecipe(defaultRecipeInput);
+
+  assert.ok(formula.levainFlourGrams > 0);
+  assert.equal(
+    overview.totalsSummary,
+    `Totals including the levain: ${Math.round(formula.totalFlourGrams)}g flour, ${Math.round(formula.totalWaterGrams)}g water.`,
+  );
 });
 
 test('overview shows a refresh step for fridge starter when the plan has one', () => {
@@ -59,6 +97,7 @@ test('overview returns no amounts when the recipe cannot be calculated', () => {
 
   assert.deepEqual(overview.ingredientRows, []);
   assert.deepEqual(overview.levainRows, []);
+  assert.equal(overview.totalsSummary, null);
 });
 
 test('formatStepDuration is compact', () => {

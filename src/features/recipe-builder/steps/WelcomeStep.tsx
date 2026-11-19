@@ -3,6 +3,7 @@ import { WelcomeTopBar } from '../../auth/WelcomeTopBar.tsx';
 import { getTemplateImageSrc } from '../../../lib/recipe/templateImages.ts';
 import { recipeTemplates } from '../../../lib/recipe/templates.ts';
 import type { BuilderDraftSummary } from '../../../lib/storage/draftStorage.ts';
+import { formatRecipeBakeStats, type RecipeBakeStats } from '../../../lib/history/recipeBakeStats.ts';
 import type { BakeSession } from '../../../lib/companion/types.ts';
 import type { SavedRecipeSummary } from '../../../lib/storage/types.ts';
 type WelcomeStepProps = {
@@ -20,8 +21,8 @@ type WelcomeStepProps = {
   onDeleteRecipe: (id: string) => void;
   onOpenAuth: () => void;
   onStartBake: (id: string) => void;
+  recipeBakeStats: Record<string, RecipeBakeStats>;
   onRetrySavedRecipes: () => void;
-  onDevUnlockTap: () => void;
 };
 
 export function WelcomeStep({
@@ -39,9 +40,124 @@ export function WelcomeStep({
   onDeleteRecipe,
   onOpenAuth,
   onStartBake,
+  recipeBakeStats,
   onRetrySavedRecipes,
-  onDevUnlockTap,
 }: WelcomeStepProps) {
+  // One filled primary action per screen: when a resume card is showing, it owns the filled button.
+  const hasResumeCard = Boolean(draftSummary || resumableBakeSession);
+  const createButtonClass = hasResumeCard
+    ? 'wizard-button wizard-button--secondary welcome-screen__create'
+    : 'wizard-button wizard-button--primary welcome-screen__create';
+  const showSavedRecipes = savedRecipes.length > 0 || Boolean(savedRecipesError);
+
+  const savedRecipesSection = showSavedRecipes ? (
+    <section className="card saved-recipes" aria-label="Saved recipes">
+      <div className="welcome-section__header saved-recipes__header">
+        <h2>Saved recipes</h2>
+        <p className="section-copy">View a saved recipe, start a bake, or duplicate it as a starting point.</p>
+      </div>
+      {savedRecipesError ? (
+        <div className="saved-recipes__error" role="alert">
+          <p className="auth-modal__error">{savedRecipesError}</p>
+          <button type="button" className="wizard-button wizard-button--secondary" onClick={onRetrySavedRecipes}>
+            Try again
+          </button>
+        </div>
+      ) : null}
+      {savedRecipes.length > 0 ? (
+        <ul className="saved-recipes__list">
+          {savedRecipes.map((recipe) => (
+            <li key={recipe.id} className="saved-recipe-card">
+              <button
+                type="button"
+                className="saved-recipe-card__open"
+                onClick={() => onLoadRecipe(recipe.id)}
+              >
+                <strong>{recipe.name}</strong>
+                <span className="saved-recipe-card__meta">
+                  {recipe.scheduleLabel}
+                  <span className="saved-recipe-card__meta-sep" aria-hidden="true">
+                    ·
+                  </span>
+                  Updated {formatSavedDate(recipe.updatedAt)}
+                </span>
+                {recipeBakeStats[recipe.id] ? (
+                  <span className="saved-recipe-card__meta saved-recipe-card__bake-stats">
+                    {formatRecipeBakeStats(recipeBakeStats[recipe.id])}
+                  </span>
+                ) : null}
+              </button>
+              <div className="saved-recipe-card__actions">
+                <div className="saved-recipe-card__buttons">
+                  {recipe.hasSchedule ? (
+                    <button
+                      type="button"
+                      className="wizard-button wizard-button--primary saved-recipe-card__bake"
+                      onClick={() => onStartBake(recipe.id)}
+                    >
+                      Start baking
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    className="wizard-button wizard-button--secondary saved-recipe-card__duplicate"
+                    onClick={() => onDuplicateRecipe(recipe.id)}
+                  >
+                    Duplicate
+                  </button>
+                  <button
+                    type="button"
+                    className="icon-button icon-button--delete saved-recipe-card__delete"
+                    aria-label={`Delete ${recipe.name}`}
+                    onClick={() => onDeleteRecipe(recipe.id)}
+                  >
+                    <BinIcon />
+                  </button>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </section>
+  ) : null;
+
+  const templatesSection = (
+    <section className="card welcome-templates" aria-label="Recipe templates">
+      <div className="welcome-section__header">
+        <h2>Start from a template</h2>
+        <p className="section-copy">Six common bakes with sensible defaults you can adjust in the wizard.</p>
+      </div>
+      <ul className="welcome-templates__list">
+        {recipeTemplates.map((template) => (
+          <li key={template.id}>
+            <button
+              type="button"
+              className="welcome-template-card"
+              onClick={() => onLoadTemplate(template.id)}
+            >
+              <img
+                className="welcome-template-card__image"
+                src={getTemplateImageSrc(template.id)}
+                alt=""
+                loading="lazy"
+                width={240}
+                height={160}
+              />
+              <span className="welcome-template-card__body">
+                <strong>{template.name}</strong>
+                <span className="welcome-template-card__copy">{template.description}</span>
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+
+  // First-time bakers see templates before an empty-looking recipe list; returning bakers see their recipes first.
+  const savedRecipesFirst = showSavedRecipes;
+
   return (
     <div className="welcome-screen">
       {importMessage ? (
@@ -52,17 +168,16 @@ export function WelcomeStep({
 
       <section className="hero welcome-screen__hero">
         <div className="welcome-screen__title-row">
-          <h1>
-            <button type="button" className="dev-panel-unlock-target" onClick={onDevUnlockTap}>
-              Sourdough recipe builder
-            </button>
-          </h1>
+          <h1>Plan your sourdough bake</h1>
           <WelcomeTopBar onOpenAuth={onOpenAuth} variant="inline" />
         </div>
         <p className="hero-copy">
-          Build a recipe, review ingredients, plan your bake schedule, and save loaves to come back to.
-          Start from scratch, a template, or where you left off.
+          Hour by hour, with alerts when it is time to act. Start from a template or build your own recipe.
         </p>
+        <button type="button" className={createButtonClass} onClick={onStart}>
+          <PlusIcon />
+          New recipe
+        </button>
       </section>
 
       {draftSummary ? (
@@ -98,108 +213,9 @@ export function WelcomeStep({
         </section>
       ) : null}
 
-      <section className="card saved-recipes" aria-label="Saved recipes">
-        <div className="welcome-section__header saved-recipes__header">
-          <h2>Saved recipes</h2>
-          <p className="section-copy">View a saved recipe, start a bake, or duplicate it as a starting point.</p>
-        </div>
-        {savedRecipesError ? (
-          <div className="saved-recipes__error" role="alert">
-            <p className="auth-modal__error">{savedRecipesError}</p>
-            <button type="button" className="wizard-button wizard-button--secondary" onClick={onRetrySavedRecipes}>
-              Try again
-            </button>
-          </div>
-        ) : null}
-        {savedRecipes.length > 0 ? (
-          <ul className="saved-recipes__list">
-            {savedRecipes.map((recipe) => (
-              <li key={recipe.id} className="saved-recipe-card">
-                <button
-                  type="button"
-                  className="saved-recipe-card__open"
-                  onClick={() => onLoadRecipe(recipe.id)}
-                >
-                  <strong>{recipe.name}</strong>
-                  <span className="saved-recipe-card__meta">
-                    {recipe.scheduleLabel}
-                    <span className="saved-recipe-card__meta-sep" aria-hidden="true">
-                      ·
-                    </span>
-                    Updated {formatSavedDate(recipe.updatedAt)}
-                  </span>
-                </button>
-                <div className="saved-recipe-card__actions">
-                  <div className="saved-recipe-card__buttons">
-                    {recipe.hasSchedule ? (
-                      <button
-                        type="button"
-                        className="wizard-button wizard-button--primary saved-recipe-card__bake"
-                        onClick={() => onStartBake(recipe.id)}
-                      >
-                        Start baking
-                      </button>
-                    ) : null}
-                    <button
-                      type="button"
-                      className="wizard-button wizard-button--secondary saved-recipe-card__duplicate"
-                      onClick={() => onDuplicateRecipe(recipe.id)}
-                    >
-                      Duplicate
-                    </button>
-                    <button
-                      type="button"
-                      className="icon-button icon-button--delete saved-recipe-card__delete"
-                      aria-label={`Delete ${recipe.name}`}
-                      onClick={() => onDeleteRecipe(recipe.id)}
-                    >
-                      <BinIcon />
-                    </button>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="saved-recipes__empty">No saved recipes yet.</p>
-        )}
-        <button type="button" className="saved-recipes__create wizard-button wizard-button--secondary" onClick={onStart}>
-          <PlusIcon />
-          New recipe from scratch
-        </button>
-      </section>
-
-      <section className="card welcome-templates" aria-label="Recipe templates">
-        <div className="welcome-section__header">
-          <h2>Start from a template</h2>
-          <p className="section-copy">Six common bakes with sensible defaults you can adjust in the wizard.</p>
-        </div>
-        <ul className="welcome-templates__list">
-          {recipeTemplates.map((template) => (
-            <li key={template.id}>
-              <button
-                type="button"
-                className="welcome-template-card"
-                onClick={() => onLoadTemplate(template.id)}
-              >
-                <img
-                  className="welcome-template-card__image"
-                  src={getTemplateImageSrc(template.id)}
-                  alt=""
-                  loading="lazy"
-                  width={240}
-                  height={160}
-                />
-                <span className="welcome-template-card__body">
-                  <strong>{template.name}</strong>
-                  <span className="welcome-template-card__copy">{template.description}</span>
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      </section>
-
+      {savedRecipesFirst ? savedRecipesSection : null}
+      {templatesSection}
+      {savedRecipesFirst ? null : savedRecipesSection}
     </div>
   );
 }

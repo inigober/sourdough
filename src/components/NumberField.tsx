@@ -3,10 +3,12 @@ import { useEffect, useId, useState, type ChangeEvent, type FocusEvent } from 'r
 import { FieldLabel } from './FieldLabel.tsx';
 import { ChevronDownIcon, ChevronUpIcon } from './icons.tsx';
 import {
-  formatNumberDraft,
-  getStepDecimalPlaces,
-  stepNumberValue,
-} from '../lib/ui/numberFieldStep.ts';
+  commitNumberDraft,
+  getValueWhileTyping,
+  shouldHoldFieldMessage,
+  stepWithinBounds,
+} from '../lib/ui/numberFieldInput.ts';
+import { formatNumberDraft, getStepDecimalPlaces } from '../lib/ui/numberFieldStep.ts';
 
 type NumberFieldProps = {
   label: string;
@@ -21,24 +23,17 @@ type NumberFieldProps = {
   showSteppers?: boolean;
   message?: string;
   status?: 'error' | 'warning';
+  /**
+   * Never rewrite what the user typed. Out-of-range numbers are reported as typed and a cleared
+   * field is reported as NaN, so the caller's validation can show `message` and block Continue.
+   * Leave off for fields with no validation of their own: they keep the old clamp-on-type behaviour.
+   */
+  keepOutOfRange?: boolean;
 };
 
-function clampValue(value: number, min?: number, max?: number): number {
-  let nextValue = value;
-
-  if (min !== undefined) {
-    nextValue = Math.max(min, nextValue);
-  }
-
-  if (max !== undefined) {
-    nextValue = Math.min(max, nextValue);
-  }
-
-  return nextValue;
-}
-
 function formatDraft(value: number, stepSize: number): string {
-  return formatNumberDraft(value, stepSize);
+  // NaN means "the user cleared this field": show it empty rather than as 0.
+  return Number.isFinite(value) ? formatNumberDraft(value, stepSize) : '';
 }
 
 function normalizeDraft(raw: string, stepSize: number): string {
@@ -76,48 +71,35 @@ export function NumberField({
   showSteppers = true,
   message,
   status,
+  keepOutOfRange = false,
 }: NumberFieldProps) {
   const stepSize = step ?? 1;
+  const bounds = { step: stepSize, min, max };
 
   function adjustValue(delta: number): void {
-    const nextValue = clampValue(stepNumberValue(value, delta, stepSize), min, max);
+    const nextValue = stepWithinBounds(value, delta, bounds);
     setDraft(formatDraft(nextValue, stepSize));
     onChange(nextValue);
   }
 
   const inputId = useId();
+  const messageId = useId();
   const decrementDisabled = min !== undefined && value <= min;
   const incrementDisabled = max !== undefined && value >= max;
   const [draft, setDraft] = useState(() => formatDraft(value, stepSize));
   const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
-    if (!isFocused) {
+    // A cleared field has value NaN. Keep its empty text instead of resyncing it to "0".
+    if (!isFocused && Number.isFinite(value)) {
       setDraft(formatDraft(value, stepSize));
     }
   }, [isFocused, stepSize, value]);
 
   function commitDraft(nextDraft: string): void {
-    if (nextDraft === '' || nextDraft === '-' || nextDraft === '.') {
-      const fallback = min ?? 0;
-      setDraft(formatDraft(fallback, stepSize));
-      onChange(fallback);
-      return;
-    }
-
-    const parsed = Number(nextDraft);
-    if (!Number.isFinite(parsed)) {
-      setDraft(formatDraft(value, stepSize));
-      return;
-    }
-
-    const clamped = clampValue(parsed, min, max);
-    const normalizedValue =
-      getStepDecimalPlaces(stepSize) === 0
-        ? Math.round(clamped)
-        : stepNumberValue(clamped, 0, stepSize);
-    setDraft(formatDraft(normalizedValue, stepSize));
-    onChange(normalizedValue);
+    const committed = commitNumberDraft(nextDraft, bounds, keepOutOfRange);
+    setDraft(committed.draft);
+    onChange(committed.value);
   }
 
   function handleChange(event: ChangeEvent<HTMLInputElement>): void {
@@ -125,6 +107,10 @@ export function NumberField({
 
     if (raw === '') {
       setDraft('');
+      const cleared = getValueWhileTyping('', bounds, keepOutOfRange);
+      if (cleared !== null) {
+        onChange(cleared);
+      }
       return;
     }
 
@@ -135,9 +121,9 @@ export function NumberField({
     const normalized = normalizeDraft(raw, stepSize);
     setDraft(normalized);
 
-    const parsed = Number(normalized);
-    if (Number.isFinite(parsed)) {
-      onChange(clampValue(parsed, min, max));
+    const typedValue = getValueWhileTyping(normalized, bounds, keepOutOfRange);
+    if (typedValue !== null) {
+      onChange(typedValue);
     }
   }
 
@@ -151,8 +137,11 @@ export function NumberField({
     commitDraft(draft);
   }
 
+  const showMessage = Boolean(message) && !shouldHoldFieldMessage({ isFocused, draft, max });
+  const visibleStatus = showMessage ? status : undefined;
+
   return (
-    <div className={status ? `field-card field-card--${status}` : 'field-card'}>
+    <div className={visibleStatus ? `field-card field-card--${visibleStatus}` : 'field-card'}>
       <FieldLabel label={label} info={info} htmlFor={inputId} />
       <span className={showSteppers ? 'input-row input-row--stepper' : 'input-row'}>
         <span className={showSteppers ? 'number-field__control' : undefined}>
@@ -163,6 +152,8 @@ export function NumberField({
             className={hideSpinner || showSteppers ? 'number-input--no-spinner' : undefined}
             value={draft}
             step={step}
+            aria-invalid={showMessage && status === 'error' ? true : undefined}
+            aria-describedby={showMessage ? messageId : undefined}
             onChange={handleChange}
             onFocus={handleFocus}
             onBlur={handleBlur}
@@ -194,7 +185,11 @@ export function NumberField({
         </span>
         {suffix ? <span className="input-suffix">{suffix}</span> : null}
       </span>
-      {message ? <span className={`field-message field-message--${status}`}>{message}</span> : null}
+      {showMessage ? (
+        <span id={messageId} className={`field-message field-message--${status}`}>
+          {message}
+        </span>
+      ) : null}
     </div>
   );
 }

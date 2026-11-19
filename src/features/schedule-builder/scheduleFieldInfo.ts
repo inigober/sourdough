@@ -28,3 +28,14 @@ export const scheduleFieldInfo = {
   openBakeTempCelsius: 'Higher starting temperature for oven spring.',
   finishTempCelsius: 'Lower finish temperature so the crust does not burn before the crumb sets.',
 } as const;
+
+// One-line plain-English explanations shown under jargon fields (always visible, unlike the `i` info).
+export const scheduleFieldHints = {
+  autolyse: 'Autolyse: letting the flour and water rest together before the levain and salt go in.',
+  slapAndFold: 'Slap and fold: lifting the dough and slapping it on the counter to build strength.',
+  stretchAndFold: 'Stretch and fold: pulling one side of the dough up and folding it over, then turning the bowl.',
+  coilFold: 'Coil fold: a gentle fold done in the bowl, lifting the middle so the dough tucks under itself.',
+  preShape: 'Pre-shape: a loose first rounding of the dough before the final shape.',
+  coldRetard: 'Cold retard: letting the shaped dough rise slowly in the fridge.',
+  levain: 'Levain: the portion of active starter you build up to mix into the dough.',
+} as const;

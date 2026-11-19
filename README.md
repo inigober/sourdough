@@ -14,7 +14,7 @@ npm install
 cp .env.example .env.local
 ```
 
-Edit `.env.local` with your Supabase project URL and publishable (or anon) key. The app runs without Supabase for local-only recipe storage; sign-in enables cloud sync and bake history.
+Edit `.env.local` with your Supabase project URL and publishable (or anon) key. The app runs without Supabase for local-only recipe storage; bake history is also kept on the device; sign-in adds cloud sync and backup (see [Bake history](docs/product/bake-history.md)).
 
 For production, configure [Vercel environment variables](docs/engineering/vercel-deployment.md) (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`) and connect the repo so pushes to `main` deploy automatically.
 

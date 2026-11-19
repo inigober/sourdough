@@ -3,9 +3,11 @@ import { FunctionsHttpError } from '@supabase/supabase-js';
 import { getSupabaseClient } from '../auth/supabaseClient.ts';
 import type { CoachPromptParts } from './buildCoachPrompt.ts';
 import {
-  canAskCoachQuestion,
-  coachQuestionLimitMessage,
-} from './coachLimits.ts';
+  classifyCoachErrorDetail,
+  getCoachFailureMessage,
+  type CoachFailureReason,
+} from './coachErrors.ts';
+import { canAskCoachQuestion } from './coachLimits.ts';
 
 type CoachReplyResponse = {
   reply?: string;
@@ -20,7 +22,11 @@ export type CoachReplyRequest = CoachPromptParts & {
 
 export type CoachReplyResult =
   | { ok: true; reply: string }
-  | { ok: false; message: string };
+  | { ok: false; reason: CoachFailureReason; message: string };
+
+function failure(reason: CoachFailureReason): CoachReplyResult {
+  return { ok: false, reason, message: getCoachFailureMessage(reason) };
+}
 
 async function readCoachInvokeError(error: unknown): Promise<string> {
   if (error instanceof FunctionsHttpError && error.context instanceof Response) {
@@ -43,15 +49,12 @@ async function readCoachInvokeError(error: unknown): Promise<string> {
 
 export async function requestCoachReply(request: CoachReplyRequest): Promise<CoachReplyResult> {
   if (!canAskCoachQuestion(request.coachQuestionsAsked)) {
-    return { ok: false, message: coachQuestionLimitMessage() };
+    return failure('limit');
   }
 
   const supabase = getSupabaseClient();
   if (!supabase) {
-    return {
-      ok: false,
-      message: 'The baking coach needs Supabase to be configured before it can reply.',
-    };
+    return failure('not-configured');
   }
 
   const { data, error } = await supabase.functions.invoke<CoachReplyResponse>('coach', {
@@ -60,23 +63,19 @@ export async function requestCoachReply(request: CoachReplyRequest): Promise<Coa
 
   if (error) {
     const detail = await readCoachInvokeError(error);
-    const limitReached = /limit reached/i.test(detail);
-    return {
-      ok: false,
-      message: limitReached ? coachQuestionLimitMessage() : `Coach is temporarily unavailable. (${detail})`,
-    };
+    // Raw detail is for the developer console only; bakers see friendly copy.
+    console.warn('[coach] request failed:', detail);
+    return failure(classifyCoachErrorDetail(detail));
   }
 
   if (data?.error) {
-    const limitReached = /limit reached/i.test(data.error);
-    return {
-      ok: false,
-      message: limitReached ? coachQuestionLimitMessage() : `Coach is temporarily unavailable. (${data.error})`,
-    };
+    console.warn('[coach] request failed:', data.error);
+    return failure(classifyCoachErrorDetail(data.error));
   }
 
   if (!data?.reply?.trim()) {
-    return { ok: false, message: 'Coach did not return a reply. Try again in a moment.' };
+    console.warn('[coach] empty reply');
+    return failure('empty-reply');
   }
 
   return { ok: true, reply: data.reply.trim() };

@@ -42,7 +42,10 @@ export type RecipeScheduleOverview = {
 /** Everything the read-only recipe view shows, computed from a saved recipe. */
 export type RecipeOverview = {
   doughSummary: string;
+  /** Dough ingredients with the flour named, e.g. "Wheat Type 1050 flour". */
   ingredientRows: IngredientRow[];
+  /** Whole-recipe flour and water, including what sits in the levain. Null when the formula is invalid. */
+  totalsSummary: string | null;
   levainRows: IngredientRow[];
   /** Null when the recipe was saved without a schedule. */
   schedule: RecipeScheduleOverview | null;
@@ -56,7 +59,8 @@ export function buildRecipeOverview(
 
   return {
     doughSummary: formatDoughSummary(recipeInput),
-    ingredientRows: formula ? buildIngredientRows(recipeInput, formula) : [],
+    ingredientRows: formula ? buildNamedIngredientRows(recipeInput, formula) : [],
+    totalsSummary: formula ? formatTotalsSummary(formula) : null,
     levainRows: formula
       ? buildLevainRows(recipeInput, formula, scheduleInput ?? createDefaultScheduleInput(recipeInput))
       : [],
@@ -76,6 +80,29 @@ export function formatStepDuration(durationMinutes: number): string | null {
   const hours = Math.floor(durationMinutes / 60);
   const minutes = durationMinutes % 60;
   return minutes === 0 ? `${hours} h` : `${hours} h ${minutes} min`;
+}
+
+/** The shared ingredient rows say "Added flour"; the recipe view names the flour instead. */
+function buildNamedIngredientRows(recipeInput: RecipeInput, formula: RecipeFormula): IngredientRow[] {
+  const rows = buildIngredientRows(recipeInput, formula);
+  const usedFlours = recipeInput.doughFlours.filter((entry) => entry.percent > 0);
+
+  return rows.map(([label, value]): IngredientRow => {
+    if (label === 'Added flour' && usedFlours.length === 1) {
+      return [formatFlourName(flourProfiles[usedFlours[0].flourType].label), value];
+    }
+
+    const isBlendFlourRow = usedFlours.some((entry) => flourProfiles[entry.flourType].label === label);
+    return isBlendFlourRow ? [formatFlourName(label), value] : [label, value];
+  });
+}
+
+function formatFlourName(profileLabel: string): string {
+  return /flour/i.test(profileLabel) ? profileLabel : `${profileLabel} flour`;
+}
+
+function formatTotalsSummary(formula: RecipeFormula): string {
+  return `Totals including the levain: ${formatGrams(formula.totalFlourGrams)} flour, ${formatGrams(formula.totalWaterGrams)} water.`;
 }
 
 function formatDoughSummary(recipeInput: RecipeInput): string {

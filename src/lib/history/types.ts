@@ -31,6 +31,8 @@ export type BakeHistorySession = {
 
 export type BakeHistorySessionSummary = {
   id: string;
+  /** Recipe this bake came from; null or absent when it was deleted or never saved. */
+  savedRecipeId?: string | null;
   recipeName: string;
   completedAt: string;
   savedAt: string;

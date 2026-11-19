@@ -67,6 +67,50 @@ export function getStepPlannedStartMs(
   return new Date(start.iso).getTime();
 }
 
+/** Starting a timer earlier than this before its planned start asks the baker first. */
+export const EARLY_START_CONFIRM_MINUTES = 30;
+
+/** Whole minutes between "now" and the step's planned start; 0 when due or overdue. */
+export function getMinutesUntilStep(
+  session: BakeSession,
+  step: TimelineStep,
+  now = Date.now(),
+): number {
+  const plannedStartMs = getStepPlannedStartMs(session.scheduleInput, step, session.scheduleDriftMinutes);
+  return Math.max(0, Math.ceil((plannedStartMs - now) / 60_000));
+}
+
+/** Minutes the step is being started before its planned start; 0 when on time or late. */
+export function getEarlyStartMinutes(
+  session: BakeSession,
+  step: TimelineStep,
+  now = Date.now(),
+): number {
+  const plannedStartMs = getStepPlannedStartMs(session.scheduleInput, step, session.scheduleDriftMinutes);
+  return Math.max(0, Math.round((plannedStartMs - now) / 60_000));
+}
+
+export function shouldConfirmEarlyStart(
+  session: BakeSession,
+  step: TimelineStep,
+  now = Date.now(),
+): boolean {
+  return getEarlyStartMinutes(session, step, now) > EARLY_START_CONFIRM_MINUTES;
+}
+
+/** "14h 43m", "2h" or "45m". */
+export function formatDurationMinutes(totalMinutes: number): string {
+  const absolute = Math.abs(Math.round(totalMinutes));
+  const hours = Math.floor(absolute / 60);
+  const minutes = absolute % 60;
+
+  if (hours > 0 && minutes > 0) {
+    return `${hours}h ${minutes}m`;
+  }
+
+  return hours > 0 ? `${hours}h` : `${minutes}m`;
+}
+
 export function startTimedStep(
   session: BakeSession,
   step: TimelineStep,
@@ -87,8 +131,16 @@ export function startTimedStep(
   }
 
   const plannedStartMs = getStepPlannedStartMs(session.scheduleInput, step, session.scheduleDriftMinutes);
-  const lateStartMinutes = Math.max(0, Math.round((now - plannedStartMs) / 60_000));
-  const nextDrift = session.scheduleDriftMinutes + lateStartMinutes;
+  const startOffsetMinutes = Math.round((now - plannedStartMs) / 60_000);
+  // Late starts always push the plan back. Early starts pull it forward only when far
+  // enough early that the baker was asked first (EARLY_START_CONFIRM_MINUTES); a few
+  // minutes early is noise. Without this, only the running step moved and the rest of
+  // the schedule kept its old clock times.
+  const planShiftMinutes =
+    startOffsetMinutes > 0 || -startOffsetMinutes > EARLY_START_CONFIRM_MINUTES
+      ? startOffsetMinutes
+      : 0;
+  const nextDrift = session.scheduleDriftMinutes + planShiftMinutes;
 
   return {
     ...session,

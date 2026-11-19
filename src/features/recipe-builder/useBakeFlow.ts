@@ -1,6 +1,8 @@
 import { useCallback, useState } from 'react';
 
 import type { BakeCompleteSaveInput } from '../../lib/companion/types.ts';
+import { buildBakeAgainStart } from '../../lib/history/bakeAgain.ts';
+import type { BakeHistorySession } from '../../lib/history/types.ts';
 import type { SavedRecipe } from '../../lib/storage/types.ts';
 import { applyBakeStart, type BakeStartChoice } from '../../lib/schedule/bakeStart.ts';
 import type { ScheduleInput } from '../../lib/schedule/types.ts';
@@ -21,13 +23,14 @@ type BeginBakeSessionOptions = {
 };
 
 /**
- * A bake waiting for its real mix date and time. `savedRecipe` is set when the bake starts straight
- * from a saved recipe; otherwise it starts from the recipe open in the builder (saved on confirm).
+ * A bake waiting for its real mix date and time. `directStart` is set when the bake starts straight
+ * from a saved recipe or a past bake ("Bake again"); otherwise it starts from the recipe open in
+ * the builder (saved on confirm).
  */
 type BakeStartRequest = {
   recipeInput: RecipeInput;
   scheduleInput: ScheduleInput;
-  savedRecipe: (SavedRecipe & { scheduleInput: ScheduleInput }) | null;
+  directStart: { savedRecipeId: string | null; recipeName: string } | null;
 };
 
 type BakeSessionActions = {
@@ -103,7 +106,7 @@ export function useBakeFlow({
   );
 
   const requestBakeStartFromBuilder = useCallback((): void => {
-    setBakeStartRequest({ recipeInput, scheduleInput, savedRecipe: null });
+    setBakeStartRequest({ recipeInput, scheduleInput, directStart: null });
   }, [recipeInput, scheduleInput]);
 
   const requestBakeStartForSavedRecipe = useCallback(
@@ -111,7 +114,7 @@ export function useBakeFlow({
       setBakeStartRequest({
         recipeInput: saved.recipeInput,
         scheduleInput: saved.scheduleInput,
-        savedRecipe: saved,
+        directStart: { savedRecipeId: saved.id, recipeName: saved.name },
       });
     },
     [],
@@ -130,12 +133,12 @@ export function useBakeFlow({
 
       setBakeStartRequest(null);
 
-      if (request.savedRecipe) {
+      if (request.directStart) {
         enterCompanionBake({
-          savedRecipeId: request.savedRecipe.id,
-          recipeName: request.savedRecipe.name,
-          recipe: request.savedRecipe.recipeInput,
-          schedule: applyBakeStart(request.savedRecipe.scheduleInput, choice),
+          savedRecipeId: request.directStart.savedRecipeId,
+          recipeName: request.directStart.recipeName,
+          recipe: request.recipeInput,
+          schedule: applyBakeStart(request.scheduleInput, choice),
         });
         return;
       }
@@ -172,6 +175,28 @@ export function useBakeFlow({
     [fetchSavedRecipe, requestBakeStartForSavedRecipe],
   );
 
+  // Starts from the snapshot stored with the past bake, not from the saved recipe as it is now.
+  const startBakeAgainFromHistory = useCallback(
+    async (session: BakeHistorySession): Promise<void> => {
+      let savedRecipeStillExists = false;
+      if (session.savedRecipeId) {
+        try {
+          savedRecipeStillExists = Boolean(await fetchSavedRecipe(session.savedRecipeId));
+        } catch {
+          savedRecipeStillExists = false;
+        }
+      }
+
+      const start = buildBakeAgainStart(session, savedRecipeStillExists);
+      setBakeStartRequest({
+        recipeInput: start.recipeInput,
+        scheduleInput: start.scheduleInput,
+        directStart: { savedRecipeId: start.savedRecipeId, recipeName: start.recipeName },
+      });
+    },
+    [fetchSavedRecipe],
+  );
+
   const saveCompletedBake = useCallback(
     async (input: BakeCompleteSaveInput): Promise<void> => {
       const saved = await bakeSession.saveCompletedBakeToHistory(input);
@@ -183,8 +208,8 @@ export function useBakeFlow({
   );
 
   const exitCompanion = useCallback(
-    (options: { finished: boolean }): void => {
-      if (getCompanionExitSessionAction(options.finished) === 'clear') {
+    (options: { discardBake: boolean }): void => {
+      if (getCompanionExitSessionAction(options.discardBake) === 'clear') {
         bakeSession.clearSessionAfterFinish();
       } else {
         bakeSession.stashSessionOnLeaveCompanion();
@@ -220,6 +245,7 @@ export function useBakeFlow({
     handleResumeBake,
     startBakeFromSchedule,
     startBakeFromSavedRecipe,
+    startBakeAgainFromHistory,
     saveCompletedBake,
     exitCompanion,
     continueAfterSaveRecipe,

@@ -32,6 +32,8 @@ The schedule builder, the recipe view, and saved-recipe cards use these labels. 
 
 **Starting a bake.** Every entry point (Home card, recipe view, schedule builder) opens the same dialog, "When are you mixing?". It asks for the real mix date and start time, defaulting to today if the usual start time is still ahead and tomorrow otherwise, and previews the first step, mix time, and oven time. Those values are written to the bake session only, so the saved recipe is untouched. Bake mode, timers and history keep using real dates.
 
+**Past start times.** A start time more than 5 minutes in the past shows a warning ("This start time was 10 days ago...") but Start baking stays enabled. Up to 5 minutes ago counts as now and shows nothing. A "Start now" button sets the date and time to the current time. The warning is only about the mix time; a first step before the mix (such as building levain) that is already late is not flagged yet.
+
 ## Compatibility
 
 Recipes saved before this change still contain a `mixDate`. It is ignored and cleared the next time the recipe is saved.
@@ -39,4 +41,3 @@ Recipes saved before this change still contain a `mixDate`. It is ignored and cl
 ## Not covered yet
 
 - Choosing the oven time instead of the mix time when starting a bake (working backward).
-- A "start now" shortcut in the bake-start dialog.

@@ -156,6 +156,14 @@ type NativeBakeTimer = {
 - JS bridge: `src/lib/companion/nativeBakeTimer/`
 - Native plugin: `ios/App/App/BakeTimerPlugin.swift`
 
+## Bake mode safety and kitchen readability
+
+- **Keep screen awake:** `useBakeKeepAwake` (`src/lib/companion/useBakeKeepAwake.ts`) runs while bake mode is mounted. Web uses `navigator.wakeLock` (`screenWakeLock.ts`, re-acquired on `visibilitychange`, no-op when unsupported). Native iOS also calls `BakeTimer.setKeepAwake({ enabled })`, which sets `UIApplication.shared.isIdleTimerDisabled`; the hook re-enables auto-lock on unmount and the plugin does so in `deinit`. WKWebView support for `navigator.wakeLock` is not verified, which is why the native path exists. Not yet tested on a physical device.
+- **Early starts:** starting a timer more than 30 minutes before the planned start asks first, and a confirmed early start shifts the whole remaining plan (negative `scheduleDriftMinutes`), so the Full schedule stays in order. Starts within 30 minutes of plan do not shift it.
+- **Web alerts:** the web build shows a persistent banner that it cannot alert with the screen off; native builds do not.
+- **Undo and skips:** Next step and Jump show an Undo toast (restores the session snapshot, keeping the coach question count). Jumping forward more than one step asks first; Full schedule rows need a second tap on "Jump to this step". Previous and backward jumps remove the step logs from the returned-to step onward.
+- **Test-mode copy:** the bake-mode test-timer note only mentions `.env.local` in dev builds.
+
 ## Product decisions (locked)
 
 1. **Permission timing:** ask on first **Start timer** tap in bake mode.

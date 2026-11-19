@@ -228,7 +228,7 @@ If the user selects `inactive` levain, still calculate a fallback value for disp
 
 Show blocking errors for:
 
-- Final dough weight at or below `0g`.
+- Final dough weight below `50g` or above `10,000g`. (`50g` is the old field minimum, so every recipe the app could already save still opens.)
 - Number of loaves below `1`.
 - Hydration below `50%` or above `110%`.
 - Salt below `0%` or above `4%`.
@@ -238,9 +238,12 @@ Show blocking errors for:
 - Calculated `addedWater` below `0g`.
 - Calculated `addedFlour` below `0g`.
 
+Number fields never rewrite what the user typed. An out-of-range number stays in the field and a cleared field stays empty; the message appears next to the field when the user leaves it (immediately if the number is already above the maximum), and Continue is disabled until it is fixed. Steppers always land inside the range.
+
 Show warnings, not blockers, for unusual but possible values:
 
 - Hydration near the edge of the selected flour's range.
+- Final dough weight from `50g` up to `300g`, or above `3kg`: "Under about 300g, timings and levain amounts stop being reliable." The formula maths is linear and works at any positive weight; the limits come from tiny salt/levain gram amounts, the fixed minimum bake time, and home oven size. Weight limits live in `DOUGH_WEIGHT_LIMITS` in `validation.ts`.
 - Salt below `1.8%` or above `2.2%`.
 - Prefermented flour below `6%` or above `25%`.
 - Levain activity below `active`.

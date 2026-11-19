@@ -397,22 +397,6 @@ p {
   min-width: 0;
 }
 
-.saved-recipes__create {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  margin-top: 16px;
-  border-color: #b8d48a;
-  background: #fbfff4;
-  color: #446322;
-}
-
-.saved-recipes__create:hover {
-  background: #f3fbe8;
-}
-
 .screen-chrome,
 .app-header {
   position: sticky;
@@ -569,10 +553,16 @@ p {
   margin-bottom: 16px;
 }
 
-.bake-history__signin {
+.bake-history__backup-nudge {
   display: grid;
   gap: 12px;
   justify-items: start;
+}
+
+.bake-history__backup-nudge-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .main-screen {
@@ -791,6 +781,15 @@ p {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+}
+
+.bake-history-detail__bake-again {
+  margin-top: 16px;
+}
+
+.saved-recipe-card__bake-stats {
+  display: block;
+  margin-top: 2px;
 }
 
 .bake-history-detail__delete {
@@ -2511,6 +2510,24 @@ div.dialog-backdrop {
   margin-top: 12px;
 }
 
+/* --- Input sanity: bake start timing (past-time warning + "Start now") --- */
+.bake-start__timing {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.bake-start__timing .field-message {
+  margin: 0;
+}
+
+.bake-start__now {
+  min-height: 44px;
+}
+/* --- end input sanity block --- */
+
 .bake-start__preview {
   margin-top: 16px;
   padding: 12px 14px;
@@ -3003,6 +3020,73 @@ div.dialog-backdrop {
   padding: 12px 16px;
   white-space: nowrap;
 }
+
+/* --- Coach sheet: framing line, quick-question chips, failure + retry, saved-transcript notes --- */
+.companion-coach__quota--last {
+  color: #a15b2a;
+}
+
+.companion-coach__framing {
+  margin: 6px 0 0;
+  color: #6f5d4e;
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.companion-coach__step-note {
+  margin: 0 0 4px;
+  color: #6f5d4e;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.companion-coach__failure {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 16px 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #fdf0ed;
+  color: #7d2e24;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.companion-coach__failure p {
+  margin: 0;
+}
+
+.companion-coach__retry {
+  flex-shrink: 0;
+  padding: 10px 16px;
+}
+
+.companion-coach__chips {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0 16px 10px;
+  list-style: none;
+  overflow-x: auto;
+}
+
+.companion-coach__chip {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid #e1c7ad;
+  border-radius: 999px;
+  background: #fff6ea;
+  color: #6f4521;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+/* --- end coach sheet additions --- */
 
 .companion__step-label {
   margin: 0;
@@ -3558,18 +3642,6 @@ dd {
   }
 }
 
-.dev-panel-unlock-target {
-  display: inline;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  font: inherit;
-  color: inherit;
-  text-align: inherit;
-  background: none;
-  cursor: default;
-}
-
 .dev-panel__hint {
   margin: 0;
 }
@@ -3612,4 +3684,295 @@ dd {
   margin: 0;
   font-size: 0.92rem;
   color: #6f5d4d;
+}
+
+/* ==========================================================================
+   Bake mode safety and kitchen readability (UX review problems 2, 3, 8).
+   Kept in one block at the end so it merges easily. It overrides a few
+   .companion__* rules above on purpose (same specificity, later wins).
+   ========================================================================== */
+
+/* Glanceable timer and step title */
+.companion__timer-value {
+  font-size: 3.5rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+}
+
+.companion__step-label {
+  font-size: 1.85rem;
+  line-height: 1.15;
+}
+
+/* Previous card: normal readable text, no dimming */
+.companion__previous {
+  opacity: 1;
+}
+
+.companion__previous strong {
+  color: var(--color-text);
+}
+
+.companion__previous-time {
+  color: var(--color-text-muted);
+}
+
+/* "About this bake" disclosure replaces the hero paragraph */
+.companion__about {
+  margin: 6px 0 0;
+}
+
+.companion__about summary {
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  color: var(--color-primary);
+  cursor: pointer;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.companion__about .hero-copy {
+  margin: 0 0 6px;
+}
+
+/* Web build: no alerts with the screen off */
+.companion__web-banner {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border: 1px solid #d9c4a8;
+  border-radius: 12px;
+  background: #fff8ef;
+  color: var(--color-text);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+/* Timing hints */
+.companion__starts-in {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.companion__next-up {
+  margin: 4px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border-soft);
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.companion__next-up strong {
+  color: var(--color-text);
+}
+
+.timeline-row__label-compact {
+  display: grid;
+  gap: 2px;
+}
+
+.timeline-row__starts-in {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Full schedule: tap a row to select it, then confirm with an explicit Jump button */
+.timeline-row--interactive[aria-expanded='true'] {
+  background: rgb(255 244 232 / 75%);
+}
+
+.companion__row-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 0 10px;
+}
+
+/* Toast with an action (Undo), lifted above the sticky bake-mode footer */
+.toast--with-action {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.toast--above-footer {
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+}
+
+.toast__action {
+  min-height: 2.75rem;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+}
+
+/* Keep the larger timer inside the card on narrow phones (hh:mm:ss is 8 characters wide). */
+.companion__current {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.companion__timer-display {
+  flex-wrap: wrap;
+}
+
+.companion__timer-value {
+  font-size: clamp(2.5rem, 14vw, 3.5rem);
+}
+
+/* The base .toast shrinks to fit when centred with left: 50%; give action toasts a stable width. */
+.toast--with-action {
+  width: min(calc(100vw - 28px), 22rem);
+  justify-content: space-between;
+  border-radius: 20px;
+  text-align: left;
+}
+
+/* --- Home: primary create action (UX review 2.4). Filled button sits in the hero, above the fold. --- */
+.welcome-screen__create {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+}
+
+@media (min-width: 640px) {
+  .welcome-screen__create {
+    width: auto;
+    justify-self: start;
+    min-width: 220px;
+  }
+}
+
+/* --- Recipe view: whole-recipe flour and water line under the amount cards (UX review 2.12). --- */
+.recipe-view__totals {
+  margin: 0;
+}
+
+/* ==========================================================================
+   Schedule builder: presets, Customise groups and field hints
+   (UX review 2.7). Self-contained so the later global accessibility/dark-mode
+   pass can find and retheme it. Colours mirror the existing card palette.
+   ========================================================================== */
+
+.schedule-presets__group {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.schedule-presets__option {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  min-height: 44px;
+  border: 1px solid #e1c7ad;
+  border-radius: 18px;
+  background: #fffaf4;
+  cursor: pointer;
+}
+
+.schedule-presets__option--selected {
+  border-color: #a15b2a;
+  background: #fff4e8;
+  box-shadow: inset 0 0 0 1px #a15b2a;
+}
+
+/* The radio is visually hidden but stays focusable; the card shows the focus ring. */
+.schedule-presets__input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.schedule-presets__option:has(.schedule-presets__input:focus-visible) {
+  outline: 3px solid #a15b2a;
+  outline-offset: 2px;
+}
+
+.schedule-presets__label {
+  color: #2f241c;
+  font-weight: 800;
+}
+
+.schedule-presets__description {
+  color: #6f5d4e;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.schedule-presets__status {
+  margin: 16px 0 0;
+  color: #6f5d4e;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+@media (min-width: 960px) {
+  .schedule-presets__group {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.schedule-customise__copy {
+  margin: 0 0 16px;
+}
+
+/* Customise groups: the sections inside "Customise" are flat rows, not cards inside a card. */
+.schedule-customise .collapsible-section .collapsible-section {
+  border: 0;
+  border-top: 1px solid #ead9c8;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.schedule-customise .collapsible-section .collapsible-section .collapsible-section__trigger {
+  padding: 16px 0;
+  font-size: 1.05rem;
+}
+
+.schedule-customise .collapsible-section .collapsible-section .collapsible-section__panel {
+  display: grid;
+  gap: 16px;
+  padding: 0 0 20px;
+}
+
+.schedule-customise .collapsible-section .collapsible-section .collapsible-section__panel .section-copy {
+  margin: 0;
+}
+
+.schedule-fold-groups {
+  display: grid;
+  gap: 20px;
+}
+
+.schedule-fold-group {
+  display: grid;
+  gap: 8px;
+}
+
+.schedule-field-hint {
+  margin: 0;
+  color: #6f5d4e;
+  font-size: 0.86rem;
+  line-height: 1.4;
 }

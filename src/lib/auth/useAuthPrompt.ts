@@ -1,22 +1,19 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 
-import { isAuthPromptDismissed, setAuthPromptDismissed } from './authPromptStorage.ts';
+import { setAuthPromptDismissed, shouldOfferAuthPrompt } from './authPromptStorage.ts';
 
 type UseAuthPromptOptions = {
   user: User | null;
   isConfigured: boolean;
   isAuthLoading: boolean;
-  shouldPrompt: boolean;
+  /** True while the baker is on the Home screen, the only place the sync offer may appear. */
+  isOnHome: boolean;
 };
 
-export function useAuthPrompt({
-  user,
-  isConfigured,
-  isAuthLoading,
-  shouldPrompt,
-}: UseAuthPromptOptions) {
+export function useAuthPrompt({ user, isConfigured, isAuthLoading, isOnHome }: UseAuthPromptOptions) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isOfferPending, setIsOfferPending] = useState(false);
 
   const openAuthModal = useCallback((): void => {
     setIsAuthModalOpen(true);
@@ -30,19 +27,27 @@ export function useAuthPrompt({
     setIsAuthModalOpen(false);
   }, []);
 
+  /** Call after a recipe is saved. The offer waits until the baker is back on Home. */
+  const offerAuthAfterSave = useCallback((): void => {
+    setIsOfferPending(true);
+  }, []);
+
   useEffect(() => {
-    if (!shouldPrompt || user || !isConfigured || isAuthLoading) {
+    if (!isOfferPending || !isOnHome || isAuthLoading) {
       return;
     }
 
-    if (!isAuthPromptDismissed()) {
+    setIsOfferPending(false);
+
+    if (shouldOfferAuthPrompt({ isSignedIn: Boolean(user), isConfigured })) {
       setIsAuthModalOpen(true);
     }
-  }, [shouldPrompt, user, isConfigured, isAuthLoading]);
+  }, [isOfferPending, isOnHome, isAuthLoading, user, isConfigured]);
 
   return {
     isAuthModalOpen,
     openAuthModal,
     closeAuthModal,
+    offerAuthAfterSave,
   };
 }
