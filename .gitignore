@@ -10,3 +10,6 @@ ios/App/App/public
 ios/DerivedData
 *.xcuserstate
 xcuserdata
+
+# macOS
+.DS_Store
