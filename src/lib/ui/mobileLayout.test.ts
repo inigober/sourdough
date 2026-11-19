@@ -52,7 +52,7 @@ test('summary groups stay in a two-column grid on desktop', () => {
 });
 
 test('number fields use a bounded width for short numeric values', () => {
-  assert.match(stylesCss, /--number-field-width:\s*7\.25rem/s);
+  assert.match(stylesCss, /--number-field-width:\s*10\.25rem/s);
   assert.match(
     stylesCss,
     /\.number-field__control\s*\{[^}]*max-width:\s*var\(--number-field-width\)/s,
@@ -60,7 +60,7 @@ test('number fields use a bounded width for short numeric values', () => {
 });
 
 test('number field stepper controls share a bordered shell with the input', () => {
-  assert.match(stylesCss, /\.number-field__control\s*\{[^}]*border:\s*1px solid #e1c7ad/s);
+  assert.match(stylesCss, /\.number-field__control\s*\{[^}]*border:\s*1px solid var\(--color-border\)/s);
   assert.match(stylesCss, /\.number-field__control input\s*\{[^}]*border:\s*0/s);
 });
 

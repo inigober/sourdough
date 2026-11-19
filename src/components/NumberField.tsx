@@ -1,7 +1,7 @@
 import { useEffect, useId, useState, type ChangeEvent, type FocusEvent } from 'react';
 
 import { FieldLabel } from './FieldLabel.tsx';
-import { ChevronDownIcon, ChevronUpIcon } from './icons.tsx';
+import { MinusIcon, PlusIcon } from './icons.tsx';
 import {
   commitNumberDraft,
   getValueWhileTyping,
@@ -145,6 +145,19 @@ export function NumberField({
       <FieldLabel label={label} info={info} htmlFor={inputId} />
       <span className={showSteppers ? 'input-row input-row--stepper' : 'input-row'}>
         <span className={showSteppers ? 'number-field__control' : undefined}>
+          {showSteppers ? (
+            <button
+              type="button"
+              className="number-field__stepper number-field__stepper--decrease"
+              aria-label={`Decrease ${label}`}
+              aria-hidden="true"
+              disabled={decrementDisabled}
+              tabIndex={-1}
+              onClick={() => adjustValue(-stepSize)}
+            >
+              <MinusIcon />
+            </button>
+          ) : null}
           <input
             id={inputId}
             type="text"
@@ -159,28 +172,17 @@ export function NumberField({
             onBlur={handleBlur}
           />
           {showSteppers ? (
-            <span className="number-field__steppers" aria-hidden="true">
-              <button
-                type="button"
-                className="number-field__stepper"
-                aria-label={`Increase ${label}`}
-                disabled={incrementDisabled}
-                tabIndex={-1}
-                onClick={() => adjustValue(stepSize)}
-              >
-                <ChevronUpIcon />
-              </button>
-              <button
-                type="button"
-                className="number-field__stepper"
-                aria-label={`Decrease ${label}`}
-                disabled={decrementDisabled}
-                tabIndex={-1}
-                onClick={() => adjustValue(-stepSize)}
-              >
-                <ChevronDownIcon />
-              </button>
-            </span>
+            <button
+              type="button"
+              className="number-field__stepper number-field__stepper--increase"
+              aria-label={`Increase ${label}`}
+              aria-hidden="true"
+              disabled={incrementDisabled}
+              tabIndex={-1}
+              onClick={() => adjustValue(stepSize)}
+            >
+              <PlusIcon />
+            </button>
           ) : null}
         </span>
         {suffix ? <span className="input-suffix">{suffix}</span> : null}

@@ -66,7 +66,7 @@ export function WizardInputSteps({
         currentStep={currentStep}
         canGoBack={canGoBack}
         canContinue={canContinue}
-        continueLabel={isLastWizardStep ? 'View ingredient summary' : 'Continue'}
+        continueLabel={isLastWizardStep ? 'View summary' : 'Continue'}
         showSaveToSummary={showReturnToSummary}
         headerAction={headerAction}
         onBack={onBack}

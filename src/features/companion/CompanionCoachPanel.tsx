@@ -88,7 +88,12 @@ export function CompanionCoachPanel({
   }, []);
 
   useEffect(() => {
-    transcriptRef.current?.scrollTo({ top: transcriptRef.current.scrollHeight, behavior: 'smooth' });
+    // An explicit 'smooth' ignores the CSS reduced-motion rule, so check the setting here.
+    const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+    transcriptRef.current?.scrollTo({
+      top: transcriptRef.current.scrollHeight,
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+    });
   }, [savedMessages.length, isSending]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {

@@ -17,7 +17,7 @@ describe('StepLayout', () => {
       }),
     );
 
-    expect(html).toMatch(/aria-label="Continue"[^>]*disabled/);
+    expect(html).toMatch(/<button[^>]*disabled[^>]*>Continue/);
   });
 
   it('enables Continue when canContinue is true', () => {
@@ -32,7 +32,41 @@ describe('StepLayout', () => {
       }),
     );
 
-    const continueButton = html.match(/<button[^>]*aria-label="Continue"[^>]*>/)?.[0] ?? '';
+    const continueButton = html.match(/<button[^>]*>(?=Continue)/)?.[0] ?? '';
+    expect(continueButton).not.toBe('');
     expect(continueButton).not.toMatch(/disabled/);
+  });
+
+  it('shows labelled Back and Continue buttons, not icon-only circles', () => {
+    const html = renderToStaticMarkup(
+      createElement(StepLayout, {
+        currentStep: 'flour',
+        canGoBack: true,
+        canContinue: true,
+        onBack: () => {},
+        onContinue: () => {},
+        children: 'Step content',
+      }),
+    );
+
+    expect(html).toMatch(/<button[^>]*>(?:<svg[^>]*>.*?<\/svg>)Back<\/button>/);
+    expect(html).toMatch(/<button[^>]*>Continue<svg/);
+    expect(html).not.toMatch(/<button[^>]*aria-label="(?:Previous step|Continue)"/);
+  });
+
+  it('uses the custom continue label as visible text on the last step', () => {
+    const html = renderToStaticMarkup(
+      createElement(StepLayout, {
+        currentStep: 'fermentation',
+        canGoBack: true,
+        canContinue: true,
+        continueLabel: 'View summary',
+        onBack: () => {},
+        onContinue: () => {},
+        children: 'Step content',
+      }),
+    );
+
+    expect(html).toMatch(/<button[^>]*>View summary<svg/);
   });
 });

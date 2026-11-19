@@ -47,6 +47,7 @@ That flags an intentional product choice so we can discuss tradeoffs once instea
 | Only one info bubble open at a time is acceptable; closing outside is enough for now. | Avoid over-engineering unless overlap becomes a problem. |
 | Destructive actions require a clear, distinct control — not the same symbol as a quantity stepper. | Prevents accidental deletes (e.g. bin for remove, not `−`). |
 | Primary navigation actions belong in consistent locations (footer in wizard, clear CTA on welcome). | Reduces hunt time. |
+| Wizard footer buttons are labelled text buttons ("Back", "Continue", "View summary" on the last step), not icon-only circles. The accessible name is the visible text. | A label is faster to read than a chevron, and speech-control users can say what they see. |
 
 **Override example:** A comparison panel that must stay open while editing multiple fields — skip click-outside dismiss and say why.
 
@@ -60,7 +61,8 @@ That flags an intentional product choice so we can discuss tradeoffs once instea
 | Delete / remove → bin/trash icon (with `aria-label`). | Must not look like a numeric decrement button. |
 | `+` / `−` are for numeric steppers only. | One symbol, one meaning. |
 | Icon-only buttons always have an accessible name (`aria-label` or visible text). | Icons alone are not readable to everyone. |
-| Touch targets ~44px where practical. | Easier to tap on mobile with floury hands. |
+| Every tappable control has a hit area of at least 44x44 CSS px. The visual size may be smaller: add the control to the "Touch targets" block at the end of `styles.css` (an invisible `::after`) instead of enlarging it. | Easier to tap on mobile with floury hands; 44px is Apple's guideline. |
+| Numeric steppers are a `−` button, the value and a `+` button in one row, each button a full 44px square. Stacked up/down chevrons cannot reach 44px. | One symbol, one meaning, and a tappable size. |
 
 **Override example:** A list row uses a text "Remove" link instead of an icon for clarity in a destructive confirmation flow.
 
@@ -114,6 +116,27 @@ That flags an intentional product choice so we can discuss tradeoffs once instea
 | Semantic controls: `button` for actions, `label` for fields, `nav` for step navigation. | Correct roles for assistive tech. |
 | Meaningful heading hierarchy (`h1` → `h2`) per screen. | Screen readers use headings to navigate. |
 | Do not rely on color alone for errors/warnings. | Include text and/or iconography. |
+| Text is at least 4.5:1 against its background in both the light and the dark palette. Check new colour pairs with a contrast script before adding them. | WCAG AA; kitchens are bright or dark and floury fingers are not precise. |
+| Never dim text with `opacity` to de-emphasise it; pick a muted colour token that still passes 4.5:1. | Opacity silently lowers contrast (the old Previous card was 55%). |
+| Honour `prefers-reduced-motion`: transitions are switched off in one block at the end of `styles.css`; JS must not force `behavior: 'smooth'` without checking the setting. | Motion can cause discomfort and an explicit smooth scroll ignores the CSS rule. |
+| A control's visible text must be part of its accessible name (`aria-label` contains the visible label). | Voice Control and screen-reader users refer to controls by what they see. |
+
+---
+
+## Colour And Dark Mode
+
+The app follows the system setting (`prefers-color-scheme`); there is no in-app switch yet.
+
+| Practice | Why |
+| --- | --- |
+| Every colour in `styles.css` is a CSS variable defined in `:root`. No hex or `rgb()` literals in rules. | Dark mode only works if one place owns each colour. |
+| Add a new colour as a token in `:root` AND in the dark block (`@media (prefers-color-scheme: dark)`, right below `:root`). | A token missing from the dark block stays light and shows up as a white patch. |
+| Brown is two tokens: `--color-primary` is a fill (buttons, switches; white text on it), `--color-primary-text` is brown used as text, borders or rings on a surface. Use the second for text. | In dark mode the text brown is lighter, the fill brown is unchanged. |
+| Soft grey-brown text is `--color-text-subtle` (4.5:1 or better on every surface); do not introduce lighter greys for text. | The old `#9a8776` was 3.07:1. |
+| Overlays use `--color-scrim`, shadows use `--shadow-color-*`. Sticky header and footer fades are built from `--color-bg-rgb`, so they follow the palette. | Prevents a light haze over a dark page. |
+| `color-scheme: light dark` is set on `:root`, `index.html` has a `theme-color` per scheme. The PWA manifest keeps one light colour (manifests cannot switch by scheme). | Native controls, scrollbars and the browser chrome match. |
+
+Light and dark ratios were checked with a throwaway script over the main text/surface pairs (all at least 4.5:1). Re-check after changing a token.
 
 ---
 
@@ -138,6 +161,8 @@ When adding or changing UI, verify:
 4. Icons: edit/delete/stepper meanings are distinct; icon buttons have labels.
 5. Copy: info text is accurate for the current step and calculation.
 6. Overrides: if the user’s request breaks a practice, confirm explicitly rather than silently diverging.
+7. Dark mode: view the screen with the system set to dark (or the browser's `prefers-color-scheme` emulation) and look for white patches or unreadable text.
+8. Touch targets: every new control is at least 44x44 tappable.
 
 ---
 
@@ -148,3 +173,4 @@ Add a line here when a practice is added or changed after a product discussion.
 - 2026-05-20: Initial doc from wizard, info bubbles, flour step, and responsive field patterns.
 - 2026-05-20: Removed header preview chips; live previews belong in step content with labels.
 - 2026-11-19: Forms never silently clamp or revert typed numbers; messages show on blur.
+- 2026-11-19: Accessibility pass: full dark theme following the system setting; text contrast at least 4.5:1; 44px hit areas; labelled Back/Continue; steppers are − value + in one row; reduced motion honoured.

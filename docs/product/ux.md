@@ -170,7 +170,7 @@ A searchable list of completed bakes (search by recipe name or notes, filter by 
 
 ## Navigation
 
-- The wizard has a sticky header with progress and a sticky footer with Back and Continue, so both stay reachable. The last wizard step's button reads "View ingredient summary".
+- The wizard has a sticky header with progress and a sticky footer with Back and Continue, so both stay reachable. The last wizard step's button reads "View summary". The app follows the system light or dark setting, respects reduced motion, and keeps tap targets at least 44px (see [UI/UX practices](./ui-ux-practices.md)).
 - Entered values are preserved when moving between steps and across reloads (draft).
 - Leaving a dirty recipe asks to save or discard (see [Leave dialog and unsaved navigation](../engineering/leave-dialog-and-unsaved-navigation.md)). Bake mode is never blocked.
 - Bake timers can reopen the app on bake mode through the `sourdough://bake` link.

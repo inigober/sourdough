@@ -11,7 +11,8 @@ import { WizardInputSteps } from './WizardInputSteps.tsx';
 const noop = () => {};
 
 function getContinueButtonMarkup(html: string): string {
-  return html.match(/<button[^>]*aria-label="(?:Continue|View ingredient summary)"[^>]*>/)?.[0] ?? '';
+  // The label is visible text now, so find the button whose text is Continue / View summary.
+  return html.match(/<button[^>]*>(?=[^<]*(?:Continue|View summary))/)?.[0] ?? '';
 }
 
 function renderWizard(options: {
@@ -99,7 +100,9 @@ describe('WizardInputSteps integration', () => {
     const html = renderWizard({ currentStep: 'fermentation' });
 
     expect(html).toContain('Timing and starter strength');
-    expect(html).toMatch(/aria-label="View ingredient summary"/);
+    expect(getContinueButtonMarkup(html)).not.toBe('');
+    expect(html).toMatch(/View summary<svg/);
+    expect(html).not.toMatch(/>Continue</);
   });
 
   it('shows Save to summary when editing from results', () => {
@@ -108,6 +111,6 @@ describe('WizardInputSteps integration', () => {
       showReturnToSummary: true,
     });
 
-    expect(html).toMatch(/aria-label="Update ingredient list"/);
+    expect(html).toMatch(/aria-label="Save and return to summary"/);
   });
 });

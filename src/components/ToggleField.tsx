@@ -23,12 +23,14 @@ export function ToggleField({ label, checked, onChange, description, info }: Tog
           </label>
         ) : null}
       </div>
-      <input
-        id={inputId}
-        type="checkbox"
-        checked={checked}
-        onChange={(event) => onChange(event.currentTarget.checked)}
-      />
+      <label className="field-card__checkbox-hit">
+        <input
+          id={inputId}
+          type="checkbox"
+          checked={checked}
+          onChange={(event) => onChange(event.currentTarget.checked)}
+        />
+      </label>
     </div>
   );
 }
