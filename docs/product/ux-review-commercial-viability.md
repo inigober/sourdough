@@ -6,6 +6,25 @@ date: 2026-10-30
 
 # UX review: what must improve before this is commercially viable
 
+## Status (as of 2026-11-19)
+
+This review is kept as a dated record of 2026-10-30. The list below says where each problem stands now, checked against the code. The sections further down are the original text and are not updated, except that former point 5 was removed.
+
+| # | Problem | State |
+| --- | --- | --- |
+| 1 | Finished bake can be lost, saving needs an account | Done. History is saved on the device first and synced when signed in. X, Escape and backdrop keep the bake; "Don't save" asks first. See [Bake history](./bake-history.md). |
+| 2 | Bake mode not designed for a kitchen | Done in code: screen kept awake (web wake lock and native iOS idle timer), large timer and step title, "Next up" and "Starts in" lines, "About this bake" collapsed. The native keep-awake is not yet tested on a physical device. |
+| 3 | One-tap destructive navigation | Done. Skipping more than one step asks first, Next step and Jump show an Undo toast, and going back removes the step logs from that step onward. |
+| 4 | First run: sign-in modal before value | Done. No modal on launch; the sync offer appears on Home after a recipe is saved, until it is dismissed. Home leads with "Plan your sourdough bake" and a filled "New recipe" button. |
+| 5 | (Schedule gaps) | Dismissed by the owner on 2026-11-19 as intentional, not a defect. Not every moment needs its own schedule step; more steps would make the plan feel robotic. Removed from this review. |
+| 6 | No input sanity | Done. Dough weight bounds with warnings, messages on blur, typed text never rewritten, past start time warning with "Start now". See [Calculation and assessment](./calculation-and-assessment.md). |
+| 7 | Schedule builder is a 6,300px expert form | Done. Three presets first, timeline directly below, every field in collapsed "Customise" sections with plain-language hints. Tapping a timeline step to edit it is not built. |
+| 8 | Timers: unproven reliability, silent web build | Partly done. Early-start confirm, "Starts in" labels, and a persistent web banner are in. Lock-screen and AlarmKit behaviour (locked, Silent, Focus, reboot) still needs a physical-device test. |
+| 9 | Coach: single-shot, no safety rails | Done. Transcript saved in the bake session, draft and photo kept on failure with Retry, quick-question chips, "AI guidance" line, live bake context, and a prompt that never changes ingredient amounts. Replies are not streamed. |
+| 10 | Accessibility and touch targets | Open, in progress. Includes touch target sizes, contrast, reduced motion, dark mode, and the icon-only wizard footer. Not documented as done until it ships. |
+| 11 | Retention loop is a log, not a learning loop | Partly done. "Bake again" and "Baked Nx · last: ..." on recipe cards are done. Loaf photo and "tweak recipe from notes" are not built. |
+| 12 | Polish and trust details | Done except where noted: the test-mode string only mentions `.env.local` in dev builds, the Home title is no longer the dev-panel unlock target, and the recipe view names the flours and shows totals. Still as reviewed: the dev panel can still be opened in production builds (five taps on the active Home tab), the flour step title is derived from the blend, and Duplicate sits next to Delete on saved recipe cards. |
+
 Scope: web build at 390x844 (Vite dev server, fresh storage and seeded recipe), code reading of the screens, a short look at the stale iOS Simulator build. Not exercised: signed-in flows (sign-in and account creation were deliberately not performed), history detail with real data, native AlarmKit timers, photo upload to the coach, true offline mode (the PWA service worker does not run in dev).
 
 Convention: **Observed** = I saw it in the running app or read it in code. **Inferred** = reasoned from code or general knowledge, not seen running.
@@ -16,11 +35,13 @@ Convention: **Observed** = I saw it in the running app or read it in code. **Inf
 
 This is a technically careful, honest, calm app with one real differentiator: it goes from a formula to a timed, backwards-planned schedule with real dates, and carries that into a step-by-step bake mode with native timers. The calculation engine and the assessment copy ("confirm readiness from dough signs, not the clock alone") are credible and better than most hobby tools. Visual language is warm and coherent: one palette, rounded cards, a sticky wizard chrome, a clear primary-button colour, a native `<dialog>` for modals, consistent pen/bin icons. The "relative days, real date at start" model is a smart idea.
 
-But it is not yet a product a stranger would pay for or trust with a two-day bake. Three things stop it. First, the kitchen reality is not designed in: no screen wake lock, no glanceable timer, one-tap jumps that destroy a running timer, no preheat or cooling step, and silence on the web build. Second, data trust is broken at the exact moment of value: a signed-out baker who finishes a bake cannot save it, and every way of leaving that dialog (Back to home, X, Escape, backdrop) deletes the bake. Third, the first-run and beginner experience is a developer's tool: a sign-in modal before any value, a page titled "Sourdough recipe builder", 25 jargon fields (coil folds, 1:15:15 feedings) on one screen, and no onboarding that explains what the app does better than a spreadsheet. It currently looks like a very good prototype for an experienced baker who is also the author. That is a good place to be, but it is a prototype.
+But it is not yet a product a stranger would pay for or trust with a two-day bake. Three things stop it. First, the kitchen reality is not designed in: no screen wake lock, no glanceable timer, one-tap jumps that destroy a running timer, and silence on the web build. Second, data trust is broken at the exact moment of value: a signed-out baker who finishes a bake cannot save it, and every way of leaving that dialog (Back to home, X, Escape, backdrop) deletes the bake. Third, the first-run and beginner experience is a developer's tool: a sign-in modal before any value, a page titled "Sourdough recipe builder", 25 jargon fields (coil folds, 1:15:15 feedings) on one screen, and no onboarding that explains what the app does better than a spreadsheet. It currently looks like a very good prototype for an experienced baker who is also the author. That is a good place to be, but it is a prototype.
 
 ---
 
-## 2. The 12 most important problems, ranked
+## 2. The most important problems, ranked
+
+Numbering is kept from the original review. Former point 5 was removed on 2026-11-19 (see Status).
 
 ### 1. A finished bake can be lost, and saving needs an account. BLOCKER. Effort M
 
@@ -46,13 +67,6 @@ But it is not yet a product a stranger would pay for or trust with a two-day bak
 - Observed: on a fresh profile the first thing on screen is a "Sync your recipes" modal over the Home page with "Sign in" and "Create account"; the close X is small and appears again after clearing storage. It reappeared on `/history` after I finished a bake (opened by the failed save). The dismissed flag persists, good, but a first-time user sees a sync prompt before they know what there is to sync.
 - Observed: Home title is "Sourdough recipe builder" and the intro says "Build a recipe, review ingredients, plan your bake schedule, and save loaves..." That describes features, not the benefit. The primary create action, "New recipe from scratch", is a secondary-style outline button inside a card, below an empty Saved recipes card. A new user's best path (a template) is two scrolls down.
 - Fix: no modal on launch; offer sync after the first saved recipe or first finished bake ("Keep your bakes safe"). First-run Home: one hero line ("Plan your sourdough bake, hour by hour, and get alerts when to act"), one primary button "Plan a bake" with a three-template carousel above the fold, saved recipes below once they exist. Rename the app header; "recipe builder" undersells the timer and bake mode.
-
-### 5. The schedule has real baking gaps and a night-time plan with no warning. MAJOR. Effort M
-
-- Observed in the timeline (builder, recipe view, bake mode): there is no oven preheat step and no cooling step. The sequence goes Cold retard ends 08:00, then "Bake with lid on 08:00-08:19". A Dutch-oven bake needs the oven and pot at temperature 45-60 minutes earlier. "Oven on" in the start dialog is the time of the first bake step, so it actively mislabels the preheat. No "cool before slicing" step although the finish dialog says "ready to cool".
-- Observed: 14:20 to 17:15 on bake day -1 has no step at all (the bulk wait). In bake mode that is a 3 hour hole between "Coil fold 3" and "Pre-shape"; the app does not say "bulk: check the dough at 16:30" and has no "waiting" state or between-steps countdown.
-- Observed: seed recipe puts "Refresh starter" at 23:45 on bake day -2 and "Build levain" at 05:45. Nothing flags that the plan requires waking at 05:45. The default "start baking" date is tomorrow, with the first task tonight at 23:45.
-- Fix: add Preheat oven (configurable lead time, with pot) as a timed step before bake, add Cool, add explicit Wait steps ("Bulk fermentation, check dough at 16:30"), and show a "sleep-friendliness" hint (steps between 23:00 and 06:00 highlighted with a one-tap "shift schedule" suggestion). Extend `buildTimeline` and bump `CURRENT_BAKE_SESSION_TIMELINE_VERSION` with a migration per CLAUDE.md.
 
 ### 6. No input sanity: nonsense recipes pass silently. MAJOR. Effort S
 
@@ -120,7 +134,6 @@ But it is not yet a product a stranger would pay for or trust with a two-day bak
 11. Warn on past start dates in the bake-start dialog and add a "Start now" button.
 12. Add dough-weight bounds (for example 300g to 3kg) with a visible message.
 13. Replace the Home title with benefit copy and make the primary action a filled button.
-14. Add an oven preheat step and a cooling step to the timeline.
 
 ---
 
@@ -129,9 +142,9 @@ But it is not yet a product a stranger would pay for or trust with a two-day bak
 - **Home:** One hero line, one filled primary button ("Plan a bake"), and either "Continue your bake" (when a session exists, always first and impossible to miss) or three template tiles above the fold. Saved recipes are cards showing name, weight/hydration, "baked 3x, last: Great", with Start baking as the only primary action and Duplicate/Delete moved into a overflow menu. No modal on launch.
 - **Recipe wizard:** Same four steps, but each step shows a live "what this means" strip: for hydration, a plain-language descriptor for the chosen flour; for weight, the loaf size in common terms. Footer is labelled "Back / Continue". Inline validation text, never silent clamping, with sanity bounds. Template name is visible so users know what they started from.
 - **Summary:** An ingredient list that reads like a recipe (named flours, levain build, totals), a single "Plan the bake" primary action, and the assessment condensed into two or three sentences with details behind a disclosure.
-- **Schedule builder:** Presets first ("Overnight", "Same day"), the resulting timeline on top, and tap-a-step-to-edit. Advanced parameters are grouped in collapsed sections. Warnings for night-time steps with a one-tap shift. Start baking on a sticky footer.
-- **Start baking dialog:** "When do you want to bake?" with both modes (mix at / oven at), a "Start now" option, a visible past-time warning, and a preview that lists the first task, preheat time and bake time.
-- **Bake mode:** Screen stays awake. Top area: a huge countdown to the next action, step name, and one line of instruction. A "Next up" strip. Optional "Wait" states between active steps with a gentle idle view. One large Done button; no accidental jumps; undo toast. Schedule list is read-only until an explicit "Jump" action. Dark/night mode. Lock-screen Live Activity mirrors the same countdown. Coach is a bottom sheet with quick chips, memory and honest framing.
+- **Schedule builder:** Presets first ("Overnight", "Same day"), the resulting timeline on top, and tap-a-step-to-edit. Advanced parameters are grouped in collapsed sections. Start baking on a sticky footer.
+- **Start baking dialog:** "When do you want to bake?" with both modes (mix at / oven at), a "Start now" option, a visible past-time warning, and a preview that lists the first task and the bake time.
+- **Bake mode:** Screen stays awake. Top area: a huge countdown to the next action, step name, and one line of instruction. A "Next up" strip. One large Done button; no accidental jumps; undo toast. Schedule list is read-only until an explicit "Jump" action. Dark/night mode. Lock-screen Live Activity mirrors the same countdown. Coach is a bottom sheet with quick chips, memory and honest framing.
 - **Bake complete:** Photo, a short structured assessment (crumb, crust, proof), notes, one primary action Save; saved locally always; "Tweak recipe for next time" as the follow-up.
 - **History:** Local-first list with photos, ratings and trends; detail view shows planned vs actual timings and a "Bake again with these tweaks" button.
 
@@ -171,4 +184,4 @@ I could not check these products during this review. Treat as recollection, not 
 5. Is the coach meant to give corrective baking advice or only explain steps? That decides how it is framed and how it is tested against the formula.
 6. Should you support working backward from oven time ("I want bread at 6pm Sunday")? The docs list it as not covered and it is probably how most people think.
 7. What is the minimum device test matrix for AlarmKit timers (locked, silent, Focus, low power, after reboot)? Without it the central promise is unproven.
-8. Are you willing to drop the "no beginner simplification" principle in `phase-1-ux.md` for the first-run path?
+8. Are you willing to drop the "no beginner simplification" principle in `ux.md` for the first-run path?

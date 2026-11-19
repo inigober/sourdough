@@ -1,6 +1,7 @@
 ---
 title: Bake history
-status: active
+status: current
+date: 2026-11-19
 ---
 
 # Bake history
@@ -30,9 +31,18 @@ Local rows are normalized on read (older or partial shapes get defaults, unusabl
 
 When a signed-in user opens the app, bakes saved on this device are uploaded (`importLocalBakeHistory.ts`) after local recipes are imported, so each bake keeps its link to its recipe. Each local copy is removed only after its upload succeeded. A bake already in the account (same recipe name and completion time) is not uploaded twice. If the upload fails, the bakes stay on this device and History shows an error with "Try again".
 
+## History screen
+
+- A list of completed bakes with the recipe name, the baked date, and the loaf assessment. Search matches the recipe name and notes; the filter narrows by assessment (Great loaf, OK, Needs work, No assessment).
+- The detail view shows notes and assessment (editable with the pen), the recipe snapshot and ingredient list, the planned schedule, step timings with start drift, **Bake again**, and Delete (with confirmation).
+- The bake snapshot is what was baked, not the saved recipe as it is today, so later edits to the recipe never rewrite history.
+
 ## Retention
 
 - **Bake again** (history detail) opens the "When are you mixing?" dialog with the recipe and schedule exactly as that bake was done (`buildBakeAgainStart`). If the original saved recipe was deleted, the new bake is not linked to it.
 - Saved recipe cards show "Baked Nx · last: <assessment>" from history (`buildRecipeBakeStats`).
 
-Not built yet (awaiting owner decisions): loaf photo, "tweak recipe from notes".
+## Ideas not built yet
+
+- Loaf photo on a saved bake.
+- "Tweak recipe from notes": prefill recipe changes from a bake's notes.

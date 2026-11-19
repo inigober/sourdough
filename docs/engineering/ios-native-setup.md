@@ -73,7 +73,7 @@ npm run build:ios:test
 6. On iOS 26+ with AlarmKit enabled, confirm dismiss stops the alert and **Open app** returns to bake mode.
 7. If permission is denied or only notifications are enabled, bake mode shows a notice with **Open Settings**.
 
-## Widget extension (Phase 4)
+## Live Activity widget extension
 
 The `BakeTimerWidgetExtension` target renders AlarmKit countdown Live Activities on the Lock Screen and Dynamic Island. Shared metadata lives in `BakeTimerShared/BakeTimerAlarmMetadata.swift` and is compiled into both the app and extension targets.
 
@@ -83,7 +83,7 @@ If the extension target is missing after a fresh clone, run:
 cd ios/App && ruby configure_widget_extension.rb
 ```
 
-## Permission UX (Phase 5)
+## Permission UX
 
 Bake mode distinguishes three alerting modes:
 

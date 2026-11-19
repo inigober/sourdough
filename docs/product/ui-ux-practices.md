@@ -7,7 +7,7 @@ status: active
 
 Baseline interaction and layout standards for this app. Use these when building or changing UI.
 
-For product-specific screen flow and Phase 1 scope, see [Phase 1 UX](./phase-1-ux.md).
+For product-specific screen flows, see [UX](./ux.md).
 
 ## How To Use This Doc
 
@@ -44,7 +44,7 @@ That flags an intentional product choice so we can discuss tradeoffs once instea
 | Info bubbles / popovers close on click outside. | Expected dismiss behavior; reduces trapped overlays. |
 | Info bubbles / popovers close on Escape when focused. | Keyboard and screen-reader users need a clear exit. |
 | Toggle buttons (including info `i`) open and close on repeat click. | Predictable control behavior. |
-| Only one info bubble open at a time is acceptable; closing outside is enough for Phase 1. | Avoid over-engineering unless overlap becomes a problem. |
+| Only one info bubble open at a time is acceptable; closing outside is enough for now. | Avoid over-engineering unless overlap becomes a problem. |
 | Destructive actions require a clear, distinct control — not the same symbol as a quantity stepper. | Prevents accidental deletes (e.g. bin for remove, not `−`). |
 | Primary navigation actions belong in consistent locations (footer in wizard, clear CTA on welcome). | Reduces hunt time. |
 
@@ -73,7 +73,7 @@ That flags an intentional product choice so we can discuss tradeoffs once instea
 | Field-level info (`i`) is for non-obvious or contextual detail — not restating the label. | Reduces noise; keeps toggles worth tapping. |
 | Step-level onboarding context belongs in visible body copy when it sets expectations (e.g. welcome screen). | Users should not need an extra tap to understand what the app does. |
 | Info copy must match what the app actually calculates on that step. | Wrong attribution erodes trust (e.g. do not say salt drives total flour on the flour step if the user has not set salt yet). |
-| Hide expert detail behind info toggles; keep primary labels and values scannable. | Aligns with Phase 1 "clarity over speed" goal. |
+| Hide expert detail behind info toggles; keep primary labels and values scannable. | Aligns with the "clarity over speed" goal. |
 | Prefer plain language over jargon; explain baker's percentages when first introduced. | PM learning goal + broader audience. |
 
 **Override example:** Welcome screen uses a dedicated info toggle again because the body copy should stay minimal.
@@ -88,7 +88,7 @@ That flags an intentional product choice so we can discuss tradeoffs once instea
 | Progress shows segment fill + "N of M" + current step name. | User always knows where they are. |
 | Live calculated previews belong inside the step content — labeled, below the inputs — not as header chips. | Header tags without context look like noise; previews need a title and explanation. |
 | Back preserves entered state. | Avoids punishment for reviewing earlier steps. |
-| Results / summary remains editable via clear entry points back into steps. | Phase 1 summary is a control surface, not a dead end. |
+| Results / summary remains editable via clear entry points back into steps. | The summary is a control surface, not a dead end. |
 
 **Override example:** A future "quick mode" skips the wizard entirely — document as a separate flow.
 

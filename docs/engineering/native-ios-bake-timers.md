@@ -92,37 +92,48 @@ Use this fallback only for older OS versions. Copy should set expectations: “Y
 
 We do **not** depend on `@capacitor/local-notifications`; the pre–iOS 26 path is handled entirely in `BakeTimerPlugin.swift`.
 
-## Implementation sketch (future)
+## Implementation notes
 
 ### Capacitor plugin interface (TypeScript)
 
+The JS side is `NativeBakeTimerClient` in `src/lib/companion/nativeBakeTimer/types.ts`; on web it is a no-op (`webNativeBakeTimer.ts`).
+
 ```ts
 type NativeBakeTimerRequest = {
-  id: string;
+  timerId: string;
   durationSeconds: number;
+  endsAtIso: string;
   title: string;
-  recipeName?: string;
+  recipeName: string;
+  bakeSessionId: string;
+  deepLinkUrl: string;
 };
 
-type NativeBakeTimer = {
+type NativeBakeTimerClient = {
+  getPermissionStatus(): Promise<NativeBakeTimerPermissionState>;
+  requestPermission(): Promise<NativeBakeTimerPermissionState>;
   schedule(request: NativeBakeTimerRequest): Promise<void>;
-  cancel(id: string): Promise<void>;
+  cancel(timerId: string): Promise<void>;
   cancelAll(): Promise<void>;
+  openSettings(): Promise<void>;
+  setKeepAwake(enabled: boolean): Promise<void>;
 };
 ```
 
 ### Hook point
 
-`CompanionView` → `handleStartStep` / `handleRestartTimer` / step navigation — after updating bake session state, call the native bridge when `Capacitor.isNativePlatform()`.
+`useBakeNativeTimer` (`src/lib/companion/nativeBakeTimer/`) derives the timer that should exist from the bake session (`deriveDesiredNativeBakeTimer.ts`) and schedules, cancels, or replaces the native alarm to match, whenever the session changes on a native platform. `CompanionView` calls it, so Start timer, restart, step changes, and exit all stay in sync.
 
 ### Native iOS (AlarmKit)
 
-- Entitlement: AlarmKit (and evaluate whether `critical-wake` is needed; likely not for bake timers).
+- AlarmKit capability (see [iOS native setup](./ios-native-setup.md)). The app uses no `critical-wake` entitlement; bake timers do not need one.
 - Info.plist: `NSAlarmKitUsageDescription`.
-- Optional: Widget extension for countdown Live Activity.
+- Widget extension for the countdown Live Activity (see Live Activity below).
 - Map `stopIntent` / `secondaryIntent` to return the baker to the app or mark the step ready for advancement.
 
-### Testing checklist
+### Testing checklist (physical device)
+
+These are manual checks on a real iPhone; the Simulator is not reliable for the alarm sound and alert UI (see [iOS native setup](./ios-native-setup.md)).
 
 - [ ] Start timer → countdown visible in app and on Lock Screen (iOS 26+).
 - [ ] Timer fires with phone locked, Silent on, Focus on.
@@ -133,14 +144,14 @@ type NativeBakeTimer = {
 - [ ] Pre–iOS 26 → end-time notification only; degraded-mode notice shown.
 - [ ] Notification-only mode → notice explains difference vs alarm mode.
 
-## Phase 4 — Live Activity (implemented)
+## Live Activity
 
 - `BakeTimerWidgetExtension` widget target with `BakeTimerLiveActivity`
 - Shared `BakeTimerAlarmMetadata` for step title + recipe name
 - AlarmKit countdown + paused presentations in `BakeTimerPlugin`
 - `NSSupportsLiveActivities` in main app `Info.plist`
 
-## Phase 5 — Permission UX (implemented)
+## Permission UX
 
 - `alertMode`: `alarm` | `notification` | `none` returned from native plugin
 - Contextual notice in bake mode (denied, notification-only)

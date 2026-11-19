@@ -31,18 +31,21 @@ For the hosted Supabase project, configure a daily keepalive ping on cron-job.or
 | `npm run test:recipe` | Recipe calculation and validation tests |
 | `npm run test:schedule` | Schedule builder logic tests |
 | `npm run test:storage` | Local and cloud storage tests |
-| `npm run test:companion` | Bake companion session tests |
+| `npm run test:companion` | Bake mode session, timer, and coach logic tests |
+| `npm run test:history` | Bake history storage, import, and stats tests |
 | `npm run test:features` | Wizard flow logic + React component smoke tests (Vitest) |
+| `npm run build:ios` | Build web, regenerate icons, `cap sync ios` (see [iOS native setup](docs/engineering/ios-native-setup.md)) |
 
 ## Project layout
 
 ```text
 src/
-  features/     # UI screens (recipe builder, schedule, companion, history)
+  features/     # UI screens (recipe builder, schedule builder, recipe view, bake mode, history, auth)
   lib/          # Domain logic, storage, hooks (no React in most modules)
   components/   # Shared UI primitives
 docs/           # Product and engineering notes
-supabase/       # Database migrations
+supabase/       # Database migrations and the coach edge function
+ios/App/        # Capacitor shell, BakeTimer plugin (AlarmKit), Live Activity widget extension
 ```
 
 `RecipeBuilder.tsx` composes feature views and custom hooks:
@@ -50,13 +53,26 @@ supabase/       # Database migrations
 - `useRecipeWizard` — recipe/schedule state, wizard steps, field updaters, draft persistence
 - `useAppRouter` + `appRoutes.ts` — URL paths synced with tab, phase, wizard step, and history detail
 - `useBakeFlow` — start, resume, save, and exit bake sessions
-- `useAuthPrompt` — welcome-screen sign-in prompt
+- `useAuthPrompt` — when the optional "Sync your recipes" offer appears
 - `useSavedRecipes`, `useBakeSession`, `useBakeHistory` — persistence and cloud sync
 - `useScheduleBuilder` — schedule timeline, advice, and export logic for the schedule screen
 
 ## Docs
 
-- [UI/UX practices](docs/product/ui-ux-practices.md)
-- [Phase 1 implementation plan](docs/engineering/phase-1-implementation-plan.md)
+Product:
+
+- [Recipe builder](docs/product/recipe-builder.md) — inputs, defaults, outputs, templates
+- [Calculation and assessment](docs/product/calculation-and-assessment.md) — formula, fermentation heuristic, validation, assessment rules
+- [UX](docs/product/ux.md) — screens and flows, schedule presets, bake mode, coach
+- [Recipe view and relative days](docs/product/recipe-view-and-relative-days.md)
+- [Bake history](docs/product/bake-history.md)
+- [UI/UX practices](docs/product/ui-ux-practices.md) — interaction and layout rules
+- [UX review for commercial viability](docs/product/ux-review-commercial-viability.md) — dated review with current status
+
+Engineering:
+
+- [Architecture](docs/engineering/architecture.md) — folders, hooks, data types, storage, routing, testing
+- [iOS native setup](docs/engineering/ios-native-setup.md) and [Native iOS bake timers](docs/engineering/native-ios-bake-timers.md)
+- [Leave dialog and unsaved navigation](docs/engineering/leave-dialog-and-unsaved-navigation.md)
 - [Vercel deployment](docs/engineering/vercel-deployment.md) — production hosting, env vars, auto-deploy on `main`
 - [Supabase operations](docs/engineering/supabase-ops.md) — free-tier keepalive via cron-job.org
