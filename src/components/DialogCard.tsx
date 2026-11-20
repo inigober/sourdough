@@ -106,7 +106,7 @@ export function DialogCard({
           </h2>
           <button
             type="button"
-            className="wizard-icon-button dialog-card__close"
+            className="icon-button dialog-card__close"
             aria-label="Close dialog"
             onClick={onClose}
           >

@@ -24,10 +24,10 @@ export function ConfirmDialog({
       onClose={onCancel}
       actions={
         <div className="dialog-card__actions">
-          <button type="button" className="wizard-button wizard-button--secondary" onClick={onCancel}>
+          <button type="button" className="button button--secondary" onClick={onCancel}>
             Cancel
           </button>
-          <button type="button" className="wizard-button wizard-button--primary" onClick={onConfirm}>
+          <button type="button" className="button button--primary" onClick={onConfirm}>
             {confirmLabel}
           </button>
         </div>

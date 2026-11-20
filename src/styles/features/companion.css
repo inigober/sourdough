@@ -66,7 +66,7 @@
   gap: var(--space-3);
 }
 
-.companion__step-controls .wizard-icon-button {
+.companion__step-controls .icon-button {
   flex-shrink: 0;
 }
 

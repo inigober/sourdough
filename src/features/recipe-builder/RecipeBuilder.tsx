@@ -326,7 +326,7 @@ export function RecipeBuilder() {
     <AppHeader onHome={navigation.goHome} title={homeHeaderTitle} />
   ) : null;
   const wizardHomeAction = navigation.showHomeButton ? (
-    <button type="button" className="app-header__home wizard-icon-button" onClick={navigation.goHome}>
+    <button type="button" className="app-header__home icon-button" onClick={navigation.goHome}>
       <HomeIcon />
       <span className="visually-hidden">Home</span>
     </button>

@@ -107,7 +107,7 @@
 }
 
 .saved-shortcut-row__bake {
-  /* The mobile .wizard-button rule makes buttons full width; this one sits beside the name. */
+  /* The mobile .button rule makes buttons full width; this one sits beside the name. */
   flex: 0 0 auto;
   width: auto;
   min-height: var(--touch-target-min);

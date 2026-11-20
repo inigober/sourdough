@@ -7,7 +7,7 @@ type ChromeBackButtonProps = {
 
 export function ChromeBackButton({ label, onClick }: ChromeBackButtonProps) {
   return (
-    <button type="button" className="wizard-icon-button" aria-label={label} onClick={onClick}>
+    <button type="button" className="icon-button" aria-label={label} onClick={onClick}>
       <ArrowLeftIcon />
     </button>
   );

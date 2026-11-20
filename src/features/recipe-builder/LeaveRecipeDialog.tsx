@@ -62,7 +62,7 @@ export function LeaveRecipeDialog({
           <div className="dialog-card__actions dialog-card__actions--stack">
             <button
               type="button"
-              className="wizard-button wizard-button--primary"
+              className="button button--primary"
               disabled={isSavingExistingRecipe}
               onClick={onSaveBeforeLeaving}
             >
@@ -70,7 +70,7 @@ export function LeaveRecipeDialog({
             </button>
             <button
               type="button"
-              className="wizard-button wizard-button--secondary"
+              className="button button--secondary"
               disabled={isSavingExistingRecipe}
               onClick={onDiscard}
             >
@@ -78,7 +78,7 @@ export function LeaveRecipeDialog({
             </button>
             <button
               type="button"
-              className="wizard-button wizard-button--secondary"
+              className="button button--secondary"
               disabled={isSavingExistingRecipe}
               onClick={onCancel}
             >
@@ -89,14 +89,14 @@ export function LeaveRecipeDialog({
           <div className="dialog-card__actions">
             <button
               type="button"
-              className="wizard-button wizard-button--secondary"
+              className="button button--secondary"
               onClick={onCancel}
             >
               Cancel
             </button>
             <button
               type="button"
-              className="wizard-button wizard-button--primary"
+              className="button button--primary"
               onClick={() => void onConfirmSave(resolvedName, updateRecipeId)}
             >
               {isUpdate ? 'Update recipe' : 'Save recipe'}

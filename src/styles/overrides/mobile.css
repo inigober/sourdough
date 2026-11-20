@@ -86,7 +86,7 @@
     margin-bottom: 0;
   }
 
-  .wizard-button {
+  .button {
     box-sizing: border-box;
     width: 100%;
     max-width: 100%;
@@ -181,7 +181,7 @@
 
   .schedule-builder__back,
   .schedule-builder__start,
-  .wizard-button--block {
+  .button--block {
     width: 100%;
     padding: var(--space-3) var(--space-5);
   }
@@ -194,12 +194,12 @@
     padding: var(--space-3) var(--space-5);
   }
 
-  .wizard-nav--split .wizard-button {
+  .wizard-nav--split .button {
     width: 100%;
     padding: var(--space-3) var(--space-5);
   }
 
-  .wizard-icon-button {
+  .icon-button {
     width: 2.75rem;
     height: 2.75rem;
     flex-shrink: 0;
@@ -215,7 +215,7 @@
     grid-template-columns: 1fr;
   }
 
-  .dialog-card__actions .wizard-button {
+  .dialog-card__actions .button {
     width: 100%;
   }
 

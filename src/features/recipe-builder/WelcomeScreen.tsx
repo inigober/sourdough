@@ -181,12 +181,12 @@ export function WelcomeScreen({
                 {historyDetailLoadError}
               </p>
               <div className="bake-history-detail__edit-actions">
-                <button type="button" className="wizard-button wizard-button--secondary" onClick={onCloseHistoryDetail}>
+                <button type="button" className="button button--secondary" onClick={onCloseHistoryDetail}>
                   Back to history
                 </button>
                 <button
                   type="button"
-                  className="wizard-button wizard-button--primary"
+                  className="button button--primary"
                   onClick={() => historyDetailId && onOpenHistoryEntry(historyDetailId)}
                 >
                   Try again
@@ -202,7 +202,7 @@ export function WelcomeScreen({
             />
             <div className="welcome-screen">
               <p className="saved-recipes__empty">This bake could not be found.</p>
-              <button type="button" className="wizard-button wizard-button--secondary" onClick={onCloseHistoryDetail}>
+              <button type="button" className="button button--secondary" onClick={onCloseHistoryDetail}>
                 Back to history
               </button>
             </div>

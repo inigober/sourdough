@@ -106,7 +106,7 @@ export function AuthModal({ onClose, initialStep = 'choose' }: AuthModalProps) {
             </div>
             <button
               type="button"
-              className="wizard-button wizard-button--secondary auth-modal__submit"
+              className="button button--secondary auth-modal__submit"
               onClick={() => onClose(true)}
             >
               Close
@@ -129,14 +129,14 @@ export function AuthModal({ onClose, initialStep = 'choose' }: AuthModalProps) {
             <div className="auth-modal__choices">
               <button
                 type="button"
-                className="wizard-button wizard-button--primary auth-modal__choice"
+                className="button button--primary auth-modal__choice"
                 onClick={() => goToStep('signIn')}
               >
                 Sign in
               </button>
               <button
                 type="button"
-                className="wizard-button wizard-button--secondary auth-modal__choice"
+                className="button button--secondary auth-modal__choice"
                 onClick={() => goToStep('signUp')}
               >
                 Create account
@@ -202,7 +202,7 @@ export function AuthModal({ onClose, initialStep = 'choose' }: AuthModalProps) {
                 </p> : null}
               <button
                 type="submit"
-                className="wizard-button wizard-button--primary auth-modal__submit"
+                className="button button--primary auth-modal__submit"
                 disabled={isSubmitting}
               >
                 {step === 'signIn' ? 'Sign in' : 'Create account'}

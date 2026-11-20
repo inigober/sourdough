@@ -92,13 +92,13 @@ export function ScheduleBuilderView({
           }
         >
           <nav className="wizard-nav wizard-nav--split" aria-label="Schedule navigation">
-            <button type="button" className="wizard-button wizard-button--secondary schedule-builder__back" onClick={onBack}>
+            <button type="button" className="button button--secondary schedule-builder__back" onClick={onBack}>
               <ArrowLeftIcon />
               Back
             </button>
             <button
               type="button"
-              className="wizard-button wizard-button--primary schedule-builder__start"
+              className="button button--primary schedule-builder__start"
               disabled={isStartingBake}
               onClick={onStartBake}
             >

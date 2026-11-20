@@ -82,7 +82,7 @@ export function RecipeResultsView({
           <nav className="wizard-nav" aria-label="Ingredient summary navigation">
             <button
               type="button"
-              className="wizard-button wizard-button--primary wizard-button--block"
+              className="button button--primary button--block"
               onClick={onBuildSchedule}
               disabled={!formula}
             >

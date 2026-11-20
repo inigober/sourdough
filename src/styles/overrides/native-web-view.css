@@ -13,14 +13,14 @@ html {
 button,
 a,
 summary,
-label.wizard-button {
+label.button {
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
 }
 
 button,
 summary,
-label.wizard-button,
+label.button,
 .app-bottom-nav,
 .screen-chrome,
 .app-header,
@@ -40,7 +40,7 @@ select {
 
 button,
 summary,
-label.wizard-button,
+label.button,
 .schedule-presets__option {
   transition:
     opacity 80ms ease-out,
@@ -48,7 +48,7 @@ label.wizard-button,
 }
 
 /* :where() keeps this at the lowest specificity, so the tile rules below can override it. */
-:where(button:not(:disabled), summary, label.wizard-button):active {
+:where(button:not(:disabled), summary, label.button):active {
   opacity: 0.7;
 }
 

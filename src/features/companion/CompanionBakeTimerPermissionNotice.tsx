@@ -18,7 +18,7 @@ export function CompanionBakeTimerPermissionNotice({
       {showOpenSettings ? (
         <button
           type="button"
-          className="wizard-button wizard-button--secondary companion__permission-settings"
+          className="button button--secondary companion__permission-settings"
           onClick={() => void onOpenSettings()}
         >
           Open Settings

@@ -52,7 +52,7 @@ export function WelcomeTopBar({ onOpenAuth, variant = 'header' }: WelcomeTopBarP
         <div className="welcome-top-bar__account" ref={menuRef}>
           <button
             type="button"
-            className="app-header__home wizard-icon-button"
+            className="app-header__home icon-button"
             aria-expanded={showAccountMenu}
                        aria-label={`Account: ${user.email ?? 'signed in'}`}
             onClick={() => setShowAccountMenu((current) => !current)}
@@ -88,7 +88,7 @@ export function WelcomeTopBar({ onOpenAuth, variant = 'header' }: WelcomeTopBarP
       <div className="welcome-top-bar__sign-in-group">
         <button
           type="button"
-          className="wizard-button wizard-button--secondary welcome-top-bar__sign-in"
+          className="button button--secondary welcome-top-bar__sign-in"
           onClick={onOpenAuth}
         >
           Sign in

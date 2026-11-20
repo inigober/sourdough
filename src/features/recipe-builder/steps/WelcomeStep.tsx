@@ -47,8 +47,8 @@ export function WelcomeStep({
   // One filled primary action per screen: when a resume card is showing, it owns the filled button.
   const hasResumeCard = Boolean(draftSummary || resumableBakeSession);
   const createButtonClass = hasResumeCard
-    ? 'wizard-button wizard-button--secondary welcome-screen__create'
-    : 'wizard-button wizard-button--primary welcome-screen__create';
+    ? 'button button--secondary welcome-screen__create'
+    : 'button button--primary welcome-screen__create';
   // No saved recipes: no shortcut at all. The Saved tab explains the empty state.
   const showSavedShortcut = savedRecipes.length > 0 || Boolean(savedRecipesError);
 
@@ -127,7 +127,7 @@ export function WelcomeStep({
               {draftSummary.label} · updated {formatSavedDate(draftSummary.updatedAt)}
             </p>
           </div>
-          <button type="button" className="wizard-button wizard-button--primary welcome-draft__resume" onClick={onResumeDraft}>
+          <button type="button" className="button button--primary welcome-draft__resume" onClick={onResumeDraft}>
             Resume
           </button>
         </section>
@@ -144,7 +144,7 @@ export function WelcomeStep({
           </div>
           <button
             type="button"
-            className="wizard-button wizard-button--primary welcome-bake-session__resume"
+            className="button button--primary welcome-bake-session__resume"
             onClick={onResumeBake}
           >
             Continue baking

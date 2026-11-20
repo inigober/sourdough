@@ -11,7 +11,7 @@ export function AppHeader({ onHome, title }: AppHeaderProps) {
     <ScreenChrome
       title={title}
       trailing={
-        <button type="button" className="wizard-icon-button" onClick={onHome}>
+        <button type="button" className="icon-button" onClick={onHome}>
           <HomeIcon />
           <span className="visually-hidden">Home</span>
         </button>

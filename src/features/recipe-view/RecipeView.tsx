@@ -123,7 +123,7 @@ function RecipeViewContent({ recipe, onHome, onEdit, onStartBake, onDelete }: Re
             <nav className="wizard-nav" aria-label="Recipe actions">
               <button
                 type="button"
-                className="wizard-button wizard-button--primary wizard-button--block"
+                className="button button--primary button--block"
                 disabled={!bakeableRecipe}
                 onClick={() => bakeableRecipe && onStartBake(bakeableRecipe)}
               >

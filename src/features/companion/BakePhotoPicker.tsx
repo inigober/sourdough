@@ -85,7 +85,7 @@ export function BakePhotoPicker({
           <img src={previewUrl} alt="Preview of your loaf photo" className="bake-photo-picker__image" />
           <button
             type="button"
-            className="wizard-icon-button"
+            className="icon-button"
             aria-label="Remove photo"
             onClick={handleRemove}
             disabled={disabled || isCompressing}
@@ -94,7 +94,7 @@ export function BakePhotoPicker({
           </button>
         </div>
       ) : null}
-      <label className="wizard-button wizard-button--secondary bake-photo-picker__choose">
+      <label className="button button--secondary bake-photo-picker__choose">
         <CameraIcon />
         <span>
           {isCompressing ? 'Preparing photo…' : previewUrl ? 'Choose a different photo' : 'Add a photo of your loaf'}

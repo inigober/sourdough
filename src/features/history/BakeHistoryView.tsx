@@ -92,7 +92,7 @@ export function BakeHistoryView({
         {loadError ? (
           <div className="bake-history__error" role="alert">
             <p className="auth-modal__error">{loadError}</p>
-            <button type="button" className="wizard-button wizard-button--secondary" onClick={onRetryLoad}>
+            <button type="button" className="button button--secondary" onClick={onRetryLoad}>
               Try again
             </button>
           </div>

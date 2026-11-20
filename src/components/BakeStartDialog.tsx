@@ -74,12 +74,12 @@ export function BakeStartDialog({
       onClose={onCancel}
       actions={
         <div className="dialog-card__actions">
-          <button type="button" className="wizard-button wizard-button--secondary" onClick={onCancel}>
+          <button type="button" className="button button--secondary" onClick={onCancel}>
             Cancel
           </button>
           <button
             type="button"
-            className="wizard-button wizard-button--primary"
+            className="button button--primary"
             disabled={!isValid || isStarting}
             onClick={() => onConfirm(choice)}
           >
@@ -123,7 +123,7 @@ export function BakeStartDialog({
         ) : null}
         <button
           type="button"
-          className="wizard-button wizard-button--secondary bake-start__now"
+          className="button button--secondary bake-start__now"
           onClick={() => {
             const startNow = new Date();
             setNow(startNow);

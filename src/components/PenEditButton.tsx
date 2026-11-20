@@ -7,7 +7,7 @@ type PenEditButtonProps = {
 };
 
 export function PenEditButton({ label, onClick, className }: PenEditButtonProps) {
-  const classes = ['wizard-icon-button', 'wizard-icon-button--accent', className]
+  const classes = ['icon-button', 'icon-button--accent', className]
     .filter(Boolean)
     .join(' ');
 

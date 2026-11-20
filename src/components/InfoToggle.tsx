@@ -112,7 +112,7 @@ export function InfoToggle({ label, children }: InfoToggleProps) {
       <button
         ref={buttonRef}
         type="button"
-        className="wizard-icon-button wizard-icon-button--help info-toggle__button"
+        className="icon-button icon-button--help info-toggle__button"
         aria-expanded={isOpen}
         aria-controls={isOpen ? panelId : undefined}
         onClick={() => setIsOpen((current) => !current)}

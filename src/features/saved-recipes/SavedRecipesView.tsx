@@ -63,7 +63,7 @@ export function SavedRecipesView({
           {savedRecipesError ? (
             <div className="saved-recipes__error" role="alert">
               <p className="auth-modal__error">{savedRecipesError}</p>
-              <button type="button" className="wizard-button wizard-button--secondary" onClick={onRetry}>
+              <button type="button" className="button button--secondary" onClick={onRetry}>
                 Try again
               </button>
             </div>
@@ -129,7 +129,7 @@ export function SavedRecipesView({
               </p>
               <button
                 type="button"
-                className="wizard-button wizard-button--primary wizard-button--with-icon"
+                className="button button--primary button--with-icon"
                 onClick={onNewRecipe}
               >
                 <PlusIcon />

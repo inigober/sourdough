@@ -76,7 +76,7 @@ export function DevPanel({ isSignedIn, onClose, onSignOut }: DevPanelProps) {
           <div className="dialog-card__actions dialog-card__actions--stack">
             <button
               type="button"
-              className="wizard-button wizard-button--primary"
+              className="button button--primary"
               disabled={isResetting}
               onClick={() => void handleReset(includeSignOut)}
             >
@@ -84,7 +84,7 @@ export function DevPanel({ isSignedIn, onClose, onSignOut }: DevPanelProps) {
             </button>
             <button
               type="button"
-              className="wizard-button wizard-button--secondary"
+              className="button button--secondary"
               disabled={isResetting}
               onClick={() => {
                 setIsConfirmingReset(false);
@@ -120,7 +120,7 @@ export function DevPanel({ isSignedIn, onClose, onSignOut }: DevPanelProps) {
         <div className="dialog-card__actions dialog-card__actions--stack">
           <button
             type="button"
-            className="wizard-button wizard-button--primary"
+            className="button button--primary"
             onClick={() => setIsConfirmingReset(true)}
           >
             Reset local data
@@ -128,7 +128,7 @@ export function DevPanel({ isSignedIn, onClose, onSignOut }: DevPanelProps) {
           {isSignedIn ? (
             <button
               type="button"
-              className="wizard-button wizard-button--secondary"
+              className="button button--secondary"
               onClick={() => setIsConfirmingResetAndSignOut(true)}
             >
               Reset local data and sign out
@@ -136,7 +136,7 @@ export function DevPanel({ isSignedIn, onClose, onSignOut }: DevPanelProps) {
           ) : null}
           <button
             type="button"
-            className="wizard-button wizard-button--secondary"
+            className="button button--secondary"
             onClick={onClose}
           >
             Close

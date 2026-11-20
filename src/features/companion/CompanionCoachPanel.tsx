@@ -251,7 +251,7 @@ export function CompanionCoachPanel({
               AI guidance based on your recipe and photo. When unsure, trust the dough.
             </p>
           </div>
-          <button type="button" className="wizard-icon-button companion-coach__close" aria-label="Close coach" onClick={onClose}>
+          <button type="button" className="icon-button companion-coach__close" aria-label="Close coach" onClick={onClose}>
             <CloseIcon />
           </button>
         </header>
@@ -291,7 +291,7 @@ export function CompanionCoachPanel({
             {isRetryableCoachFailure(failure.reason) ? (
               <button
                 type="button"
-                className="wizard-button wizard-button--secondary companion-coach__retry"
+                className="button button--secondary companion-coach__retry"
                 disabled={isSending}
                 onClick={() => void sendQuestion()}
               >
@@ -324,7 +324,7 @@ export function CompanionCoachPanel({
         {needsSignIn ? (
           <div className="companion-coach__sign-in">
             <p>Sign in to ask the baking coach questions about your dough. The step tips above work without an account.</p>
-            <button type="button" className="wizard-button wizard-button--primary" onClick={onSignIn}>
+            <button type="button" className="button button--primary" onClick={onSignIn}>
               Sign in
             </button>
           </div>
@@ -360,7 +360,7 @@ export function CompanionCoachPanel({
               />
               <button
                 type="button"
-                className="wizard-icon-button wizard-icon-button--help companion-coach__photo-button"
+                className="icon-button icon-button--help companion-coach__photo-button"
                 aria-label="Add photo"
                 disabled={isPreparingPhoto || isSending}
                 onClick={() => photoInputRef.current?.click()}
@@ -383,7 +383,7 @@ export function CompanionCoachPanel({
                 }}
               />
             </label>
-            <button type="submit" className="wizard-button wizard-button--primary companion-coach__send" disabled={isSending || isPreparingPhoto}>
+            <button type="submit" className="button button--primary companion-coach__send" disabled={isSending || isPreparingPhoto}>
               Send
             </button>
           </form>

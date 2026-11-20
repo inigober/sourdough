@@ -48,7 +48,7 @@ export function StepLayout({
           {canGoBack ? (
             <button
               type="button"
-              className="wizard-button wizard-button--secondary wizard-button--with-icon wizard-nav__back"
+              className="button button--secondary button--with-icon wizard-nav__back"
               onClick={onBack}
             >
               <ArrowLeftIcon />
@@ -58,7 +58,7 @@ export function StepLayout({
           {hasSave ? (
             <button
               type="button"
-              className="wizard-button wizard-button--primary wizard-button--with-icon wizard-nav__save"
+              className="button button--primary button--with-icon wizard-nav__save"
               aria-label="Save and return to summary"
               onClick={onSaveToSummary}
             >
@@ -71,8 +71,8 @@ export function StepLayout({
             type="button"
             className={
               hasSave
-                ? 'wizard-button wizard-button--secondary wizard-button--with-icon wizard-nav__continue'
-                : 'wizard-button wizard-button--primary wizard-button--with-icon wizard-nav__continue'
+                ? 'button button--secondary button--with-icon wizard-nav__continue'
+                : 'button button--primary button--with-icon wizard-nav__continue'
             }
             disabled={!canContinue}
             onClick={onContinue}

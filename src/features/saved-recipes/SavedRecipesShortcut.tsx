@@ -41,7 +41,7 @@ export function SavedRecipesShortcut({
       {savedRecipesError ? (
         <div className="saved-recipes__error" role="alert">
           <p className="auth-modal__error">{savedRecipesError}</p>
-          <button type="button" className="wizard-button wizard-button--secondary" onClick={onRetry}>
+          <button type="button" className="button button--secondary" onClick={onRetry}>
             Try again
           </button>
         </div>
@@ -61,7 +61,7 @@ export function SavedRecipesShortcut({
                 {recipe.hasSchedule ? (
                   <button
                     type="button"
-                    className="wizard-button wizard-button--secondary saved-shortcut-row__bake"
+                    className="button button--secondary saved-shortcut-row__bake"
                     aria-label={`Start baking ${recipe.name}`}
                     onClick={() => onStartBake(recipe.id)}
                   >

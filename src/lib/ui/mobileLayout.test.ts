@@ -24,7 +24,7 @@ test('flour percent control keeps digits separate from the external suffix', () 
 
 test('wizard footer buttons share equal columns and one height; Save takes its own row on narrow screens', () => {
   assert.match(stylesCss, /\.wizard-nav--steps\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s);
-  assert.match(stylesCss, /\.wizard-nav--steps \.wizard-button\s*\{[^}]*min-height:\s*48px/s);
+  assert.match(stylesCss, /\.wizard-nav--steps \.button\s*\{[^}]*min-height:\s*48px/s);
   assert.match(stylesCss, /\.wizard-nav--has-save \.wizard-nav__save\s*\{[^}]*grid-column:\s*1 \/ -1/s);
 });
 

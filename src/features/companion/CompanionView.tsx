@@ -330,7 +330,7 @@ export function CompanionView({
         <section className="hero companion__hero">
           <p className="hero-copy">No schedule steps found for this recipe.</p>
         </section>
-        <button type="button" className="wizard-button wizard-button--secondary" onClick={() => onExit(false)}>
+        <button type="button" className="button button--secondary" onClick={() => onExit(false)}>
           Back to home
         </button>
       </PageShell>
@@ -345,13 +345,13 @@ export function CompanionView({
           <nav className="wizard-nav wizard-nav--split" aria-label="Bake mode navigation">
           <button
             type="button"
-            className="wizard-button wizard-button--secondary"
+            className="button button--secondary"
             disabled={session.currentStepIndex === 0}
             onClick={handlePrevious}
           >
             Previous
           </button>
-          <button type="button" className="wizard-button wizard-button--primary" onClick={handleNextStep}>
+          <button type="button" className="button button--primary" onClick={handleNextStep}>
             {isComplete ? 'Finish baking' : 'Next step'}
           </button>
           </nav>
@@ -424,7 +424,7 @@ export function CompanionView({
           <h2 className="companion__step-label">{currentStep.label}</h2>
           <button
             type="button"
-            className="wizard-icon-button wizard-icon-button--help companion__coach-button"
+            className="icon-button icon-button--help companion__coach-button"
             aria-label="Open AI baking coach"
             onClick={() => setIsCoachOpen(true)}
           >
@@ -443,7 +443,7 @@ export function CompanionView({
         {stepCanStart || (canEditStep && !stepIsRunning) ? (
           <div className="companion__step-controls">
             {stepCanStart ? (
-              <button type="button" className="wizard-button wizard-button--primary companion__start-step" onClick={handleStartStep}>
+              <button type="button" className="button button--primary companion__start-step" onClick={handleStartStep}>
                 Start timer
               </button>
             ) : null}
@@ -472,7 +472,7 @@ export function CompanionView({
                 {timerRemainingSeconds > 0 ? (
                   <button
                     type="button"
-                    className="wizard-icon-button wizard-icon-button--accent"
+                    className="icon-button icon-button--accent"
                     aria-label="Restart timer"
                     onClick={handleRestartTimer}
                   >
@@ -546,7 +546,7 @@ export function CompanionView({
                   <div className="companion__row-actions">
                     <button
                       type="button"
-                      className="wizard-button wizard-button--secondary"
+                      className="button button--secondary"
                       onClick={() => handleRequestJump(index)}
                     >
                       Jump to this step
@@ -559,7 +559,7 @@ export function CompanionView({
         </ol>
       </section>
 
-      <button type="button" className="wizard-button wizard-button--secondary companion__exit" onClick={() => onExit(false)}>
+      <button type="button" className="button button--secondary companion__exit" onClick={() => onExit(false)}>
         Exit bake mode
       </button>
 

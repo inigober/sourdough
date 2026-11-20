@@ -50,7 +50,7 @@ export function BakeCompleteDialog({
         <div className="dialog-card__actions">
           <button
             type="button"
-            className="wizard-button wizard-button--secondary"
+            className="button button--secondary"
             onClick={(event) => handleAction(event, () => setIsDiscardConfirmOpen(true))}
             disabled={isSaving}
           >
@@ -58,7 +58,7 @@ export function BakeCompleteDialog({
           </button>
           <button
             type="button"
-            className="wizard-button wizard-button--primary"
+            className="button button--primary"
             onClick={(event) => handleAction(event, () => void onSave({ note, assessment, photo: photo ?? undefined }))}
             disabled={isSaving || isPreparingPhoto}
           >

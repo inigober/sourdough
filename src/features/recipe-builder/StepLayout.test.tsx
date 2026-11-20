@@ -88,11 +88,11 @@ describe('StepLayout', () => {
 
     expect(nav).toContain('wizard-nav--has-save');
     expect(buttons).toHaveLength(3);
-    expect(buttons.filter((className) => className.includes('wizard-button--primary'))).toHaveLength(1);
+    expect(buttons.filter((className) => className.includes('button--primary'))).toHaveLength(1);
     expect(buttons[1]).toContain('wizard-nav__save');
-    expect(buttons[1]).toContain('wizard-button--primary');
-    expect(buttons[0]).toContain('wizard-button--secondary');
-    expect(buttons[2]).toContain('wizard-button--secondary');
+    expect(buttons[1]).toContain('button--primary');
+    expect(buttons[0]).toContain('button--secondary');
+    expect(buttons[2]).toContain('button--secondary');
   });
 
   it('on the first step there is no Back button and no empty spacer', () => {

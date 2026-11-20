@@ -178,7 +178,7 @@ export function BakeHistoryDetailView({
         </div>
         <button
           type="button"
-          className="wizard-button wizard-button--primary bake-history-detail__bake-again"
+          className="button button--primary bake-history-detail__bake-again"
           onClick={onBakeAgain}
         >
           Bake again
@@ -218,7 +218,7 @@ export function BakeHistoryDetailView({
                 {chosenPhoto ? (
                   <button
                     type="button"
-                    className="wizard-button wizard-button--primary"
+                    className="button button--primary"
                     onClick={() => void handleSavePhoto()}
                     disabled={isSavingPhoto || isPreparingPhoto}
                   >
@@ -228,7 +228,7 @@ export function BakeHistoryDetailView({
                 {photoUrl ? (
                   <button
                     type="button"
-                    className="wizard-button wizard-button--secondary"
+                    className="button button--secondary"
                     onClick={closePhotoPicker}
                     disabled={isSavingPhoto}
                   >
@@ -242,7 +242,7 @@ export function BakeHistoryDetailView({
           <div className="bake-history-detail__photo-actions">
             <button
               type="button"
-              className="wizard-button wizard-button--secondary bake-history-detail__photo-action"
+              className="button button--secondary bake-history-detail__photo-action"
               onClick={() => setIsChoosingPhoto(true)}
               disabled={isSavingPhoto}
             >
@@ -251,7 +251,7 @@ export function BakeHistoryDetailView({
             </button>
             <button
               type="button"
-              className="wizard-button wizard-button--secondary bake-history-detail__photo-action"
+              className="button button--secondary bake-history-detail__photo-action"
               onClick={() => setIsRemovePhotoDialogOpen(true)}
               disabled={isSavingPhoto}
             >
@@ -301,13 +301,13 @@ export function BakeHistoryDetailView({
             <div className="bake-history-detail__edit-actions">
               <button
                 type="button"
-                className="wizard-button wizard-button--secondary"
+                className="button button--secondary"
                 onClick={() => setIsEditing(false)}
                 disabled={isSaving}
               >
                 Cancel
               </button>
-              <button type="submit" className="wizard-button wizard-button--primary" disabled={isSaving}>
+              <button type="submit" className="button button--primary" disabled={isSaving}>
                 {isSaving ? 'Saving…' : 'Save changes'}
               </button>
             </div>
@@ -387,7 +387,7 @@ export function BakeHistoryDetailView({
         ) : null}
         <button
           type="button"
-          className="wizard-button bake-history-detail__delete"
+          className="button bake-history-detail__delete"
           onClick={() => setIsDeleteDialogOpen(true)}
           disabled={isSaving}
         >
@@ -404,7 +404,7 @@ export function BakeHistoryDetailView({
             <div className="dialog-card__actions">
               <button
                 type="button"
-                className="wizard-button wizard-button--secondary"
+                className="button button--secondary"
                 onClick={() => setIsPhotoOpen(false)}
               >
                 Close

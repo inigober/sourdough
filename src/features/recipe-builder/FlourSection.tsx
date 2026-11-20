@@ -98,7 +98,7 @@ export function FlourSection({
           </p>
         ) : null}
 
-        <button type="button" className="wizard-button wizard-button--secondary flour-add-button" onClick={onAddFlour}>
+        <button type="button" className="button button--secondary flour-add-button" onClick={onAddFlour}>
           <PlusIcon />
           Add another flour
         </button>
