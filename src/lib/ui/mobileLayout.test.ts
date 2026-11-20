@@ -1,15 +1,10 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 import { MOBILE_LAYOUT, flourPercentControlFitsTwoDigits } from './mobileLayout.ts';
+import { readStylesheet } from './readStylesheet.ts';
 
-const stylesCss = readFileSync(
-  join(dirname(fileURLToPath(import.meta.url)), '../../styles.css'),
-  'utf8',
-);
+const stylesCss = readStylesheet();
 
 test('flour percent control keeps digits separate from the external suffix', () => {
   assert.equal(

@@ -1,0 +1,64 @@
+/* ==========================================================================
+   Accessibility pass (2026-11-20). One block, appended, so it merges cleanly.
+   See docs/product/accessibility.md. Colour tokens only, so the dark theme follows.
+   ========================================================================== */
+
+/* Script-focused landmarks and headings (screen title after navigation, dialog titles, the coach
+   heading) are focus targets for screen readers, not controls: no ring around a heading. */
+[tabindex='-1']:focus {
+  outline: none;
+}
+
+/* Differentiate without colour: a finished step gets a check mark and the current step a bar on
+   its left edge, so state is not carried by text colour or tint alone. The check has an empty
+   alternative text because the button already says "Done:" to screen readers. */
+.companion__overview-list .timeline-row--done .timeline-row__time-compact::after {
+  content: '\00a0✓';
+  content: '\00a0✓' / '';
+}
+
+.companion__overview-list .timeline-row--current.timeline-row--interactive {
+  box-shadow: inset 4px 0 0 var(--color-primary-text);
+}
+
+/* Increase Contrast (iOS Settings > Accessibility > Display & Text Size). Control outlines go from
+   about 1.5:1 to at least 4:1, and the soft grey-brown text steps up to the muted text colour. */
+@media (prefers-contrast: more) {
+  :root {
+    --color-border: #8a7260;
+    --color-border-strong: #8a7260;
+    --color-border-soft: #8a7260;
+    --color-border-faint: #8a7260;
+    --color-border-notice: #8a7260;
+    --color-text-subtle: var(--color-text-muted);
+  }
+}
+
+@media (prefers-contrast: more) and (prefers-color-scheme: dark) {
+  :root {
+    --color-border: #9d8773;
+    --color-border-strong: #9d8773;
+    --color-border-soft: #9d8773;
+    --color-border-faint: #9d8773;
+    --color-border-notice: #9d8773;
+  }
+}
+
+/* Reduce Transparency: the blurred, see-through bars become solid. */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --app-chrome-blur: none;
+    --app-chrome-bg: var(--color-bg);
+    --color-nav-bg: var(--color-surface);
+  }
+}
+
+/* Windows high contrast and similar forced-colour modes: keep selected states visible without colour fills. */
+@media (forced-colors: active) {
+  .loaf-assessment-picker__chip[aria-pressed='true'],
+  .schedule-presets__option--selected,
+  .app-bottom-nav__item[aria-current='page'] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}

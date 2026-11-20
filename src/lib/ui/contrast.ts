@@ -1,4 +1,4 @@
-/** WCAG 2.x contrast helpers, used by `contrast.test.ts` to guard the colour tokens in styles.css. */
+/** WCAG 2.x contrast helpers, used by `contrast.test.ts` to guard the colour tokens in src/styles/tokens.css. */
 
 export type ColourTokens = Record<string, string>;
 

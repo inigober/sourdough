@@ -17,7 +17,7 @@ type SectionHeadingProps = {
   /**
    * 1 for the title of a screen that has no other level-1 heading (the wizard steps); 2 otherwise.
    * Level 1 keeps the h2 element so the existing styles apply, and says level 1 through aria-level.
-   * When styles.css is split, switch this to a real h1.
+   * The CSS split is done; switching this to a real h1 is a separate change (see docs/product/accessibility.md).
    */
   headingLevel?: 1 | 2;
   children?: ReactNode;

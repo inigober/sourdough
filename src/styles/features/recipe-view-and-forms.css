@@ -1,0 +1,237 @@
+.recipe-view {
+  display: grid;
+  gap: 20px;
+}
+
+.recipe-view__hero {
+  margin-bottom: 0;
+}
+
+.recipe-view__day {
+  margin-top: 16px;
+}
+
+.recipe-view__day-label {
+  margin: 0 0 4px;
+  color: var(--color-primary-text);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.recipe-view__steps {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recipe-view__step {
+  display: grid;
+  grid-template-columns: 3.25rem minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: baseline;
+  padding: 8px 0;
+  border-top: 1px solid var(--color-border-soft);
+}
+
+.recipe-view__step:first-child {
+  border-top: 0;
+}
+
+.recipe-view__step-time {
+  color: var(--color-text-subtle);
+  font-size: 0.9rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.recipe-view__step-label {
+  color: var(--color-text);
+  line-height: 1.35;
+}
+
+.recipe-view__step-duration {
+  color: var(--color-text-subtle);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.bake-start__fields {
+  margin-top: 12px;
+}
+
+/* --- Input sanity: bake start timing (past-time warning + "Start now") --- */
+.bake-start__timing {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.bake-start__timing .field-message {
+  margin: 0;
+}
+
+.bake-start__now {
+  min-height: 44px;
+}
+/* --- end input sanity block --- */
+
+.bake-start__preview {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-card);
+  background: var(--color-surface-muted);
+}
+
+.bake-start__preview .recipe-list {
+  margin-top: 0;
+}
+
+.schedule-builder__hero {
+  margin-bottom: 0;
+}
+
+.schedule-builder__back,
+.schedule-builder__start {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.schedule-bake-form {
+  display: grid;
+  gap: 16px;
+}
+
+.field-card--toggle {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+/* The 24px checkbox sits in a 44px label so the whole square toggles it; the negative margin keeps the layout the same. */
+.field-card__checkbox-hit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  margin: -10px;
+  cursor: pointer;
+}
+
+.field-card--error {
+  border-color: var(--color-danger-border-strong);
+  background: var(--color-danger-bg);
+}
+
+.field-card--warning {
+  border-color: var(--color-warning-border);
+  background: var(--color-warning-bg);
+}
+
+.field-description {
+  display: block;
+  margin-top: 4px;
+  color: var(--color-text-subtle);
+  font-size: 0.86rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.field-message {
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.field-message--error {
+  color: var(--color-danger-text-bright);
+}
+
+.field-message--warning {
+  color: var(--color-warning-text-alt);
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.input-row--stepper {
+  align-items: center;
+}
+
+.input-row--stepper .number-field__control {
+  position: relative;
+  display: flex;
+  flex: 0 1 auto;
+  width: min(100%, var(--number-field-width));
+  max-width: var(--number-field-width);
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
+/* The value sits between a decrease and an increase button, each a full 44px target. */
+.number-field__control input {
+  flex: 1 1 auto;
+  padding-inline: 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  text-align: center;
+}
+
+.number-field__stepper {
+  display: flex;
+  flex: 0 0 var(--touch-target-min);
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  padding: 0;
+  border: 0;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.number-field__stepper--decrease {
+  border-right: 1px solid var(--color-border);
+}
+
+.number-field__stepper--increase {
+  border-left: 1px solid var(--color-border);
+}
+
+.number-field__stepper .icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+@media (hover: hover) {
+  .number-field__stepper:hover:not(:disabled) {
+    background: var(--color-hover-stepper);
+    color: var(--color-text);
+  }
+}
+
+.number-field__stepper:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.saved-recipe-card__bake {
+  padding: 10px 14px;
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+

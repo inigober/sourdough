@@ -42,7 +42,7 @@ Related: the rules for new UI are in [UI/UX practices](./ui-ux-practices.md), "A
 | Forms | A label that wrapped a group of buttons (loaf assessment) is now a plain container, so tapping its text no longer activates the first button; save errors are `alert` | `BakeCompleteDialog.tsx`, `BakeHistoryDetailView.tsx` |
 | Account menu | Removed `role="menu"` / `menuitem` (a menu role promises arrow-key behaviour that did not exist); it is now a disclosure button that closes on Escape | `features/auth/WelcomeTopBar.tsx` |
 | `aria-controls` | Only set while the panel exists | `CollapsibleSection`, `RecipeAssessment`, `InfoToggle` |
-| Display settings | Increase Contrast (borders and subtle text), Reduce Transparency (solid bars), forced colours; no ring on script-focused headings | one appended block at the end of `styles.css` |
+| Display settings | Increase Contrast (borders and subtle text), Reduce Transparency (solid bars), forced colours; no ring on script-focused headings | one block, `src/styles/overrides/accessibility.css` |
 | Tests | Contrast guard for the colour tokens, focus-trap and inert logic, spoken timer text, document titles, result counts, and markup checks for the items above | `lib/ui/*.test.ts`, `lib/companion/timerSpeech.test.ts`, `features/recipe-builder/documentTitle.test.ts`, `features/accessibility/accessibility.test.tsx` |
 
 Visible text was not changed, except: the hidden label of the coach's text field now reads "Ask about this step" (it matches the visible placeholder, so Voice Control's "Tap Ask about this step" works), and the summary edit buttons' hidden name changed from "Edit Dough size" to "Edit Dough size: 900g · 1 loaf" (contains the visible value). Check the "Edit ..." wording in the on-device script.
@@ -242,7 +242,7 @@ Files: `ios/App/App/BakeTimerPlugin.swift`, `ios/App/BakeTimerWidget/*.swift`, `
 - `SectionHeading` level 1 via `aria-level` on an `h2` (see above).
 - Timer announcement and focus timing use timeouts (`routeEffects.ts`, `CompanionView.tsx`); both degrade gracefully (focus falls back after 1.5 s).
 - `useModalSheet` makes every other child of `<body>` inert; if a future overlay is added to `<body>` while a sheet is open it will be inert too.
-- Contrast test reads `styles.css` and so will fail when a colour token is changed to something that fails 4.5:1. That is the point, but tell whoever edits the tokens.
+- Contrast test reads the stylesheet (`src/styles/`) and so will fail when a colour token is changed to something that fails 4.5:1. That is the point, but tell whoever edits the tokens.
 
 ## Changelog
 

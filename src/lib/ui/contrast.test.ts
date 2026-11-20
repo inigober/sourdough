@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
 import { contrastRatio, readColourPalettes } from './contrast.ts';
+import { readStylesheet } from './readStylesheet.ts';
 
-const css = readFileSync(new URL('../../styles.css', import.meta.url), 'utf8');
+const css = readStylesheet();
 const { light, dark } = readColourPalettes(css);
 
 // Tokens used as text colours, and the surfaces they sit on most. See docs/product/accessibility.md.

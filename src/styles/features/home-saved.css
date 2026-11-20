@@ -1,0 +1,165 @@
+/* ==========================================================================
+   Home / Saved split (owner feedback 10). Everything for the Saved tab, the
+   compact Home shortcut, the three-tab bottom nav and the recipe-view delete
+   lives in this one block. Colours are tokens only.
+   ========================================================================== */
+
+/* Bottom nav: Home | Saved | History. */
+.app-bottom-nav {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* Saved tab. */
+.saved-recipes__search {
+  margin: 16px 0 0;
+}
+
+.saved-recipes__empty-state {
+  display: grid;
+  gap: 16px;
+  justify-items: start;
+}
+
+.saved-recipes__empty-state .saved-recipes__empty {
+  margin: 0;
+}
+
+/* Home shortcut: a short card, not the full list. */
+.saved-shortcut__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.saved-shortcut__header .page-shell__secondary-link {
+  flex-shrink: 0;
+  align-self: center;
+  white-space: nowrap;
+}
+
+.saved-shortcut__list {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.saved-shortcut-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--touch-target-min);
+  padding: 8px 8px 8px 12px;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 14px;
+  background: var(--color-surface-muted);
+}
+
+.saved-shortcut-row__open {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+  min-height: var(--touch-target-min);
+  align-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.saved-shortcut-row__open:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.saved-shortcut-row__open strong,
+.saved-shortcut-row__meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saved-shortcut-row__open strong {
+  color: var(--color-text);
+}
+
+.saved-shortcut-row__open:focus-visible strong {
+  color: var(--color-primary-text);
+}
+
+@media (hover: hover) {
+  .saved-shortcut-row__open:hover strong {
+    color: var(--color-primary-text);
+  }
+}
+
+.saved-shortcut-row__meta {
+  color: var(--color-text-subtle);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.saved-shortcut-row__bake {
+  /* The mobile .wizard-button rule makes buttons full width; this one sits beside the name. */
+  flex: 0 0 auto;
+  width: auto;
+  min-height: var(--touch-target-min);
+  padding: 8px 12px;
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+/* Recipe view: delete is the last thing on the page, quiet and clearly apart from Start baking. */
+.recipe-view__danger-zone {
+  display: flex;
+  justify-content: center;
+  margin: 28px 0 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border-soft);
+}
+
+.recipe-view__delete .icon {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.recipe-view__delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--touch-target-min);
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--color-danger);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+@media (hover: hover) {
+  .recipe-view__delete:hover {
+    background: var(--color-danger-bg);
+  }
+}
+
+.recipe-view__delete:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Saved cards no longer have a bin beside Duplicate, so the mobile button grid is a single column. */
+.saved-recipe-card__buttons {
+  grid-template-columns: 1fr;
+}
+

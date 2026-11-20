@@ -1,0 +1,117 @@
+.password-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.password-field input {
+  width: 100%;
+}
+
+.password-field__toggle {
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+}
+
+.field-hint {
+  color: var(--color-text-subtle);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 110;
+  transform: translateX(-50%);
+  max-width: min(calc(100vw - 28px), 22rem);
+  padding: 12px 18px;
+  border: 1px solid var(--color-success-border);
+  border-radius: 999px;
+  background: var(--color-success-bg);
+  box-shadow: 0 12px 32px var(--shadow-color-overlay);
+  color: var(--color-success);
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 20px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  overflow: visible;
+}
+
+.dialog-backdrop::backdrop {
+  background: var(--color-scrim);
+}
+
+div.dialog-backdrop {
+  background: var(--color-scrim);
+}
+
+.dialog-card {
+  display: grid;
+  gap: 16px;
+  width: min(100%, 28rem);
+  padding: 20px;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 20px;
+  background: var(--color-surface);
+  box-shadow: 0 18px 40px var(--shadow-color-overlay);
+}
+
+.dialog-card h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+/* Bake complete: a warm neutral card. The green tint made it read as a form result, and the
+   fields inside are already tinted, so the card itself stays on the plain surface. */
+.dialog-card--success {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface);
+}
+
+.dialog-card__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.dialog-card__actions--stack {
+  grid-template-columns: 1fr;
+}
+
+.dialog-card__fields {
+  display: grid;
+  gap: 16px;
+}
+
+.dialog-card .field-card {
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+

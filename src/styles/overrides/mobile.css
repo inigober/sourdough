@@ -1,0 +1,279 @@
+@media (max-width: 640px) {
+  .timeline-row__layout {
+    --timeline-time-width: 6.7rem;
+    gap: 4px 8px;
+  }
+
+  .timeline-row--interactive {
+    --timeline-time-width: 6.7rem;
+    gap: 4px 6px;
+  }
+
+  :root {
+    --app-shell-pad-top: 16px;
+    --app-shell-pad-inline: 14px;
+  }
+
+  .app-shell {
+    padding: calc(var(--app-shell-pad-top) + env(safe-area-inset-top, 0px)) var(--app-shell-pad-inline)
+      calc(40px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .app-bottom-nav {
+    width: 100%;
+    padding-inline: 14px;
+  }
+
+  .main-screen--with-nav {
+    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .bake-history-detail__step-row {
+    grid-template-columns: 4.75rem minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .bake-history__filters {
+    grid-template-columns: 1fr;
+  }
+
+  .bake-history-detail__edit-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .dialog-backdrop {
+    padding: 14px;
+  }
+
+  .card {
+    padding: 18px 16px;
+    border-radius: 22px;
+  }
+
+  .section-heading {
+    margin-bottom: 18px;
+  }
+
+  .hero-copy {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .summary-group.card {
+    padding: 14px;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px var(--shadow-color-card-soft);
+  }
+
+  .welcome-screen {
+    gap: 20px;
+  }
+
+  .welcome-screen__title-row {
+    align-items: center;
+  }
+
+  .welcome-top-bar__sign-in {
+    padding: 8px 12px;
+    font-size: 0.86rem;
+  }
+
+  .reference-chip__label {
+    min-height: 2.75rem;
+  }
+
+  .welcome-screen__hero {
+    margin-bottom: 0;
+  }
+
+  .wizard-button {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    padding: 13px 18px;
+    font-size: 0.95rem;
+    line-height: 1.25;
+    text-align: center;
+  }
+
+  .wizard-shell__header {
+    padding-bottom: 18px;
+  }
+
+  .page-shell__footer {
+    margin-inline: -14px;
+    margin-bottom: calc(-40px - env(safe-area-inset-bottom, 0px));
+    padding-inline: 14px;
+  }
+
+  .companion {
+    min-height: calc(100dvh - 16px - 14px - 40px - env(safe-area-inset-bottom, 0px));
+  }
+
+  .hero h1,
+  .screen-chrome__title {
+    font-size: clamp(1.55rem, 6vw, 2rem);
+    line-height: 1.15;
+  }
+
+  .saved-recipe-card {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .saved-recipe-card__actions {
+    justify-items: stretch;
+    width: 100%;
+  }
+
+  .saved-recipe-card__buttons {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .saved-recipe-card__bake {
+    grid-column: 1 / -1;
+    width: 100%;
+    padding: 13px 18px;
+    font-size: 0.95rem;
+    white-space: normal;
+  }
+
+  .saved-recipe-card__duplicate {
+    grid-column: 1;
+    width: 100%;
+    padding: 13px 18px;
+    font-size: 0.95rem;
+    white-space: normal;
+  }
+
+  .welcome-draft__resume,
+  .welcome-bake-session__resume {
+    width: 100%;
+    padding: 13px 18px;
+  }
+
+  .welcome-top-bar__sign-in {
+    padding: 12px 16px;
+    font-size: 0.92rem;
+  }
+
+  .companion__coach-button {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .welcome-templates__list {
+    grid-template-columns: 1fr;
+  }
+
+  .flour-context-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .flour-blend-row,
+  .flour-blend-row--multi {
+    grid-template-columns: 1fr;
+  }
+
+  .schedule-builder__back,
+  .schedule-builder__start,
+  .wizard-button--block {
+    width: 100%;
+    padding: 13px 18px;
+  }
+
+  .flour-add-button,
+  .auth-modal__choice,
+  .auth-modal__submit,
+  .companion__start-step {
+    width: 100%;
+    padding: 13px 18px;
+  }
+
+  .wizard-nav--split .wizard-button {
+    width: 100%;
+    padding: 13px 18px;
+  }
+
+  .wizard-icon-button {
+    width: 2.75rem;
+    height: 2.75rem;
+    flex-shrink: 0;
+  }
+
+  .dialog-card {
+    width: 100%;
+    max-height: calc(100dvh - 40px);
+    overflow: auto;
+  }
+
+  .dialog-card__actions {
+    grid-template-columns: 1fr;
+  }
+
+  .dialog-card__actions .wizard-button {
+    width: 100%;
+  }
+
+  .companion__timer-value {
+    font-size: 1.5rem;
+  }
+
+  .input-row {
+    flex-wrap: wrap;
+  }
+
+  .input-row--stepper {
+    flex-wrap: nowrap;
+  }
+
+  .input-row--stepper .number-field__control {
+    width: min(100%, var(--number-field-width));
+  }
+
+  .info-toggle__button {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 0.82rem;
+  }
+
+  .field-card input[type='date'],
+  .field-card input[type='time'] {
+    padding: 11px 14px;
+    font-size: 1rem;
+  }
+
+  .reference-chip__label .info-toggle__button,
+  .reference-chip__label .reference-chip__action {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .info-toggle__bubble {
+    width: min(17rem, calc(100vw - 28px));
+  }
+
+  .icon-button,
+  .auth-modal__close,
+  .password-field__toggle {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .collapsible-section__trigger {
+    padding: 18px 16px;
+    font-size: 1.15rem;
+  }
+
+  .collapsible-section__panel {
+    padding: 0 16px 18px;
+  }
+
+  .companion__exit {
+    margin-bottom: 4px;
+  }
+}

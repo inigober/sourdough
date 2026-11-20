@@ -1,0 +1,121 @@
+/* --- Bake mode: "Amounts" disclosure on the current step, and padding for the Full schedule rows --- */
+.companion-amounts {
+  display: grid;
+  gap: 8px;
+}
+
+.companion-amounts__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 4px;
+  min-height: var(--touch-target-min);
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.companion-amounts__toggle:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.companion-amounts__chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-90deg);
+  transition: transform 0.15s ease;
+}
+
+.companion-amounts__chevron--open {
+  transform: rotate(0deg);
+}
+
+.companion-amounts__panel {
+  display: grid;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 14px;
+  background: var(--color-surface-muted);
+}
+
+.companion-amounts__list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.companion-amounts__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.companion-amounts__row dt {
+  color: var(--color-text-muted);
+}
+
+.companion-amounts__row dd {
+  margin: 0;
+  color: var(--color-text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.companion-amounts__row--total {
+  padding-top: 6px;
+  border-top: 1px solid var(--color-border-soft);
+}
+
+.companion-amounts__note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/*
+ * Full schedule rows: every row gets the same inner padding and a rounded corner, so the
+ * highlight (current step, or the row picked for "Jump to this step") has room around the text
+ * and the text stays in the same place whether a row is highlighted or not. The negative list
+ * margin cancels the padding, so the text still lines up with the card title.
+ */
+.companion__overview-list {
+  margin-inline: -12px;
+}
+
+.companion__overview-list .timeline-row--interactive {
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+.companion__overview-list .timeline-row--current.timeline-row--interactive {
+  background: var(--color-tint-primary);
+}
+
+/* The row picked for "Jump to this step": outlined, so it cannot be mistaken for the current (filled) step. */
+.companion__overview-list .timeline-row--interactive[aria-expanded='true'] {
+  background: var(--color-row-active-bg);
+  box-shadow: inset 0 0 0 1.5px var(--color-primary-text);
+}
+
+.companion__overview-list .timeline-row--current .timeline-row__time-compact,
+.companion__overview-list .timeline-row--current .timeline-row__label-compact {
+  color: var(--color-primary-text);
+}
+
+/* The Jump button sits under its row, indented to the same inner edge as the row text. */
+.companion__overview-list .companion__row-actions {
+  padding: 6px 12px 10px;
+}
+/* --- end bake mode amounts and Full schedule --- */
+

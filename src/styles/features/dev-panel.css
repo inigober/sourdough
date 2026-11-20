@@ -1,0 +1,45 @@
+
+.dev-panel__hint {
+  margin: 0;
+}
+
+.dev-panel__storage {
+  display: grid;
+  gap: 10px;
+}
+
+.dev-panel__section-title {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.dev-panel__key-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dev-panel__key-list li {
+  display: grid;
+  gap: 4px;
+}
+
+.dev-panel__key-label {
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.dev-panel__key-code {
+  overflow-wrap: anywhere;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.dev-panel__empty {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--color-text-muted);
+}
+

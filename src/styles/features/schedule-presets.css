@@ -1,0 +1,119 @@
+/* ==========================================================================
+   Schedule builder: presets, Customise groups and field hints
+   (UX review 2.7). Self-contained so the later global accessibility/dark-mode
+   pass can find and retheme it. Colours mirror the existing card palette.
+   ========================================================================== */
+
+.schedule-presets__group {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.schedule-presets__option {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  background: var(--color-surface);
+  cursor: pointer;
+}
+
+.schedule-presets__option--selected {
+  border-color: var(--color-primary-text);
+  background: var(--color-surface-muted);
+  box-shadow: inset 0 0 0 1px var(--color-primary-text);
+}
+
+/* The radio is visually hidden but stays focusable; the card shows the focus ring. */
+.schedule-presets__input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.schedule-presets__option:has(.schedule-presets__input:focus-visible) {
+  outline: 3px solid var(--color-primary-text);
+  outline-offset: 2px;
+}
+
+.schedule-presets__label {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.schedule-presets__description {
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.schedule-presets__status {
+  margin: 16px 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+@media (min-width: 960px) {
+  .schedule-presets__group {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.schedule-customise__copy {
+  margin: 0 0 16px;
+}
+
+/* Customise groups: the sections inside "Customise" are flat rows, not cards inside a card. */
+.schedule-customise .collapsible-section {
+  border: 0;
+  border-top: 1px solid var(--color-border-faint);
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.schedule-customise .collapsible-section .collapsible-section__trigger {
+  padding: 16px 0;
+  font-size: 1.05rem;
+}
+
+.schedule-customise .collapsible-section .collapsible-section__panel {
+  display: grid;
+  gap: 16px;
+  padding: 0 0 20px;
+}
+
+.schedule-customise .collapsible-section .collapsible-section__panel .section-copy {
+  margin: 0;
+}
+
+.schedule-fold-groups {
+  display: grid;
+  gap: 20px;
+}
+
+.schedule-fold-group {
+  display: grid;
+  gap: 8px;
+}
+
+.schedule-field-hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+

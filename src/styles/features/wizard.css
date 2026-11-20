@@ -1,0 +1,68 @@
+.wizard-progress-bar {
+  display: grid;
+  gap: 8px;
+}
+
+.wizard-progress-bar__track {
+  display: grid;
+  /* One equal column per segment, however many steps there are. A fixed repeat(5, ...) left a
+     fifth empty column, so the bar stopped at 80% of its width. */
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 6px;
+}
+
+.wizard-progress-bar__segment {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-track);
+}
+
+.wizard-progress-bar__segment--filled {
+  background: var(--color-primary-text);
+}
+
+.wizard-progress-bar__meta {
+  display: grid;
+  gap: 0;
+}
+
+.wizard-progress-bar__meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.wizard-progress-bar__separator {
+  color: var(--color-separator);
+  font-weight: 600;
+}
+
+.wizard-progress-bar__count {
+  color: var(--color-text-subtle);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.wizard-progress-bar__label {
+  color: var(--color-text);
+  font-size: 0.95rem;
+  font-weight: 600;
+  min-width: 0;
+}
+
+.wizard-shell__header-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.wizard-shell__header-action {
+  flex-shrink: 0;
+}
+

@@ -61,7 +61,7 @@ That flags an intentional product choice so we can discuss tradeoffs once instea
 | Delete / remove → bin/trash icon (with `aria-label`). | Must not look like a numeric decrement button. |
 | `+` / `−` are for numeric steppers only. | One symbol, one meaning. |
 | Icon-only buttons always have an accessible name (`aria-label` or visible text). | Icons alone are not readable to everyone. |
-| Every tappable control has a hit area of at least 44x44 CSS px. The visual size may be smaller: add the control to the "Touch targets" block at the end of `styles.css` (an invisible `::after`) instead of enlarging it. | Easier to tap on mobile with floury hands; 44px is Apple's guideline. |
+| Every tappable control has a hit area of at least 44x44 CSS px. The visual size may be smaller: add the control to the "Touch targets" block (`src/styles/overrides/touch-targets.css`) (an invisible `::after`) instead of enlarging it. | Easier to tap on mobile with floury hands; 44px is Apple's guideline. |
 | Numeric steppers are a `−` button, the value and a `+` button in one row, each button a full 44px square. Stacked up/down chevrons cannot reach 44px. | One symbol, one meaning, and a tappable size. |
 
 **Override example:** A list row uses a text "Remove" link instead of an icon for clarity in a destructive confirmation flow.
@@ -118,7 +118,7 @@ That flags an intentional product choice so we can discuss tradeoffs once instea
 | Do not rely on color alone for errors/warnings. | Include text and/or iconography. |
 | Text is at least 4.5:1 against its background in both the light and the dark palette. Check new colour pairs with a contrast script before adding them. | WCAG AA; kitchens are bright or dark and floury fingers are not precise. |
 | Never dim text with `opacity` to de-emphasise it; pick a muted colour token that still passes 4.5:1. | Opacity silently lowers contrast (the old Previous card was 55%). |
-| Honour `prefers-reduced-motion`: transitions are switched off in one block at the end of `styles.css`; JS must not force `behavior: 'smooth'` without checking the setting. | Motion can cause discomfort and an explicit smooth scroll ignores the CSS rule. |
+| Honour `prefers-reduced-motion`: transitions are switched off in one block (`src/styles/overrides/reduced-motion.css`); JS must not force `behavior: 'smooth'` without checking the setting. | Motion can cause discomfort and an explicit smooth scroll ignores the CSS rule. |
 | A control's visible text must be part of its accessible name (`aria-label` contains the visible label). | Voice Control and screen-reader users refer to controls by what they see. |
 | A dialog or sheet moves focus in when it opens, keeps Tab inside, closes on Escape and returns focus to what opened it. Use `DialogCard`; a custom sheet must be portaled to `<body>` and use `useModalSheet`. | Without it, VoiceOver and keyboard users end up in the page behind. |
 | Anything that changes by itself (timers, toasts, replies) is announced once through a live region that is already on the page and empty, never every tick. | A countdown that speaks every second is unusable; a live region inserted with its text is often not read. |
@@ -135,7 +135,7 @@ The app follows the system setting (`prefers-color-scheme`); there is no in-app 
 
 | Practice | Why |
 | --- | --- |
-| Every colour in `styles.css` is a CSS variable defined in `:root`. No hex or `rgb()` literals in rules. | Dark mode only works if one place owns each colour. |
+| Every colour in `src/styles/` is a CSS variable defined in `:root`. No hex or `rgb()` literals in rules. | Dark mode only works if one place owns each colour. |
 | Add a new colour as a token in `:root` AND in the dark block (`@media (prefers-color-scheme: dark)`, right below `:root`). | A token missing from the dark block stays light and shows up as a white patch. |
 | Brown is two tokens: `--color-primary` is a fill (buttons, switches; white text on it), `--color-primary-text` is brown used as text, borders or rings on a surface. Use the second for text. | In dark mode the text brown is lighter, the fill brown is unchanged. |
 | Soft grey-brown text is `--color-text-subtle` (4.5:1 or better on every surface); do not introduce lighter greys for text. | The old `#9a8776` was 3.07:1. |

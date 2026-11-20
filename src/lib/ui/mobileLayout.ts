@@ -1,4 +1,4 @@
-/** Layout tokens mirrored in styles.css — keep in sync when changing mobile form layout. */
+/** Layout tokens mirrored in src/styles/ — keep in sync when changing mobile form layout. */
 export const MOBILE_LAYOUT = {
   /** Min width of the % pill between minus/plus controls. */
   flourPercentPillMinWidth: '4.5rem',

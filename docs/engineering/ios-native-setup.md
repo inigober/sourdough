@@ -50,7 +50,7 @@ npm run cap:open:ios
 ## Orientation and launch colour
 
 - iPhone is portrait only (`UISupportedInterfaceOrientations` in `Info.plist`); iPad keeps all four. The layout has no left or right safe-area insets, so landscape on iPhone would put content under the Dynamic Island.
-- `AppViewController.swift` paints the view and the web view in the page colour (light `#f8f1e8`, dark `#1a1511`, the same as `--color-bg` in `src/styles.css`) so there is no white frame before the page's first paint. Change both places together.
+- `AppViewController.swift` paints the view and the web view in the page colour (light `#f8f1e8`, dark `#1a1511`, the same as `--color-bg` in `src/styles/tokens.css`) so there is no white frame before the page's first paint. Change both places together.
 
 ## Deep link
 

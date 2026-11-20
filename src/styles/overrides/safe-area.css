@@ -1,0 +1,50 @@
+/* --- Top safe area (Dynamic Island / notch) ---
+   Before: every top edge was (shell padding + full safe-area inset), which left 16-24px of dead space
+   under the island. Now one token owns it: the shell padding on screens without a notch (unchanged),
+   or just under the safe-area edge (+4px) on a notched iPhone. The sticky header cancels the same
+   amount with a negative margin, so the inset is counted once.
+   The header fade also gets a fully opaque band behind the status bar, so scrolled content never
+   shows through under the clock and battery. Colours come from the tokens, so light and dark follow. */
+:root {
+  --app-top-inset: max(var(--app-shell-pad-top), calc(env(safe-area-inset-top, 0px) + 4px));
+  --app-chrome-header-bg: linear-gradient(
+    var(--color-bg) 0,
+    var(--color-bg) env(safe-area-inset-top, 0px),
+    var(--app-chrome-bg) calc(env(safe-area-inset-top, 0px) + 1px),
+    var(--app-chrome-bg) 68%,
+    rgb(var(--color-bg-rgb) / 0)
+  );
+}
+
+html,
+body {
+  background: var(--color-bg);
+}
+
+.app-shell {
+  padding-top: var(--app-top-inset);
+}
+
+/* A fixed strip in the page colour over the status bar area. Screens with a sticky header already paint
+   this band themselves; Home, Saved and History have no header, so without the strip their cards scroll
+   through the clock and the island. Height is 0 where there is no safe-area inset (desktop, no notch).
+   Above the sticky headers (20 to 30), below dialogs, toasts and the coach sheet (100 and up). */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top, 0px);
+  background: var(--color-bg);
+  pointer-events: none;
+  z-index: 40;
+}
+
+.wizard-shell__header,
+.screen-chrome,
+.app-header {
+  margin-top: calc(-1 * var(--app-top-inset));
+  padding-top: var(--app-top-inset);
+}
+

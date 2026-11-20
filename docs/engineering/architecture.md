@@ -48,6 +48,7 @@ src/
     history/         History list and detail
     auth/            Sign-in modal and top bar
     dev/             Hidden dev panel
+  styles/         All CSS. index.css imports the files below in order (see "Styles")
   lib/            Domain logic, storage, hooks. Mostly no React
     recipe/    Formula, validation, assessment, flour profiles, templates
     schedule/  Timeline, presets, defaults, bake start, relative days
@@ -61,6 +62,18 @@ supabase/       migrations/ and functions/coach
 ios/App/        Capacitor shell, BakeTimer plugin (AlarmKit), widget extension
 docs/           product/ and engineering/ notes
 ```
+
+## Styles
+
+`src/styles/index.css` is the only stylesheet the app imports (`main.tsx`). It lists the other files with `@import`, and **the order of that list is the cascade order**: when two rules have the same specificity, the later file wins.
+
+- `tokens.css`: colour tokens (light, then the dark palette), spacing and layout variables. Every colour is a variable defined here.
+- `base.css`, `layout.css`: reset, typography, app and page shell.
+- `components/`: shared pieces (buttons, inputs, cards and fields, dialogs and toasts).
+- `features/`: one file per screen area (wizard, summary, schedule builder, bake mode, history, saved, and so on).
+- `overrides/`: cross-cutting blocks that were appended late and deliberately sit near the end of the cascade: mobile breakpoints, touch targets, reduced motion, native web view, top safe area, accessibility.
+
+The split was a pure move of the former single `styles.css` (the built CSS is byte-identical), so the files are contiguous slices, not strict layers: some feature files still hold a few component rules, and 35 selectors are still defined twice. **Do not reorder the imports or move a rule across files without checking the cascade.** Later phases of the UI review merge the duplicates. Tests that check CSS values (`contrast.test.ts`, `mobileLayout.test.ts`) read the whole stylesheet through `src/lib/ui/readStylesheet.ts`, so they do not depend on the file layout.
 
 Why this placement:
 

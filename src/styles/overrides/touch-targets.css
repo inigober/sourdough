@@ -1,0 +1,27 @@
+/* ==========================================================================
+   Touch targets (UX review problem 10). The visual size of these controls stays
+   as designed; an invisible ::after grows the tappable area to at least 44x44px.
+   Add a new small control to this list instead of enlarging it visually.
+   ========================================================================== */
+.info-toggle__button,
+.summary-group__body,
+.page-shell__secondary-link,
+.bake-history__backup-nudge-link,
+.saved-recipe-card__open {
+  position: relative;
+}
+
+.info-toggle__button::after,
+.summary-group__body::after,
+.page-shell__secondary-link::after,
+.bake-history__backup-nudge-link::after,
+.saved-recipe-card__open::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(100%, var(--touch-target-min));
+  height: max(100%, var(--touch-target-min));
+  transform: translate(-50%, -50%);
+}
+

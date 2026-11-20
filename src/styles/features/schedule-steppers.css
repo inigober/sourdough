@@ -1,0 +1,84 @@
+/* ==========================================================================
+   Schedule builder + number steppers (owner feedback 7, 8, 9)
+   - Custom is the fourth plan option; its field groups sit under the picker.
+   - NumberField never clips its + button: the control has a floor width and the input may shrink.
+   - Export is a quiet text button that reveals three small text actions.
+   Colours are tokens only, so the dark theme follows.
+   ========================================================================== */
+
+/* Stepper: root cause of the clipped "+" was a 5.5rem min-width on the bake inputs
+   (44 + 88 + 44 > the 164px control, whose overflow is hidden). The input may now shrink, and the
+   control cannot go narrower than two 44px buttons plus room for a 3-digit value. */
+.input-row--stepper .number-field__control {
+  min-width: calc(var(--touch-target-min) * 2 + 3.25rem + 2px);
+}
+
+.number-field__control input {
+  min-width: 0;
+}
+
+.number-field__stepper {
+  min-width: var(--touch-target-min);
+}
+
+/* A unit label that does not fit drops under the stepper instead of squeezing it. */
+.input-row--stepper {
+  flex-wrap: wrap;
+}
+
+/* The control clips its children (rounded corners), so rings are drawn inside the buttons and as a
+   box-shadow on the control rather than as outlines that would be cut off. */
+.number-field__stepper:focus-visible {
+  outline: 3px solid var(--color-primary-text);
+  outline-offset: -4px;
+}
+
+.number-field__control:has(input:focus) {
+  border-color: var(--color-primary-text);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.number-field__control input:focus {
+  outline: none;
+}
+
+/* Export: small, quiet, text only. Three actions appear under it on demand. */
+.schedule-export {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+}
+
+.schedule-export__toggle,
+.schedule-export__action {
+  min-height: var(--touch-target-min);
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.schedule-export__toggle:focus-visible,
+.schedule-export__action:focus-visible {
+  outline: 3px solid var(--color-primary-text);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.schedule-export__action:disabled {
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.schedule-export__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+

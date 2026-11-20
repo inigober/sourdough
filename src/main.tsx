@@ -4,7 +4,7 @@ import { registerSW } from 'virtual:pwa-register';
 
 import { AuthProvider } from './lib/auth/AuthProvider.tsx';
 import { App } from './app/App.tsx';
-import './styles.css';
+import './styles/index.css';
 
 registerSW({ immediate: true });
 

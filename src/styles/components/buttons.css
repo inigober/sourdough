@@ -1,0 +1,145 @@
+.wizard-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 0;
+}
+
+.wizard-nav--split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.wizard-nav--split .wizard-button {
+  width: 100%;
+}
+
+.icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+}
+
+.wizard-icon-button,
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-button-size);
+  height: var(--icon-button-size);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 0;
+}
+
+.wizard-icon-button .icon,
+.icon-button .icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.wizard-icon-button:disabled,
+.icon-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.wizard-icon-button--accent {
+  border-color: var(--color-primary-text);
+  color: var(--color-primary-text);
+}
+
+@media (hover: hover) {
+  .wizard-icon-button--accent:hover:not(:disabled) {
+    background: var(--color-hover-accent);
+    filter: none;
+  }
+}
+
+.wizard-icon-button--help {
+  border-color: var(--color-help-border);
+  background: var(--color-help-bg);
+  color: var(--color-help);
+}
+
+@media (hover: hover) {
+  .wizard-icon-button--help:hover:not(:disabled) {
+    background: var(--color-help-hover);
+    filter: none;
+  }
+}
+
+.wizard-icon-button:focus-visible,
+.icon-button:focus-visible {
+  filter: brightness(0.97);
+}
+
+@media (hover: hover) {
+  .wizard-icon-button:hover:not(:disabled),
+  .icon-button:hover:not(:disabled) {
+    filter: brightness(0.97);
+  }
+}
+
+.wizard-icon-button--accent:focus-visible,
+.wizard-icon-button--help:focus-visible {
+  outline: 3px solid var(--color-focus-ring-help);
+  outline-offset: 2px;
+}
+
+.wizard-icon-button--accent:focus-visible {
+  outline-color: var(--color-focus-ring);
+}
+
+.wizard-button {
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 12px 22px;
+}
+
+.wizard-button .icon {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.wizard-button--with-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.wizard-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.wizard-button--primary {
+  border-color: var(--color-primary-border);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+@media (hover: hover) {
+  .wizard-button--secondary:hover:not(:disabled),
+  .wizard-button--primary:hover:not(:disabled) {
+    filter: brightness(0.97);
+  }
+}
+
+.wizard-button:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+

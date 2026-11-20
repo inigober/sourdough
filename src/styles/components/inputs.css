@@ -1,0 +1,164 @@
+input,
+select,
+textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 1rem;
+  padding: 10px 12px;
+}
+
+input:not([type='checkbox']):not([type='radio']),
+select {
+  min-height: var(--touch-target-min);
+}
+
+input,
+select {
+  font-weight: 600;
+}
+
+textarea {
+  min-height: 6rem;
+  font-weight: 500;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+/* The native date and time pickers take their selection colour from this; without it they use system blue. */
+input[type="date"],
+input[type="time"] {
+  accent-color: var(--color-primary);
+}
+
+input[type="checkbox"] {
+  width: 24px;
+  height: 24px;
+  accent-color: var(--color-primary);
+}
+
+/* Chevron so a select does not look like a text field. A data URI cannot read CSS variables, so the
+   stroke colour is written out: it equals --color-text-muted in each palette (#6f5d4e light,
+   #cdbcab dark). This is the one place a colour literal is allowed; change both if the token changes. */
+select {
+  appearance: none;
+  overflow: hidden;
+  padding-right: 40px;
+  text-overflow: ellipsis;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236f5d4e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 8 5 5 5-5'/%3E%3C/svg%3E");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+}
+
+@media (prefers-color-scheme: dark) {
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23cdbcab' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 8 5 5 5-5'/%3E%3C/svg%3E");
+  }
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--color-primary-text);
+  outline: 3px solid var(--color-focus-ring);
+}
+
+.input-suffix {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.recipe-list {
+  display: grid;
+  gap: 14px;
+  margin: 20px 0 0;
+}
+
+.recipe-assessment {
+  margin-top: 16px;
+}
+
+.recipe-assessment > p {
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.recipe-assessment ul {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  margin: 18px 0 0;
+  list-style: none;
+}
+
+.assessment-section {
+  display: grid;
+  gap: 5px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  line-height: 1.4;
+}
+
+.assessment-section strong {
+  color: var(--color-text);
+}
+
+.assessment-section span,
+.assessment-section p {
+  margin: 0;
+}
+
+.assessment-section span {
+  font-weight: 600;
+}
+
+.assessment-section p {
+  color: var(--color-text-muted);
+}
+
+.assessment-section--risk {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.assessment-section--warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.assessment-section--positive {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.assessment-section--info {
+  background: var(--color-surface-neutral);
+  color: var(--color-text-neutral);
+}
+
+.card--notice {
+  grid-column: 1 / -1;
+}
+
+.card--notice p {
+  margin-top: 10px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+dt {
+  color: var(--color-text-subtle);
+  font-weight: 400;
+}
+
+dd {
+  margin: 0;
+  color: var(--color-text);
+  font-weight: 600;
+}
+

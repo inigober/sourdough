@@ -1,0 +1,118 @@
+/* ==========================================================================
+   Native web view feel (UI review, quick wins 3 and 4). One block, tokens only.
+   - Pressed states: the only feedback a finger gets on a phone, because :hover is not reliable
+     on touch (hover rules are wrapped in `@media (hover: hover)` above).
+   - Web view tells: grey tap flash, long-press callout, text selection on buttons and chrome,
+     and rubber-banding of the whole page. Text content and inputs stay selectable.
+   ========================================================================== */
+html {
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+summary,
+label.wizard-button {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+button,
+summary,
+label.wizard-button,
+.app-bottom-nav,
+.screen-chrome,
+.app-header,
+.wizard-shell__header,
+.page-shell__footer {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* iOS can make inputs unusable when a parent is user-select: none, so restore them explicitly. */
+input,
+textarea,
+select {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+button,
+summary,
+label.wizard-button,
+.schedule-presets__option {
+  transition:
+    opacity 80ms ease-out,
+    transform 80ms ease-out;
+}
+
+/* :where() keeps this at the lowest specificity, so the tile rules below can override it. */
+:where(button:not(:disabled), summary, label.wizard-button):active {
+  opacity: 0.7;
+}
+
+/* Large tiles (photo cards, plan options) shrink a little instead of fading, so the photo stays readable. */
+.welcome-template-card:active,
+.schedule-presets__option:active {
+  opacity: 1;
+  transform: scale(0.98);
+}
+
+.timeline-row--interactive:active {
+  opacity: 1;
+  background: var(--color-row-active-bg);
+}
+
+/* Dialogs and the coach sheet: a short fade plus a slight slide (200ms) when they open. They are
+   only animated in, not out: both are unmounted by React the moment they close.
+   Everything sits inside no-preference, so reduced motion shows them instantly. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes dialog-card-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes sheet-in {
+    from {
+      opacity: 0;
+      transform: translateY(32px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scrim-in {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  .dialog-card {
+    animation: dialog-card-in 200ms ease-out;
+  }
+
+  .dialog-backdrop::backdrop,
+  .companion-coach__backdrop {
+    animation: scrim-in 200ms ease-out;
+  }
+
+  .companion-coach__panel {
+    animation: sheet-in 200ms ease-out;
+  }
+}
+

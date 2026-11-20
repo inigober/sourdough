@@ -1,0 +1,167 @@
+/* ==========================================================================
+   Bake mode safety and kitchen readability (UX review problems 2, 3, 8).
+   Kept in one block at the end so it merges easily. It overrides a few
+   .companion__* rules above on purpose (same specificity, later wins).
+   ========================================================================== */
+
+/* Glanceable timer and step title */
+.companion__timer-value {
+  font-size: 3.5rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+}
+
+.companion__step-label {
+  font-size: 1.85rem;
+  line-height: 1.15;
+}
+
+/* Previous card: normal readable text, no dimming */
+.companion__previous {
+  opacity: 1;
+}
+
+.companion__previous strong {
+  color: var(--color-text);
+}
+
+.companion__previous-time {
+  color: var(--color-text-muted);
+}
+
+/* "About this bake" disclosure replaces the hero paragraph */
+.companion__about {
+  margin: 6px 0 0;
+}
+
+.companion__about summary {
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  color: var(--color-primary-text);
+  cursor: pointer;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.companion__about .hero-copy {
+  margin: 0 0 6px;
+}
+
+/* Web build: no alerts with the screen off */
+.companion__web-banner {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border-notice);
+  border-radius: 12px;
+  background: var(--color-surface-notice);
+  color: var(--color-text);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+/* Timing hints */
+.companion__starts-in {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.companion__next-up {
+  margin: 4px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border-soft);
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.companion__next-up strong {
+  color: var(--color-text);
+}
+
+.timeline-row__label-compact {
+  display: grid;
+  gap: 2px;
+}
+
+.timeline-row__starts-in {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Full schedule: tap a row to select it, then confirm with an explicit Jump button */
+.timeline-row--interactive[aria-expanded='true'] {
+  background: var(--color-row-active-bg);
+}
+
+.companion__row-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 0 10px;
+}
+
+/* Toast with an action (Undo), lifted above the sticky bake-mode footer */
+.toast--with-action {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.toast--above-footer {
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+}
+
+.toast__action {
+  min-height: 2.75rem;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary-text);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* Keep the larger timer inside the card on narrow phones (hh:mm:ss is 8 characters wide). */
+.companion__current {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.companion__timer-display {
+  flex-wrap: wrap;
+}
+
+.companion__timer-value {
+  font-size: clamp(2.5rem, 14vw, 3.5rem);
+}
+
+/* The base .toast shrinks to fit when centred with left: 50%; give action toasts a stable width. */
+.toast--with-action {
+  width: min(calc(100vw - 28px), 22rem);
+  justify-content: space-between;
+  border-radius: 20px;
+  text-align: left;
+}
+
+/* --- Home: primary create action (UX review 2.4). Filled button sits in the hero, above the fold. --- */
+.welcome-screen__create {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+}
+
+@media (min-width: 640px) {
+  .welcome-screen__create {
+    width: auto;
+    justify-self: start;
+    min-width: 220px;
+  }
+}
+

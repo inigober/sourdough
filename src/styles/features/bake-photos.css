@@ -1,0 +1,91 @@
+/* ==========================================================================
+   Loaf photos on bakes: picker in the bake-complete dialog, thumbnail in the
+   history list, photo on the history detail screen. One self-contained block
+   using colour tokens only, so the dark theme picks it up.
+   ========================================================================== */
+
+.bake-photo-picker {
+  display: grid;
+  gap: 10px;
+}
+
+.bake-photo-picker__preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bake-photo-picker__image {
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+/* The file input is visually hidden but focusable; the button-styled label shows the focus ring. */
+.bake-photo-picker__choose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  text-align: center;
+}
+
+.bake-photo-picker__choose:focus-within {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.bake-photo-button {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.bake-photo-button:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.bake-photo-button__image {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.bake-photo-large {
+  display: block;
+  width: 100%;
+  max-height: 70dvh;
+  border-radius: 12px;
+  object-fit: contain;
+}
+
+/* --- Coach: sign-in prompt shown to signed-out bakers (the coach server only answers signed-in users). --- */
+.companion-coach__sign-in {
+  display: grid;
+  gap: 12px;
+  margin: 0 16px 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface-muted);
+}
+
+.companion-coach__sign-in p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
