@@ -45,11 +45,6 @@
     padding: var(--space-4);
   }
 
-  .card {
-    padding: var(--space-5) var(--space-4);
-    border-radius: var(--radius-xl);
-  }
-
   .section-heading {
     margin-bottom: var(--space-5);
   }
@@ -57,12 +52,6 @@
   .hero-copy {
     font-size: var(--text-md);
     line-height: 1.5;
-  }
-
-  .summary-group.card {
-    padding: var(--space-4);
-    border-radius: var(--radius-lg);
-    box-shadow: none;
   }
 
   .welcome-screen {
