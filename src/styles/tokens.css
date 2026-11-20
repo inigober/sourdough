@@ -95,9 +95,10 @@
   --touch-target-min: 44px;
   --app-shell-pad-top: 24px;
   --app-shell-pad-inline: 20px;
-  --app-chrome-bg: rgb(var(--color-bg-rgb) / 92%);
-  --app-chrome-blur: blur(10px);
-  --app-chrome-header-bg: linear-gradient(var(--app-chrome-bg) 68%, rgb(var(--color-bg-rgb) / 0));
+  --app-chrome-bg: var(--color-bg); /* solid: text scrolling underneath must not show through the bar */
+  /* No blur: a uniform blur over a bar whose colour fades out leaves a hard edge where the blur stops. */
+  --app-chrome-blur: none;
+  --app-chrome-header-bg: linear-gradient(var(--app-chrome-bg) 82%, rgb(var(--color-bg-rgb) / 0));
   --app-chrome-footer-bg: linear-gradient(rgb(var(--color-bg-rgb) / 0), var(--color-bg) 28%);
 
   color: var(--color-text);

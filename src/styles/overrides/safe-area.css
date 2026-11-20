@@ -11,7 +11,7 @@
     var(--color-bg) 0,
     var(--color-bg) env(safe-area-inset-top, 0px),
     var(--app-chrome-bg) calc(env(safe-area-inset-top, 0px) + 1px),
-    var(--app-chrome-bg) 68%,
+    var(--app-chrome-bg) 82%,
     rgb(var(--color-bg-rgb) / 0)
   );
 }
