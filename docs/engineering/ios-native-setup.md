@@ -51,6 +51,7 @@ npm run cap:open:ios
 
 - iPhone is portrait only (`UISupportedInterfaceOrientations` in `Info.plist`); iPad keeps all four. The layout has no left or right safe-area insets, so landscape on iPhone would put content under the Dynamic Island.
 - `AppViewController.swift` paints the view and the web view in the page colour (light `#f8f1e8`, dark `#1a1511`, the same as `--color-bg` in `src/styles/tokens.css`) so there is no white frame before the page's first paint. Change both places together.
+- The launch screen is the `Splash` image (`LaunchScreen.storyboard` shows it full screen). `npm run sync:ios-assets` (part of `build:ios`) regenerates it with `@capacitor/assets` from `assets/splash.png` (loaf on `#f8f1e8`) and `assets/splash-dark.png` (loaf on `#1a1511`), so the launch colour matches the page in both appearances. Both are the loaf of `public/icon.svg` without its rounded square, drawn at 2732 x 2732 with the loaf about 700 px wide. Before this, the dark splash was the tool's default near-black `#111` with the cream icon square showing. Do not edit the PNGs in `ios/App/App/Assets.xcassets/Splash.imageset/` by hand: the next `build:ios` overwrites them. Needs a cold launch on a device to confirm, in light and in dark.
 
 ## Deep link
 

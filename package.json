@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "sync:ios-assets": "mkdir -p assets && cp public/icon-512.png assets/logo.png && npx @capacitor/assets generate --ios --iconBackgroundColor '#f8f1e8' --splashBackgroundColor '#f8f1e8'",
+    "sync:ios-assets": "mkdir -p assets && cp public/icon-512.png assets/logo.png && npx @capacitor/assets generate --ios --iconBackgroundColor '#f8f1e8' --splashBackgroundColor '#f8f1e8' --splashBackgroundColorDark '#1a1511'",
     "build:ios": "node scripts/assertNoBakeTimerTestEnv.mjs && npm run build && npm run sync:ios-assets && npx cap sync ios",
     "build:ios:test": "ALLOW_BAKE_TIMER_TEST=1 npm run build:ios",
     "cap:open:ios": "npx cap open ios",
