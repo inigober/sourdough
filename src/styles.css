@@ -736,6 +736,8 @@ p {
 
 .main-screen {
   display: grid;
+  /* minmax(0, …): without it a long nowrap title makes the single column wider than the phone. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 0;
 }
 
