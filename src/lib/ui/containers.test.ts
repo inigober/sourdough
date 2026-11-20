@@ -34,3 +34,23 @@ test('Field error and warning states bring their own box, since the base field h
     assert.match(rule, /border-radius:\s*var\(--radius-md\)/, `${state} needs a radius`);
   }
 });
+
+test('Sheet: dialogs sit at the bottom with rounded top corners, a grabber and a safe-area bottom', () => {
+  const [backdrop] = rulesFor('.dialog-backdrop');
+  assert.match(backdrop, /place-items:\s*end center/);
+  assert.equal(rulesFor('.dialog-backdrop').length, 1, 'no per-breakpoint copy of the backdrop rule');
+
+  const [card] = rulesFor('.dialog-card');
+  assert.match(card, /border-radius:\s*var\(--radius-xl\) var\(--radius-xl\) 0 0/);
+  assert.match(card, /max-height:\s*90dvh/);
+  assert.match(card, /safe-area-inset-bottom/);
+
+  // One shared grabber rule for the dialogs and the coach sheet.
+  assert.match(css, /\.dialog-card::before,\s*\.companion-coach__header::before\s*\{[^}]*content:\s*''/);
+});
+
+test('Sheet: dialogs and the coach slide up from the bottom edge', () => {
+  assert.match(css, /@keyframes sheet-in\s*\{\s*from\s*\{[^}]*translateY\(100%\)/);
+  assert.match(css, /\.dialog-card\s*\{\s*animation:\s*sheet-in/);
+  assert.doesNotMatch(css, /@keyframes dialog-card-in/);
+});

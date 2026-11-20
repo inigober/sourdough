@@ -64,30 +64,16 @@ label.button,
   background: var(--color-row-active-bg);
 }
 
-/* Dialogs and the coach sheet: a short fade plus a slight slide (200ms) when they open. They are
+/* Dialogs and the coach sheet: slide up from the bottom edge (250ms) when they open. They are
    only animated in, not out: both are unmounted by React the moment they close.
    Everything sits inside no-preference, so reduced motion shows them instantly. */
 @media (prefers-reduced-motion: no-preference) {
-  @keyframes dialog-card-in {
-    from {
-      opacity: 0;
-      transform: translateY(12px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
   @keyframes sheet-in {
     from {
-      opacity: 0;
-      transform: translateY(32px);
+      transform: translateY(100%);
     }
 
     to {
-      opacity: 1;
       transform: translateY(0);
     }
   }
@@ -103,7 +89,7 @@ label.button,
   }
 
   .dialog-card {
-    animation: dialog-card-in 200ms ease-out;
+    animation: sheet-in 250ms ease-out;
   }
 
   .dialog-backdrop::backdrop,
@@ -112,7 +98,7 @@ label.button,
   }
 
   .companion-coach__panel {
-    animation: sheet-in 200ms ease-out;
+    animation: sheet-in 250ms ease-out;
   }
 }
 

@@ -41,10 +41,6 @@
     grid-template-columns: 1fr;
   }
 
-  .dialog-backdrop {
-    padding: var(--space-4);
-  }
-
   .section-heading {
     margin-bottom: var(--space-5);
   }
