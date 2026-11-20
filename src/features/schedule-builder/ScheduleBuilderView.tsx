@@ -58,6 +58,8 @@ export function ScheduleBuilderView({
     pendingPreset,
     selectPlanOption,
     editSchedule,
+    isStepEditable,
+    editStep,
     confirmPendingPreset,
     cancelPendingPreset,
     autolyseAdvice,
@@ -488,7 +490,12 @@ export function ScheduleBuilderView({
         </section>
       ) : null}
 
-      <BakePlanTimeline steps={timeline} caption={`Times follow your start time. ${mixAndBakeSentence}`} />
+      <BakePlanTimeline
+        steps={timeline}
+        caption={`Times follow your start time. ${mixAndBakeSentence}`}
+        isStepEditable={isStepEditable}
+        onEditStep={editStep}
+      />
 
       <div className="schedule-export">
         <button

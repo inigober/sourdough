@@ -396,7 +396,7 @@ export function CompanionView({
       </section>
 
       {previousStep ? (
-        <section className="card companion__previous" aria-label="Previous step">
+        <section className="companion__previous" aria-label="Previous step">
           <span className="companion__section-label">Previous</span>
           <strong>{previousStep.label}</strong>
           <span className="companion__previous-time">

@@ -1,7 +1,7 @@
-import { formatRecipeBakeStats, type RecipeBakeStats } from '../../lib/history/recipeBakeStats.ts';
+import type { RecipeBakeStats } from '../../lib/history/recipeBakeStats.ts';
 import { pickMostRecentRecipes } from '../../lib/storage/savedRecipeList.ts';
 import type { SavedRecipeSummary } from '../../lib/storage/types.ts';
-import { formatSavedDate } from './formatSavedDate.ts';
+import { buildSavedRecipeMetaLine } from './savedRecipeMetaLine.ts';
 
 type SavedRecipesShortcutProps = {
   savedRecipes: SavedRecipeSummary[];
@@ -56,7 +56,7 @@ export function SavedRecipesShortcut({
               <li key={recipe.id} className="saved-shortcut-row">
                 <button type="button" className="saved-shortcut-row__open" onClick={() => onOpenRecipe(recipe.id)}>
                   <strong>{recipe.name}</strong>
-                  <span className="saved-shortcut-row__meta">{buildMetaLine(recipe, stats)}</span>
+                  <span className="saved-shortcut-row__meta">{buildSavedRecipeMetaLine(recipe, stats)}</span>
                 </button>
                 {recipe.hasSchedule ? (
                   <button
@@ -75,13 +75,4 @@ export function SavedRecipesShortcut({
       ) : null}
     </section>
   );
-}
-
-/**
- * One short line under the name. The schedule label is dropped when there is a schedule (it is the
- * same on almost every recipe and would push the useful part off the end); a recipe without one says so.
- */
-function buildMetaLine(recipe: SavedRecipeSummary, stats: RecipeBakeStats | undefined): string {
-  const detail = stats ? formatRecipeBakeStats(stats) : `Updated ${formatSavedDate(recipe.updatedAt)}`;
-  return recipe.hasSchedule ? detail : `${recipe.scheduleLabel} · ${detail}`;
 }

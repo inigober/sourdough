@@ -1,6 +1,6 @@
-import { formatRecipeBakeStats, type RecipeBakeStats } from '../../lib/history/recipeBakeStats.ts';
+import type { RecipeBakeStats } from '../../lib/history/recipeBakeStats.ts';
 import type { SavedRecipeSummary } from '../../lib/storage/types.ts';
-import { formatSavedDate } from './formatSavedDate.ts';
+import { buildSavedRecipeMetaLine } from './savedRecipeMetaLine.ts';
 
 type SavedRecipeCardProps = {
   recipe: SavedRecipeSummary;
@@ -10,46 +10,36 @@ type SavedRecipeCardProps = {
   onDuplicate: (id: string) => void;
 };
 
-/** One saved recipe on the Saved tab. Delete lives on the recipe view, not here. */
+/**
+ * One saved recipe on the Saved tab, drawn as a flat row (hairline between rows, no box per row).
+ * Delete lives on the recipe view, not here.
+ */
 export function SavedRecipeCard({ recipe, bakeStats, onOpen, onStartBake, onDuplicate }: SavedRecipeCardProps) {
   return (
-    <li className="saved-recipe-card">
-      <button type="button" className="saved-recipe-card__open" onClick={() => onOpen(recipe.id)}>
-        <strong>{recipe.name}</strong>
-        <span className="saved-recipe-card__meta">
-          {recipe.scheduleLabel}
-          <span className="saved-recipe-card__meta-sep" aria-hidden="true">
-            ·
-          </span>
-          Updated {formatSavedDate(recipe.updatedAt)}
-        </span>
-        {bakeStats ? (
-          <span className="saved-recipe-card__meta saved-recipe-card__bake-stats">
-            {formatRecipeBakeStats(bakeStats)}
-          </span>
-        ) : null}
+    <li className="saved-recipe-row">
+      <button type="button" className="saved-recipe-row__open" onClick={() => onOpen(recipe.id)}>
+        <strong className="saved-recipe-row__name">{recipe.name}</strong>
+        <span className="saved-recipe-row__meta">{buildSavedRecipeMetaLine(recipe, bakeStats)}</span>
       </button>
-      <div className="saved-recipe-card__actions">
-        <div className="saved-recipe-card__buttons">
-          {recipe.hasSchedule ? (
-            <button
-              type="button"
-              className="button button--primary saved-recipe-card__bake"
-              aria-label={`Start baking ${recipe.name}`}
-              onClick={() => onStartBake(recipe.id)}
-            >
-              Start baking
-            </button>
-          ) : null}
+      <div className="saved-recipe-row__actions">
+        {recipe.hasSchedule ? (
           <button
             type="button"
-            className="button button--secondary saved-recipe-card__duplicate"
-            aria-label={`Duplicate ${recipe.name}`}
-            onClick={() => onDuplicate(recipe.id)}
+            className="button button--primary saved-recipe-row__bake"
+            aria-label={`Start baking ${recipe.name}`}
+            onClick={() => onStartBake(recipe.id)}
           >
-            Duplicate
+            Start baking
           </button>
-        </div>
+        ) : null}
+        <button
+          type="button"
+          className="button button--secondary saved-recipe-row__duplicate"
+          aria-label={`Duplicate ${recipe.name}`}
+          onClick={() => onDuplicate(recipe.id)}
+        >
+          Duplicate
+        </button>
       </div>
     </li>
   );

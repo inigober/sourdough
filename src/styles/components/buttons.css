@@ -129,9 +129,17 @@
 
 @media (hover: hover) {
   .button--secondary:hover:not(:disabled),
+  .button--danger:hover:not(:disabled),
   .button--primary:hover:not(:disabled) {
     filter: brightness(0.97);
   }
+}
+
+/* Destructive confirm (delete, discard): danger colours, still an outlined pill so Cancel stays the calm option. */
+.button--danger {
+  border-color: var(--color-danger-border-strong);
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
 }
 
 .button:focus-visible {

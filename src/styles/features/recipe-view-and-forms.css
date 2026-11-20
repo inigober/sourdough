@@ -233,9 +233,3 @@
   opacity: 0.35;
 }
 
-.saved-recipe-card__bake {
-  padding: var(--space-3) var(--space-4);
-  font-size: var(--text-sm);
-  white-space: nowrap;
-}
-

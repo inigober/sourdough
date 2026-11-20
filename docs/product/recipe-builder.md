@@ -46,6 +46,7 @@ The welcome (Home) screen is not part of the step count. The progress bar shows 
 3. **Hydration & salt**
    - Hydration (% of total flour)
    - Salt (% of total flour)
+   - The step title is a question ("How wet should the dough be?"); a labelled "Your targets" line below the inputs shows the derived "80% hydration · 2% salt"
 4. **Fermentation & levain**
    - Target bulk fermentation time
    - Room temperature
@@ -53,7 +54,7 @@ The welcome (Home) screen is not part of the step count. The progress bar shows 
    - Levain type, and custom levain hydration when the type is "Custom hydration"
    - Levain flour (flour used in the levain itself)
 5. **Summary** (`/build/summary`)
-   - Four tappable cards (Dough size, Flour blend, Hydration & salt, Fermentation & levain) jump back to the matching step. After editing, the wizard offers a Save action that returns straight to the summary.
+   - Four tappable rows in one card (icon, small-caps label, value, pen) (Dough size, Flour blend, Hydration & salt, Fermentation & levain) jump back to the matching step. After editing, the wizard offers a Save action that returns straight to the summary.
    - Ingredient list, formula breakdown, and the assessment, all recalculated from the inputs.
    - Actions: **Save recipe** and **Build schedule**.
 

@@ -21,6 +21,13 @@ import {
   type SchedulePlanOptionId,
   type SchedulePresetId,
 } from '../../lib/schedule/presets.ts';
+import {
+  applyStepEdit,
+  isDisplayStepEditable,
+  withFoldOverridesCleared,
+  type StepChange,
+  type StepEditResult,
+} from '../../lib/schedule/stepEditPanel.ts';
 import { getColdRetardHours, roundColdRetardHoursUp } from '../../lib/schedule/scheduleTiming.ts';
 import {
   formatBakeDayLabel,
@@ -29,7 +36,7 @@ import {
   withBakeDayLabels,
 } from '../../lib/schedule/relativeDays.ts';
 import type { RecipeInput } from '../../lib/recipe/types.ts';
-import type { ScheduleInput } from '../../lib/schedule/types.ts';
+import type { ScheduleInput, TimelineStep } from '../../lib/schedule/types.ts';
 import {
   describeStarterPrepPlan,
   formatLevainBuildAmounts,
@@ -65,13 +72,18 @@ export function useScheduleBuilder({
     () => getProofingStyleAdvice(recipeInput, scheduleInput.proofingStyle),
     [recipeInput, scheduleInput.proofingStyle],
   );
-  const timeline = useMemo(() => {
+  // The raw timeline is what step edits work on; the display timeline merges "mix" markers with their rest.
+  const rawTimeline = useMemo(() => {
     try {
-      return withBakeDayLabels(formatTimelineForDisplay(buildTimeline(scheduleInput, recipeInput)));
+      return buildTimeline(scheduleInput, recipeInput);
     } catch {
       return [];
     }
   }, [scheduleInput, recipeInput]);
+  const timeline = useMemo(
+    () => withBakeDayLabels(formatTimelineForDisplay(rawTimeline)),
+    [rawTimeline],
+  );
   const totalBakeMinutes = getTotalBakeMinutes(scheduleInput);
   const coldRetardHours = useMemo(
     () => getColdRetardHours(scheduleInput, recipeInput),
@@ -189,15 +201,36 @@ export function useScheduleBuilder({
   const editSchedule = useCallback(
     (patch: Partial<ScheduleInput>): void => {
       setCustomChosen(true);
-      onScheduleChange(patch);
+      // Changing the fold layout makes any per-fold override stale, so it is dropped here.
+      onScheduleChange(withFoldOverridesCleared(patch));
     },
     [onScheduleChange],
+  );
+
+  /** True for the rows of the timeline the baker can tap to edit (markers, Shape, cold retard are not). */
+  const isStepEditable = useCallback(
+    (step: TimelineStep): boolean => isDisplayStepEditable(rawTimeline, step.id),
+    [rawTimeline],
+  );
+
+  /** A tapped step's start or duration changed. Refused edits leave the schedule alone. */
+  const editStep = useCallback(
+    (displayStepId: string, change: StepChange): StepEditResult => {
+      const result = applyStepEdit(scheduleInput, recipeInput, rawTimeline, displayStepId, change);
+      if (result.ok) {
+        setCustomChosen(true);
+        onScheduleChange(result.schedule);
+      }
+      return result;
+    },
+    [onScheduleChange, rawTimeline, recipeInput, scheduleInput],
   );
 
   const applyPreset = useCallback(
     (presetId: SchedulePresetId): void => {
       setCustomChosen(false);
-      onScheduleChange(getSchedulePresetPatch(presetId, recipeInput));
+      // A preset starts from its own folds, so earlier per-fold edits go.
+      onScheduleChange({ ...getSchedulePresetPatch(presetId, recipeInput), foldRestMinutesByStep: undefined });
     },
     [onScheduleChange, recipeInput],
   );
@@ -255,6 +288,8 @@ export function useScheduleBuilder({
     pendingPreset,
     selectPlanOption,
     editSchedule,
+    isStepEditable,
+    editStep,
     confirmPendingPreset,
     cancelPendingPreset,
     autolyseAdvice,

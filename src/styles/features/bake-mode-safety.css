@@ -16,13 +16,9 @@
   line-height: 1.15;
 }
 
-/* Previous card: normal readable text, no dimming */
-.companion__previous {
-  opacity: 1;
-}
-
+/* Previous step: normal readable text, no dimming */
 .companion__previous strong {
-  color: var(--color-text);
+  color: var(--color-text-muted);
 }
 
 .companion__previous-time {
@@ -31,7 +27,7 @@
 
 /* "About this bake" disclosure replaces the hero paragraph */
 .companion__about {
-  margin: var(--space-2) 0 0;
+  margin: 0;
 }
 
 .companion__about summary {

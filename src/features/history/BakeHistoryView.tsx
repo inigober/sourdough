@@ -150,17 +150,17 @@ export function BakeHistoryView({
         ) : null}
 
         {filteredEntries.length > 0 ? (
-          <ul className="saved-recipes__list">
+          <ul className="bake-history__list">
             {filteredEntries.map((entry) => {
               const assessmentLabel = getLoafAssessmentLabel(entry.overallAssessment);
               const photoUrl = photoUrls.get(entry.id);
               const summaryLine = buildBakeSummaryLine(entry.recipeFacts);
 
               return (
-                <li key={entry.id} className="saved-recipe-card">
+                <li key={entry.id} className="bake-history__row">
                   <button
                     type="button"
-                    className="saved-recipe-card__open bake-history__entry-open"
+                    className="bake-history__entry-open"
                     onClick={() => onOpenEntry(entry.id)}
                   >
                     <span className="bake-history__thumb" aria-hidden="true">
@@ -177,8 +177,8 @@ export function BakeHistoryView({
                       )}
                     </span>
                     <span className="bake-history__entry-text">
-                      <strong>{entry.recipeName}</strong>
-                      <span className="saved-recipe-card__meta">
+                      <strong className="bake-history__name">{entry.recipeName}</strong>
+                      <span className="bake-history__meta">
                         Baked {formatHistoryDate(entry.completedAt)}
                         {assessmentLabel ? (
                           <span className="bake-history__assessment-badge">

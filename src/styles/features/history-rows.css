@@ -4,32 +4,77 @@
    assessment, then one muted recipe line (hydration, loaf size, flour).
    Colour tokens only, so the dark theme picks it up. Rows stay at least 44px tall.
    ========================================================================== */
+/* The list sits inside the one card; rows are separated by a hairline, not boxed. */
+.bake-history__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bake-history__row + .bake-history__row {
+  border-top: 1px solid var(--color-border-soft);
+}
+
 .bake-history__entry-open {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  min-height: 64px;
+  gap: var(--space-4);
   width: 100%;
+  min-height: var(--touch-target-min);
+  padding: var(--space-3) 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.bake-history__entry-open:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
 
 .bake-history__entry-text {
   display: grid;
+  flex: 1;
   gap: var(--space-1);
   min-width: 0;
 }
 
+/* The loaf photo is the hero of the row: a larger rounded square, a calm placeholder without a photo. */
 .bake-history__thumb {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 64px;
-  height: 64px;
+  width: 5rem;
+  aspect-ratio: 1;
   flex-shrink: 0;
   overflow: hidden;
   border: 1px solid var(--color-border-soft);
   border-radius: var(--radius-md);
   background: var(--color-surface-muted);
   color: var(--color-text-subtle);
+}
+
+/* A long name wraps to two lines and never pushes the row wider than the screen. */
+.bake-history__name {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+@media (hover: hover) {
+  .bake-history__entry-open:hover .bake-history__name {
+    color: var(--color-primary-text);
+  }
 }
 
 .bake-history__thumb-image {
@@ -69,6 +114,24 @@
   box-shadow: none;
 }
 
+/* A bake with a photo: the loaf is the hero at the top, full width, with no card around it. */
+.bake-history-detail__photo.bake-history-detail__photo--hero {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.bake-history-detail__photo--hero .bake-photo-button,
+.bake-history-detail__photo--hero .bake-photo-button__image {
+  border-radius: var(--radius-lg);
+}
+
+.bake-history-detail__photo--hero .bake-photo-button__image {
+  aspect-ratio: 4 / 3;
+  max-height: none;
+}
+
 .bake-photo-picker--compact {
   display: grid;
   gap: var(--space-2);
@@ -92,6 +155,9 @@
   justify-content: center;
   gap: var(--space-2);
   min-height: 44px;
+  /* Replace and Remove share one row instead of two full-width buttons. */
+  flex: 1 1 0;
+  width: auto;
 }
 
 .bake-history-detail__photo-message {

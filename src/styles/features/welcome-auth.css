@@ -111,33 +111,14 @@
 
 .auth-modal__close {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  padding: 0;
-  border: 0;
-  border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  font-size: var(--title-2);
-  line-height: 1;
-}
-
-@media (hover: hover) {
-  .auth-modal__close:hover {
-    background: var(--color-surface-muted);
-  }
+  top: var(--space-4);
+  right: var(--space-4);
 }
 
 .auth-modal__intro {
   display: grid;
   gap: var(--space-2);
-  padding-right: 2rem;
+  padding-right: 3rem; /* clear of the close button */
 }
 
 .auth-modal__back {

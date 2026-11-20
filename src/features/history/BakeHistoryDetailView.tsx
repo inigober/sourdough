@@ -150,6 +150,93 @@ export function BakeHistoryDetailView({
     setIsEditing(true);
   }
 
+  const photoSection = (
+    <section
+      className={`card bake-history-detail__photo${
+        isPhotoEmpty ? ' bake-history-detail__photo--empty' : ''
+      }${photoUrl ? ' bake-history-detail__photo--hero' : ''}`}
+      aria-label="Loaf photo"
+    >
+      <h2 className={`bake-history-detail__section-title${isPhotoEmpty || photoUrl ? ' visually-hidden' : ''}`}>
+        Loaf photo
+      </h2>
+      {photoUrl ? (
+        <button
+          type="button"
+          className="bake-photo-button"
+          aria-label="View loaf photo larger"
+          onClick={() => setIsPhotoOpen(true)}
+        >
+          <img src={photoUrl} alt={`Your ${session.recipeName} loaf`} className="bake-photo-button__image" />
+        </button>
+      ) : null}
+
+      {!photoUrl || isChoosingPhoto ? (
+        <>
+          <BakePhotoPicker
+            key={photoPickerKey}
+            label={photoUrl ? 'New photo' : 'Add a photo of this loaf'}
+            compact={isPhotoEmpty}
+            onChange={setChosenPhoto}
+            onBusyChange={setIsPreparingPhoto}
+            disabled={isSavingPhoto}
+          />
+          {chosenPhoto || photoUrl ? (
+            <div className="bake-history-detail__photo-actions">
+              {chosenPhoto ? (
+                <button
+                  type="button"
+                  className="button button--primary"
+                  onClick={() => void handleSavePhoto()}
+                  disabled={isSavingPhoto || isPreparingPhoto}
+                >
+                  {isSavingPhoto ? 'Saving photo…' : 'Save photo'}
+                </button>
+              ) : null}
+              {photoUrl ? (
+                <button
+                  type="button"
+                  className="button button--secondary"
+                  onClick={closePhotoPicker}
+                  disabled={isSavingPhoto}
+                >
+                  Cancel
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+        </>
+      ) : (
+        <div className="bake-history-detail__photo-actions">
+          <button
+            type="button"
+            className="button button--secondary bake-history-detail__photo-action"
+            onClick={() => setIsChoosingPhoto(true)}
+            disabled={isSavingPhoto}
+          >
+            <CameraIcon />
+            <span>Replace photo</span>
+          </button>
+          <button
+            type="button"
+            className="button button--secondary bake-history-detail__photo-action"
+            onClick={() => setIsRemovePhotoDialogOpen(true)}
+            disabled={isSavingPhoto}
+          >
+            <BinIcon />
+            <span>Remove photo</span>
+          </button>
+        </div>
+      )}
+
+      {photoMessage ? (
+        <p className="bake-history-detail__photo-message" role="status">
+          {photoMessage}
+        </p>
+      ) : null}
+    </section>
+  );
+
   return (
     <PageShell
       className="bake-history-detail"
@@ -161,6 +248,8 @@ export function BakeHistoryDetailView({
         />
       }
     >
+      {photoUrl ? photoSection : null}
+
       <section className="hero bake-history-detail__hero">
         <div className="bake-history-detail__hero-row">
           <div>
@@ -185,88 +274,7 @@ export function BakeHistoryDetailView({
         </button>
       </section>
 
-      <section
-        className={`card bake-history-detail__photo${isPhotoEmpty ? ' bake-history-detail__photo--empty' : ''}`}
-        aria-label="Loaf photo"
-      >
-        <h2 className={`bake-history-detail__section-title${isPhotoEmpty ? ' visually-hidden' : ''}`}>
-          Loaf photo
-        </h2>
-        {photoUrl ? (
-          <button
-            type="button"
-            className="bake-photo-button"
-            aria-label="View loaf photo larger"
-            onClick={() => setIsPhotoOpen(true)}
-          >
-            <img src={photoUrl} alt={`Your ${session.recipeName} loaf`} className="bake-photo-button__image" />
-          </button>
-        ) : null}
-
-        {!photoUrl || isChoosingPhoto ? (
-          <>
-            <BakePhotoPicker
-              key={photoPickerKey}
-              label={photoUrl ? 'New photo' : 'Add a photo of this loaf'}
-              compact={isPhotoEmpty}
-              onChange={setChosenPhoto}
-              onBusyChange={setIsPreparingPhoto}
-              disabled={isSavingPhoto}
-            />
-            {chosenPhoto || photoUrl ? (
-              <div className="bake-history-detail__photo-actions">
-                {chosenPhoto ? (
-                  <button
-                    type="button"
-                    className="button button--primary"
-                    onClick={() => void handleSavePhoto()}
-                    disabled={isSavingPhoto || isPreparingPhoto}
-                  >
-                    {isSavingPhoto ? 'Saving photo…' : 'Save photo'}
-                  </button>
-                ) : null}
-                {photoUrl ? (
-                  <button
-                    type="button"
-                    className="button button--secondary"
-                    onClick={closePhotoPicker}
-                    disabled={isSavingPhoto}
-                  >
-                    Cancel
-                  </button>
-                ) : null}
-              </div>
-            ) : null}
-          </>
-        ) : (
-          <div className="bake-history-detail__photo-actions">
-            <button
-              type="button"
-              className="button button--secondary bake-history-detail__photo-action"
-              onClick={() => setIsChoosingPhoto(true)}
-              disabled={isSavingPhoto}
-            >
-              <CameraIcon />
-              <span>Replace photo</span>
-            </button>
-            <button
-              type="button"
-              className="button button--secondary bake-history-detail__photo-action"
-              onClick={() => setIsRemovePhotoDialogOpen(true)}
-              disabled={isSavingPhoto}
-            >
-              <BinIcon />
-              <span>Remove photo</span>
-            </button>
-          </div>
-        )}
-
-        {photoMessage ? (
-          <p className="bake-history-detail__photo-message" role="status">
-            {photoMessage}
-          </p>
-        ) : null}
-      </section>
+      {photoUrl ? null : photoSection}
 
       <section className="card bake-history-detail__note" aria-label="Bake notes">
         <h2 className="bake-history-detail__section-title">Notes & assessment</h2>
@@ -421,6 +429,7 @@ export function BakeHistoryDetailView({
           title="Remove this photo?"
           message="The photo of this loaf will be deleted. The rest of the bake stays in your history."
           confirmLabel="Remove photo"
+          destructive
           onCancel={() => setIsRemovePhotoDialogOpen(false)}
           onConfirm={() => {
             setIsRemovePhotoDialogOpen(false);
@@ -438,6 +447,7 @@ export function BakeHistoryDetailView({
               : 'This bake and its step timings will be removed from your history.'
           }
           confirmLabel="Delete bake"
+          destructive
           onCancel={() => setIsDeleteDialogOpen(false)}
           onConfirm={() => {
             setIsDeleteDialogOpen(false);

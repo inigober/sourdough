@@ -7,7 +7,7 @@
 .summary-group__body,
 .page-shell__secondary-link,
 .bake-history__backup-nudge-link,
-.saved-recipe-card__open {
+.saved-recipe-row__open {
   position: relative;
 }
 
@@ -15,7 +15,7 @@
 .summary-group__body::after,
 .page-shell__secondary-link::after,
 .bake-history__backup-nudge-link::after,
-.saved-recipe-card__open::after {
+.saved-recipe-row__open::after {
   content: '';
   position: absolute;
   top: 50%;

@@ -108,6 +108,19 @@ div.dialog-backdrop {
   background: var(--color-surface);
 }
 
+/* Actions stay reachable when the sheet content is taller than the screen: the footer sticks to the bottom
+   edge of the scrolling sheet. The negative margin and matching padding cancel the sheet's own bottom padding
+   (which clears the home indicator) so the sticky area still covers that strip. */
+.dialog-card__footer {
+  position: sticky;
+  /* Sticky offsets are measured from the padding edge of the scrolling sheet, so the same negative value
+     is needed here, or the footer rides up over the last field when the content is short. */
+  bottom: calc((var(--space-5) + env(safe-area-inset-bottom, 0px)) * -1);
+  margin-bottom: calc((var(--space-5) + env(safe-area-inset-bottom, 0px)) * -1);
+  padding: var(--space-3) 0 calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
+  background: var(--color-surface);
+}
+
 .dialog-card__actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

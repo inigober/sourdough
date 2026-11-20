@@ -102,6 +102,7 @@ export function BakeCompleteDialog({
           title="Don't save this bake?"
           message="This bake and its step timings will be deleted. This cannot be undone."
           confirmLabel="Delete bake"
+          destructive
           onCancel={() => setIsDiscardConfirmOpen(false)}
           onConfirm={() => {
             setIsDiscardConfirmOpen(false);

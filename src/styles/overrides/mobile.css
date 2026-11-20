@@ -1,9 +1,4 @@
 @media (max-width: 640px) {
-  .timeline-row__layout {
-    --timeline-time-width: 6.7rem;
-    gap: var(--space-1) var(--space-2);
-  }
-
   .timeline-row--interactive {
     --timeline-time-width: 6.7rem;
     gap: var(--space-1) var(--space-2);
@@ -99,40 +94,6 @@
   .screen-chrome__title {
     font-size: var(--title-2);
     line-height: 1.15;
-  }
-
-  .saved-recipe-card {
-    grid-template-columns: 1fr;
-    gap: var(--space-4);
-    padding: var(--space-4);
-  }
-
-  .saved-recipe-card__actions {
-    justify-items: stretch;
-    width: 100%;
-  }
-
-  .saved-recipe-card__buttons {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: var(--space-3);
-    width: 100%;
-  }
-
-  .saved-recipe-card__bake {
-    grid-column: 1 / -1;
-    width: 100%;
-    padding: var(--space-3) var(--space-5);
-    font-size: var(--text-md);
-    white-space: normal;
-  }
-
-  .saved-recipe-card__duplicate {
-    grid-column: 1;
-    width: 100%;
-    padding: var(--space-3) var(--space-5);
-    font-size: var(--text-md);
-    white-space: normal;
   }
 
   .welcome-draft__resume,

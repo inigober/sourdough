@@ -41,10 +41,8 @@
 .companion-amounts__panel {
   display: grid;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-border-soft);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-muted);
+  padding: var(--space-3) 0 0;
+  border-top: 1px solid var(--color-border-soft);
 }
 
 .companion-amounts__list {
@@ -90,12 +88,12 @@
  * margin cancels the padding, so the text still lines up with the card title.
  */
 .companion__overview-list {
-  margin-inline: -12px;
+  margin-inline: calc(var(--space-4) * -1);
 }
 
 .companion__overview-list .timeline-row--interactive {
-  padding: var(--space-3) var(--space-3);
-  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 0;
 }
 
 .companion__overview-list .timeline-row--current.timeline-row--interactive {
@@ -115,7 +113,7 @@
 
 /* The Jump button sits under its row, indented to the same inner edge as the row text. */
 .companion__overview-list .companion__row-actions {
-  padding: var(--space-2) var(--space-3) var(--space-3);
+  padding: var(--space-2) var(--space-4) var(--space-3);
 }
 /* --- end bake mode amounts and Full schedule --- */
 

@@ -60,9 +60,12 @@
   font-size: var(--title-1);
   line-height: 1.08;
   letter-spacing: -0.035em;
-  white-space: nowrap;
+  /* A long recipe name wraps to two lines (then is cut) instead of one line with an ellipsis. */
+  display: -webkit-box;
   overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .screen-chrome__slot {

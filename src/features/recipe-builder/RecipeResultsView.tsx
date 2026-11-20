@@ -3,7 +3,6 @@ import type { ReactNode } from 'react';
 import { PageShell } from '../../components/PageShell.tsx';
 import { StickyFooter } from '../../components/StickyFooter.tsx';
 import { SaveIcon } from '../../components/icons.tsx';
-import { InfoToggle } from '../../components/InfoToggle.tsx';
 import {
   ClockIcon,
   PenIcon,
@@ -98,31 +97,27 @@ export function RecipeResultsView({
         </p>
       </section>
 
-      <section className="summary-groups" aria-label="Recipe inputs summary">
+      <section className="summary-groups card" aria-label="Recipe inputs summary">
         <SummaryGroup
           icon={<ScaleIcon />}
-          tone="size"
           title="Dough size"
           value={`${recipeInput.finalDoughWeightGrams}g · ${recipeInput.numberOfLoaves} loaf${recipeInput.numberOfLoaves === 1 ? '' : 'es'}`}
           onEdit={() => onEditStep('doughSize')}
         />
         <SummaryGroup
           icon={<WheatIcon />}
-          tone="flour"
           title="Flour blend"
           onEdit={() => onEditStep('flour')}
           stackedLines={getFlourSummaryLines(recipeInput.doughFlours, formula?.totalFlourGrams ?? null)}
         />
         <SummaryGroup
           icon={<WaterIcon />}
-          tone="water"
           title="Hydration & salt"
           value={`${recipeInput.hydrationPercent}% hydration · ${recipeInput.saltPercent}% salt`}
           onEdit={() => onEditStep('recipeTargets')}
         />
         <SummaryGroup
           icon={<ClockIcon />}
-          tone="time"
           title="Fermentation & levain"
           value={`${recipeInput.targetBulkHours}h bulk · ${recipeInput.roomTemperatureCelsius}°C · ${levainActivityLabel}`}
           onEdit={() => onEditStep('fermentation')}
@@ -172,31 +167,26 @@ function getFlourSummaryLines(
 
 type SummaryGroupProps = {
   icon: ReactNode;
-  tone: 'size' | 'flour' | 'water' | 'time';
   title: string;
-  info?: string;
   value?: string;
   stackedLines?: string[];
   onEdit: () => void;
 };
 
-function SummaryGroup({ icon, tone, title, info, value, stackedLines, onEdit }: SummaryGroupProps) {
+function SummaryGroup({ icon, title, value, stackedLines, onEdit }: SummaryGroupProps) {
   return (
-    <div className="summary-group card">
-      <div className="summary-group__header">
-        <span className="summary-group__label">
-          <span className={`summary-group__icon summary-group__icon--${tone}`} aria-hidden="true">
-            {icon}
-          </span>
-          {title}
-        </span>
-        {info ? <InfoToggle label={title}>{info}</InfoToggle> : null}
-      </div>
-      {/* Hidden text instead of aria-label: the name is "Edit Dough size: 500g · 2 loaves", so it says what the
-          current value is and still contains the visible value (Voice Control: "Tap 500g"). */}
+    <div className="summary-group">
+      {/* The whole row is one button. Its name is "Edit Dough size 500g · 2 loaves": the hidden "Edit " says what
+          it does and the rest is the visible text, so Voice Control ("Tap 500g") still works. */}
       <button type="button" className="summary-group__body" onClick={onEdit}>
-        <span className="visually-hidden">Edit {title}: </span>
-        <span className="summary-group__value-row">
+        <span className="summary-group__icon" aria-hidden="true">
+          {icon}
+        </span>
+        <span className="summary-group__text">
+          <span className="summary-group__label">
+            <span className="visually-hidden">Edit </span>
+            {title}
+          </span>
           {stackedLines && stackedLines.length > 1 ? (
             <span className="summary-group__stack">
               {stackedLines.map((line) => (
@@ -208,9 +198,9 @@ function SummaryGroup({ icon, tone, title, info, value, stackedLines, onEdit }: 
           ) : (
             <strong className="summary-group__value">{stackedLines?.[0] ?? value}</strong>
           )}
-          <span className="summary-group__edit" aria-hidden="true">
-            <PenIcon />
-          </span>
+        </span>
+        <span className="summary-group__edit" aria-hidden="true">
+          <PenIcon />
         </span>
       </button>
     </div>

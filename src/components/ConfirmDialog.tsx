@@ -4,6 +4,8 @@ type ConfirmDialogProps = {
   title: string;
   message: string;
   confirmLabel: string;
+  /** Deleting or discarding something: the confirm button is shown in the danger colour. */
+  destructive?: boolean;
   onCancel: () => void;
   onConfirm: () => void;
 };
@@ -12,6 +14,7 @@ export function ConfirmDialog({
   title,
   message,
   confirmLabel,
+  destructive = false,
   onCancel,
   onConfirm,
 }: ConfirmDialogProps) {
@@ -27,7 +30,11 @@ export function ConfirmDialog({
           <button type="button" className="button button--secondary" onClick={onCancel}>
             Cancel
           </button>
-          <button type="button" className="button button--primary" onClick={onConfirm}>
+          <button
+            type="button"
+            className={destructive ? 'button button--danger' : 'button button--primary'}
+            onClick={onConfirm}
+          >
             {confirmLabel}
           </button>
         </div>

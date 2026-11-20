@@ -7,7 +7,7 @@ import type {
   IngredientKind,
   IngredientLine,
 } from '../lib/recipe/buildIngredientBreakdown.ts';
-import { ClockIcon, JarIcon, SaltIcon, ScaleIcon, WaterIcon, WheatIcon } from './icons.tsx';
+import { ClockIcon, JarIcon, SaltIcon, WaterIcon, WheatIcon } from './icons.tsx';
 
 type IngredientBreakdownCardProps = {
   breakdown: IngredientBreakdown;
@@ -33,20 +33,15 @@ export function IngredientBreakdownCard({ breakdown, title = 'Ingredients' }: In
     <section className="card ingredient-breakdown" aria-labelledby="ingredient-breakdown-title">
       <h2 id="ingredient-breakdown-title">{title}</h2>
 
-      <div className="ingredient-group ingredient-group--levain">
-        <div className="ingredient-group__header">
-          <span className="ingredient-group__icon" aria-hidden="true">
-            <JarIcon />
-          </span>
-          <div className="ingredient-group__heading">
-            <h3>Levain</h3>
-            <p>{levain.description}</p>
-          </div>
-          <p className="ingredient-group__total">
+      <section className="ingredient-section ingredient-section--levain">
+        <div className="ingredient-section__header">
+          <h3>Levain</h3>
+          <p className="ingredient-section__total">
             <strong>{formatGrams(levain.grams)}</strong>
             <span>in the dough</span>
           </p>
         </div>
+        <p className="ingredient-section__description">{levain.description}</p>
 
         {levain.plan ? (
           <>
@@ -57,7 +52,7 @@ export function IngredientBreakdownCard({ breakdown, title = 'Ingredients' }: In
               heading={levain.plan.refresh ? '2. Build the levain' : 'Build the levain'}
               feeding={levain.plan.build}
             />
-            <p className="ingredient-group__meta">
+            <p className="ingredient-section__meta">
               <ClockIcon />
               <span>
                 About {levain.plan.buildHours} h before mixing. Includes {levain.plan.bufferPercent}% extra for scrape
@@ -66,20 +61,15 @@ export function IngredientBreakdownCard({ breakdown, title = 'Ingredients' }: In
             </p>
           </>
         ) : null}
-      </div>
+      </section>
 
-      <div className="ingredient-group ingredient-group--dough">
-        <div className="ingredient-group__header">
-          <span className="ingredient-group__icon ingredient-group__icon--dough" aria-hidden="true">
-            <ScaleIcon />
-          </span>
-          <div className="ingredient-group__heading">
-            <h3>Added to the dough</h3>
-            <p>Weigh these on mix day</p>
-          </div>
+      <section className="ingredient-section ingredient-section--dough">
+        <div className="ingredient-section__header">
+          <h3>Added to the dough</h3>
         </div>
+        <p className="ingredient-section__description">Weigh these on mix day</p>
         <IngredientRows lines={dough} />
-      </div>
+      </section>
 
       <p className="ingredient-breakdown__totals">
         Totals including the levain: {formatGrams(totals.flourGrams)} flour, {formatGrams(totals.waterGrams)} water.
@@ -109,7 +99,7 @@ function IngredientRows({ lines, total }: { lines: IngredientLine[]; total?: num
       {lines.map((line) => (
         <div key={`${line.kind}-${line.label}`} className="ingredient-row">
           <dt>
-            <span className={`ingredient-row__icon ingredient-row__icon--${line.kind}`} aria-hidden="true">
+            <span className="ingredient-row__icon" aria-hidden="true">
               {kindIcons[line.kind]}
             </span>
             <span className="ingredient-row__label">

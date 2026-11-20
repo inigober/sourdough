@@ -45,7 +45,20 @@ describe('BakeHistoryView', () => {
   });
 
   it('does not leave a separator after the date when a bake has no assessment', () => {
-    expect(render(makeEntries(1))).not.toContain('saved-recipe-card__meta-sep');
-    expect(render(makeEntries(1, 'ok'))).not.toContain('saved-recipe-card__meta-sep');
+    expect(render(makeEntries(1))).not.toContain('bake-history__meta-sep');
+    expect(render(makeEntries(1, 'ok'))).not.toContain('bake-history__meta-sep');
+  });
+
+  it('leads each row with the loaf thumbnail, then the name, in a hairline list rather than a card per row', () => {
+    const html = render(makeEntries(2, 'great'));
+
+    expect(html).toContain('bake-history__list');
+    expect(html).toContain('bake-history__row');
+    expect(html).not.toContain('saved-recipe-card');
+    // The thumbnail comes before the name inside the row button, so the photo is the hero.
+    expect(html.indexOf('bake-history__thumb')).toBeLessThan(html.indexOf('bake-history__name'));
+    // No photo in this test: the calm loaf placeholder shows.
+    expect(html).toContain('bake-history__thumb-placeholder');
+    expect(html).toContain('Assessment · Great loaf');
   });
 });

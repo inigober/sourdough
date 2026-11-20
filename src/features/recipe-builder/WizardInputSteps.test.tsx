@@ -104,7 +104,10 @@ describe('WizardInputSteps integration', () => {
     expect(doughHtml).toContain('How much dough are you making?');
     expect(getContinueButtonMarkup(doughHtml)).not.toMatch(/disabled/);
 
-    expect(targetsHtml).toContain('0% hydration, 2% salt');
+    // The title is a question; the derived numbers live in a labelled "Your targets" block below the inputs.
+    expect(targetsHtml).toContain('How wet should the dough be?');
+    expect(targetsHtml).toContain('Your targets');
+    expect(targetsHtml).toContain('0% hydration · 2% salt');
     expect(getContinueButtonMarkup(targetsHtml)).toMatch(/disabled/);
   });
 

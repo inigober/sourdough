@@ -21,7 +21,7 @@ export function RecipeTargetsSection({
     <section className="card">
       <SectionHeading
         headingLevel={1}
-        title={`${recipeInput.hydrationPercent}% hydration, ${recipeInput.saltPercent}% salt`}
+        title="How wet should the dough be?"
         copy="Hydration and salt are baker&apos;s percentages based on total flour weight."
       />
 
@@ -51,6 +51,13 @@ export function RecipeTargetsSection({
           {...getFieldValidationProps(validationIssues, 'saltPercent')}
         />
       </form>
+
+      <p className="flour-blend-summary">
+        <span className="flour-blend-summary__label">Your targets</span>
+        <strong>
+          {recipeInput.hydrationPercent}% hydration · {recipeInput.saltPercent}% salt
+        </strong>
+      </p>
     </section>
   );
 }

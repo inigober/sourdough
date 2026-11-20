@@ -258,3 +258,16 @@ test('Custom is not a preset and has copy for the picker', () => {
   assert.ok(CUSTOM_PLAN_OPTION.label.length > 0);
   assert.ok(CUSTOM_PLAN_OPTION.description.length > 0);
 });
+
+test('a plan with per-fold overrides is Custom, even when every preset field matches', () => {
+  const recipe = defaultRecipeInput;
+  const preset = { ...createDefaultScheduleInput(recipe), ...getSchedulePresetPatch('simpleOvernight', recipe) };
+  assert.equal(findMatchingSchedulePresetId(preset, recipe), 'simpleOvernight');
+
+  const withOverride = { ...preset, foldRestMinutesByStep: { 'stretch-fold-1': 45 } };
+  assert.equal(findMatchingSchedulePresetId(withOverride, recipe), null);
+  assert.equal(hasEditedScheduleValues(withOverride, recipe), true);
+
+  // An empty record is not an override.
+  assert.equal(findMatchingSchedulePresetId({ ...preset, foldRestMinutesByStep: {} }, recipe), 'simpleOvernight');
+});

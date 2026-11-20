@@ -108,6 +108,7 @@ export function RecipeBuilderDialogs({
           title="Delete saved recipe?"
           message={`"${pendingDeleteRecipe.name}" will be removed${useCloudRecipes ? ' from your account' : ' from this device'}.`}
           confirmLabel="Delete recipe"
+          destructive
           onCancel={onCancelDelete}
           onConfirm={() => void onConfirmDelete()}
         />

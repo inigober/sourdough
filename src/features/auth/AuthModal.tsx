@@ -89,7 +89,7 @@ export function AuthModal({ onClose, initialStep = 'choose' }: AuthModalProps) {
       >
         <button
           type="button"
-          className="auth-modal__close"
+          className="icon-button auth-modal__close"
           aria-label="Close"
           onClick={() => onClose(true)}
         >

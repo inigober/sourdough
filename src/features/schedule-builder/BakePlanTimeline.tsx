@@ -1,18 +1,33 @@
+import { useState } from 'react';
+
+import { TimelineList } from '../../components/TimelineList.tsx';
+import type { StepChange, StepEditResult } from '../../lib/schedule/stepEditPanel.ts';
 import type { TimelineStep } from '../../lib/schedule/types.ts';
-import { shouldShowTimelineDateLabel } from '../../lib/schedule/timelineDisplay.ts';
-import { TimelineRow } from '../../components/TimelineRow.tsx';
+import { StepEditPanel } from './StepEditPanel.tsx';
 
 type BakePlanTimelineProps = {
   steps: TimelineStep[];
   caption?: string;
   embedded?: boolean;
+  /**
+   * Turns on tap-to-edit. Rows for which `isStepEditable` is true open an inline panel, and the panel
+   * reports changes through `onEditStep`. Leave both off for a read-only timeline (bake history).
+   */
+  isStepEditable?: (step: TimelineStep) => boolean;
+  onEditStep?: (stepId: string, change: StepChange) => StepEditResult;
 };
 
 export function BakePlanTimeline({
   steps,
   caption,
   embedded = false,
+  isStepEditable,
+  onEditStep,
 }: BakePlanTimelineProps) {
+  // One row open at a time; tapping the open row closes it.
+  const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
+  const canEdit = Boolean(isStepEditable && onEditStep);
+
   if (steps.length === 0) {
     const emptyContent = (
       <>
@@ -33,20 +48,17 @@ export function BakePlanTimeline({
       {!embedded ? <h2>Bake schedule</h2> : null}
       <p className="section-copy">
         {caption ?? 'Times move forward from your start time. No calendar day is attached.'}
+        {canEdit ? ' Tap a step to change when it starts or how long it takes.' : ''}
       </p>
-      <ol className="timeline-list bake-plan__list">
-        {steps.map((step, index) => (
-          <TimelineRow
-            key={step.id}
-            startTime={step.startTime}
-            endTime={step.endTime}
-            dateLabel={step.dateLabel}
-            showDateLabel={shouldShowTimelineDateLabel(steps, index)}
-            label={step.label}
-            detail={step.detail}
-          />
-        ))}
-      </ol>
+      <TimelineList
+        steps={steps}
+        selectedStepId={selectedStepId}
+        isStepSelectable={canEdit ? isStepEditable : undefined}
+        onSelectStep={(step) => setSelectedStepId((current) => (current === step.id ? null : step.id))}
+        renderPanel={(step) =>
+          onEditStep ? <StepEditPanel step={step} onApply={(change) => onEditStep(step.id, change)} /> : null
+        }
+      />
     </>
   );
 

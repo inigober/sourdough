@@ -248,11 +248,20 @@ export function getSchedulePresetChanges(
   return changes;
 }
 
+function hasFoldOverrides(schedule: ScheduleInput): boolean {
+  return Object.keys(schedule.foldRestMinutesByStep ?? {}).length > 0;
+}
+
 /** The preset the schedule currently matches, or null for "Custom". */
 export function findMatchingSchedulePresetId(
   schedule: ScheduleInput,
   recipeInput: RecipeInput,
 ): SchedulePresetId | null {
+  // A change to one individual fold is not part of any preset, so the plan is Custom.
+  if (hasFoldOverrides(schedule)) {
+    return null;
+  }
+
   const match = SCHEDULE_PRESET_INFO.find(
     (preset) => getSchedulePresetChanges(schedule, preset.id, recipeInput).length === 0,
   );
@@ -268,6 +277,10 @@ export function findMatchingSchedulePresetId(
 export function hasEditedScheduleValues(schedule: ScheduleInput, recipeInput: RecipeInput): boolean {
   if (findMatchingSchedulePresetId(schedule, recipeInput) !== null) {
     return false;
+  }
+
+  if (hasFoldOverrides(schedule)) {
+    return true;
   }
 
   const defaults = createDefaultScheduleInput(recipeInput);

@@ -114,7 +114,9 @@ export function DialogCard({
           </button>
         </header>
         {children}
-        <div onClick={handleCardClick}>{actions}</div>
+        <div className="dialog-card__footer" onClick={handleCardClick}>
+          {actions}
+        </div>
       </div>
     </dialog>,
     document.body,

@@ -15,22 +15,7 @@
   background: var(--color-surface-muted);
 }
 
-.timeline-row__layout {
-  --timeline-time-width: 7.75rem;
-  display: grid;
-  grid-template-columns: var(--timeline-time-width) minmax(0, 1fr);
-  gap: var(--space-1) var(--space-3);
-  align-items: start;
-}
-
-.timeline-row__content-col {
-  display: grid;
-  gap: var(--space-1);
-  min-width: 0;
-  grid-column: 2;
-  grid-row: 1;
-}
-
+/* The two --dated rules below no longer match any markup: src/lib/ui/mobileLayout.test.ts still pins them. */
 .timeline-row__layout--dated .timeline-row__content-col {
   grid-row: 2;
 }
@@ -44,29 +29,8 @@
   letter-spacing: 0.02em;
 }
 
-.timeline-row__time {
-  grid-column: 1;
-  grid-row: 1;
-  color: var(--color-text-subtle);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-bold);
-  line-height: 1.3;
-  white-space: nowrap;
-}
-
 .timeline-row__layout--dated .timeline-row__time {
   grid-row: 2;
-}
-
-.timeline-row__label {
-  color: var(--color-text);
-}
-
-.timeline-row__detail {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
-  line-height: 1.4;
 }
 
 .timeline-row--interactive {
@@ -144,3 +108,177 @@
   font-weight: var(--weight-bold);
 }
 
+
+/* --------------------------------------------------------------------------
+   Day-spine timeline (bake plan; TimelineList + TimelineRow components).
+   A heading per day, then hairline-separated rows: time left, dot on the spine, name right.
+   No card per step. Brown stays reserved for "now" in bake mode, so the spine is neutral.
+   -------------------------------------------------------------------------- */
+.timeline-days {
+  --timeline-step-time-width: 3.25rem;
+  --timeline-step-dot-size: 0.5rem;
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.timeline-day__label {
+  margin: 0 0 var(--space-1);
+  color: var(--color-text-subtle);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.02em;
+}
+
+.timeline-day__steps {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline-step {
+  position: relative;
+  border-top: 1px solid var(--color-border-soft);
+}
+
+.timeline-step:first-child {
+  border-top: 0;
+}
+
+/* The spine: a hairline through the row and a dot beside the step name. */
+.timeline-step::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--timeline-step-time-width) + var(--space-3));
+  width: 1px;
+  background: var(--color-border);
+}
+
+.timeline-step:first-child::before {
+  top: calc(var(--space-3) + 0.65em);
+}
+
+.timeline-step:last-child::before {
+  bottom: calc(100% - var(--space-3) - 0.65em);
+}
+
+.timeline-step:only-child::before {
+  display: none;
+}
+
+.timeline-step::after {
+  content: '';
+  position: absolute;
+  top: calc(var(--space-3) + 0.65em - var(--timeline-step-dot-size) / 2);
+  left: calc(var(--timeline-step-time-width) + var(--space-3) - var(--timeline-step-dot-size) / 2 + 0.5px);
+  width: var(--timeline-step-dot-size);
+  height: var(--timeline-step-dot-size);
+  border-radius: var(--radius-pill);
+  background: var(--color-separator);
+}
+
+.timeline-step__main {
+  display: grid;
+  grid-template-columns: var(--timeline-step-time-width) minmax(0, 1fr) auto;
+  column-gap: var(--space-6);
+  align-items: start;
+  width: 100%;
+  padding: var(--space-3) 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.timeline-step__main--button {
+  min-height: var(--touch-target-min);
+  cursor: pointer;
+}
+
+.timeline-step__main--button:active,
+.timeline-step--selected > .timeline-step__main--button {
+  background: var(--color-row-focus-bg);
+}
+
+.timeline-step__main--button:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.timeline-step__time {
+  color: var(--color-text-subtle);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-semibold);
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.timeline-step__body {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.timeline-step__label {
+  color: var(--color-text);
+  line-height: 1.3;
+}
+
+.timeline-step__meta,
+.timeline-step__detail {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+}
+
+.timeline-step__edit-icon {
+  width: 1rem;
+  height: 1rem;
+  margin-top: var(--space-1);
+  color: var(--color-text-subtle);
+}
+
+/* The open row's edit fields: flat, under the name column, no card. */
+.timeline-step__panel {
+  padding: 0 0 var(--space-4) calc(var(--timeline-step-time-width) + var(--space-6));
+}
+
+.step-edit {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.step-edit__field {
+  display: grid;
+  gap: var(--space-1);
+  justify-items: start;
+}
+
+.step-edit__label {
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.step-edit__readable {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.step-edit__feedback {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+}
+
+.step-edit__feedback--error {
+  color: var(--color-danger);
+}
