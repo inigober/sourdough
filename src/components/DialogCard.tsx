@@ -6,6 +6,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 
+import { useSheetDrag } from '../lib/ui/useSheetDrag.ts';
 import { CloseIcon } from './icons.tsx';
 
 type DialogCardProps = {
@@ -31,8 +32,11 @@ export function DialogCard({
 }: DialogCardProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
+  useSheetDrag(cardRef, headerRef, onClose);
 
   useLayoutEffect(() => {
     // showModal before paint; portal to body — see docs/engineering/leave-dialog-and-unsaved-navigation.md
@@ -93,6 +97,7 @@ export function DialogCard({
       aria-describedby={messageId}
     >
       <div
+        ref={cardRef}
         className={
           variant === 'success'
             ? 'dialog-card dialog-card--success'
@@ -100,7 +105,7 @@ export function DialogCard({
         }
         onClick={handleCardClick}
       >
-        <header className="dialog-card__header">
+        <header ref={headerRef} className="dialog-card__header">
           <h2 id={titleId} ref={titleRef} tabIndex={-1}>
             {title}
           </h2>

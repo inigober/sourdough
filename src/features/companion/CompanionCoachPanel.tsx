@@ -30,6 +30,7 @@ import type { BakeSession, CoachTranscriptMessage } from '../../lib/companion/ty
 import { buildTimeline, formatTimelineForDisplay } from '../../lib/schedule/buildTimeline.ts';
 import { CameraIcon, CloseIcon } from '../../components/icons.tsx';
 import { useModalSheet } from '../../lib/ui/useModalSheet.ts';
+import { useSheetDrag } from '../../lib/ui/useSheetDrag.ts';
 
 const PHOTO_ONLY_QUESTION = 'What can you tell me from this photo?';
 
@@ -70,6 +71,8 @@ export function CompanionCoachPanel({
   const [failure, setFailure] = useState<CoachFailure | null>(null);
   const [announcement, setAnnouncement] = useState('');
   const sheetRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
   const transcriptRef = useRef<HTMLDivElement>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const textInputRef = useRef<HTMLInputElement>(null);
@@ -88,6 +91,7 @@ export function CompanionCoachPanel({
   );
   const savedMessages = session.coachTranscript ?? [];
   useModalSheet(sheetRef, { onClose });
+  useSheetDrag(panelRef, headerRef, onClose);
   const pendingQuestionText = draft.trim() || PHOTO_ONLY_QUESTION;
 
   useEffect(() => {
@@ -229,8 +233,8 @@ export function CompanionCoachPanel({
       aria-labelledby="companion-coach-title"
     >
       <div className="companion-coach__backdrop" onClick={onClose} aria-hidden="true" />
-      <section className="companion-coach__panel">
-        <header className="companion-coach__header">
+      <section ref={panelRef} className="companion-coach__panel">
+        <header ref={headerRef} className="companion-coach__header">
           <div>
             <h2 id="companion-coach-title" data-modal-initial-focus>
               Baking coach
