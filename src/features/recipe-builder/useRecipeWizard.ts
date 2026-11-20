@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { assessRecipe } from '../../lib/recipe/assessRecipe.ts';
 import { calculateRecipe } from '../../lib/recipe/calculateRecipe.ts';
@@ -31,6 +31,7 @@ import type { ScheduleInput } from '../../lib/schedule/types.ts';
 import {
   clearBuilderDraft,
   getBuilderDraftSummary,
+  isUntouchedBuilderState,
   loadBuilderDraft,
   saveBuilderDraft,
   type BuilderDraftSummary,
@@ -83,6 +84,8 @@ export function useRecipeWizard({
     createDefaultScheduleInput(defaultRecipeInput),
   );
   const [draftSummary, setDraftSummary] = useState<BuilderDraftSummary | null>(null);
+  // What the builder starts with, to tell "nothing happened yet" from a real recipe in progress.
+  const initialBuilderStateRef = useRef({ recipeInput, scheduleInput });
 
   const validationIssues = useMemo(() => validateRecipeInput(recipeInput), [recipeInput]);
   const hasBlockingIssues = hasBlockingValidationIssue(validationIssues);
@@ -115,6 +118,17 @@ export function useRecipeWizard({
 
     // A cleared field is not a recipe worth resuming. Keep the last complete draft instead.
     if (hasMissingNumber(recipeInput)) {
+      return;
+    }
+
+    // On page load the builder holds defaults while a real draft may be waiting in storage (the Resume card
+    // reads it). Saving untouched defaults here would replace that draft.
+    if (
+      isUntouchedBuilderState(
+        { recipeInput, scheduleInput, hasCompletedWizard, editingFromResults, hasOpenedSchedule, activeSavedRecipeId },
+        initialBuilderStateRef.current,
+      )
+    ) {
       return;
     }
 

@@ -7,6 +7,7 @@ import {
   BUILDER_DRAFT_STORAGE_KEY,
   clearBuilderDraft,
   getBuilderDraftSummary,
+  isUntouchedBuilderState,
   loadBuilderDraft,
   saveBuilderDraft,
 } from './draftStorage.ts';
@@ -68,4 +69,25 @@ test('clearBuilderDraft removes stored draft', () => {
 
   clearBuilderDraft(storage);
   assert.equal(storage.getItem(BUILDER_DRAFT_STORAGE_KEY), null);
+});
+
+test('isUntouchedBuilderState is true only for the state the builder starts with', () => {
+  const initial = { recipeInput: defaultRecipeInput, scheduleInput: createDefaultScheduleInput(defaultRecipeInput) };
+  const untouched = {
+    ...initial,
+    hasCompletedWizard: false,
+    editingFromResults: false,
+    hasOpenedSchedule: false,
+    activeSavedRecipeId: null,
+  };
+
+  assert.equal(isUntouchedBuilderState(untouched, initial), true);
+
+  // Any real change makes it worth keeping as a draft.
+  assert.equal(isUntouchedBuilderState({ ...untouched, recipeInput: { ...defaultRecipeInput } }, initial), false);
+  assert.equal(isUntouchedBuilderState({ ...untouched, scheduleInput: { ...initial.scheduleInput } }, initial), false);
+  assert.equal(isUntouchedBuilderState({ ...untouched, hasCompletedWizard: true }, initial), false);
+  assert.equal(isUntouchedBuilderState({ ...untouched, editingFromResults: true }, initial), false);
+  assert.equal(isUntouchedBuilderState({ ...untouched, hasOpenedSchedule: true }, initial), false);
+  assert.equal(isUntouchedBuilderState({ ...untouched, activeSavedRecipeId: 'recipe-1' }, initial), false);
 });

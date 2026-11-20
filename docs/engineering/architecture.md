@@ -138,7 +138,7 @@ Local storage keys (all read defensively):
 | Key | Content |
 | --- | --- |
 | `sourdough:saved-recipes:v1` | Saved recipes while signed out |
-| `sourdough:builder-draft:v1` | The unfinished recipe and schedule |
+| `sourdough:builder-draft:v1` | The unfinished recipe and schedule. Written as the baker works, but never while the builder still holds its untouched starting state (`isUntouchedBuilderState`), so loading the app or a `/build/...` URL cannot replace a real draft with defaults |
 | `sourdough:bake-session:v1` | The active bake session |
 | `sourdough:bake-history:v1` | Completed bakes while signed out |
 | `sourdough:auth-prompt-dismissed`, `sourdough:history-backup-nudge-dismissed` | Dismissed prompts |

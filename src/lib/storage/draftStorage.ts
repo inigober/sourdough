@@ -66,6 +66,29 @@ export function loadBuilderDraft(storage: StorageLike = getDefaultStorage()): Bu
   return readBuilderDraft(storage);
 }
 
+/**
+ * True while the builder still holds exactly the state it started with: nothing loaded, edited or completed.
+ * Such a state is not worth saving as a draft, and saving it would replace a real stored draft with defaults
+ * every time the page loads (a reload, or opening a /build/... URL directly).
+ * Objects are compared by reference on purpose: every edit creates a new object.
+ */
+export function isUntouchedBuilderState(
+  state: Pick<
+    BuilderDraft,
+    'recipeInput' | 'scheduleInput' | 'hasCompletedWizard' | 'editingFromResults' | 'hasOpenedSchedule' | 'activeSavedRecipeId'
+  >,
+  initial: Pick<BuilderDraft, 'recipeInput' | 'scheduleInput'>,
+): boolean {
+  return (
+    state.recipeInput === initial.recipeInput &&
+    state.scheduleInput === initial.scheduleInput &&
+    !state.hasCompletedWizard &&
+    !state.editingFromResults &&
+    !state.hasOpenedSchedule &&
+    state.activeSavedRecipeId === null
+  );
+}
+
 export function clearBuilderDraft(storage: StorageLike = getDefaultStorage()): void {
   storage.removeItem(BUILDER_DRAFT_STORAGE_KEY);
 }
