@@ -138,7 +138,13 @@ Other top-area checks:
 | 1. Home, Saved and History scroll through the status bar | Fixed in code: a fixed `body::before` strip in the page colour, as tall as the top safe-area inset (`styles.css`, "Top safe area"). Checked in a browser with a simulated 62 px inset; not yet seen on a device or in the simulator |
 | 5. "Timer alerts are off" before the baker was asked | Fixed in code: no notice while the status is `prompt` (`permissionNotice.ts`, with a test). Not yet seen on a device |
 | 8 and 10. Select chevron, long-press selection, callout, pressed states | Fixed by the UI quick wins; needs a new `build:ios` to see |
-| 2, 3, 4, 6, 7, 9, 11, 12, 13, 14 | Open |
+| 2. Keyboard pans the page and leaves it shifted | Fixed in code, option (a): `lib/ui/keyboardScrollReset.ts` puts the page back where it was when a text field closes, on touch devices only. A device may show it is not enough |
+| 3. Landscape | Fixed: iPhone is portrait only (`Info.plist`); iPad unchanged |
+| 6. White launch frame in light mode | Fixed in code (`AppViewController.swift` paints the page colour); needs a new `build:ios` to see |
+| 7. Date and time pickers in system blue | Fixed in code (`accent-color` on date and time inputs); whether WebKit's picker honours it is not verified |
+| 11. Autocorrect and capital letters on search | Fixed: search boxes have no auto-capitalise or autocorrect and a Search key; recipe name fields have a Done key |
+| 12. Bake mode copy | Fixed: no signed durations ("The remaining schedule moved 8h 25m earlier...", "move the rest of the plan 8h 25m earlier?"), and "(next day)" after an end time past midnight. The blank band under "Step 1 of 13" is still open |
+| 4, 9, 13, 14 | Open: Dynamic Type and contrast (needs the type scale), header fade, close buttons, edge-swipe back |
 
 ## 3. Device sizes
 

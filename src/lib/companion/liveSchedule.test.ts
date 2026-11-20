@@ -18,6 +18,7 @@ import {
   isTimedStepRunning,
   recordSkippedStep,
   shouldConfirmEarlyStart,
+  stepEndsOnLaterDay,
 } from './liveSchedule.ts';
 
 test('starting a step late shifts the remaining schedule', () => {
@@ -262,4 +263,53 @@ test('formatDurationMinutes writes hours and minutes compactly', () => {
   assert.equal(formatDurationMinutes(120), '2h');
   assert.equal(formatDurationMinutes(45), '45m');
   assert.equal(formatDurationMinutes(0), '0m');
+});
+
+test('stepEndsOnLaterDay is true when a planned step runs past midnight', () => {
+  const schedule = {
+    ...createDefaultScheduleInput(defaultRecipeInput),
+    mixDate: '2026-05-20',
+    startTime: '09:00',
+  };
+  const session = createBakeSession({
+    savedRecipeId: null,
+    recipeName: 'Past midnight',
+    recipeInput: defaultRecipeInput,
+    scheduleInput: schedule,
+  });
+  const base = { id: 'x', label: 'X', startTime: '', endTime: '' };
+
+  // 09:00 + 14h = 23:00 the same day
+  const lateEvening = { ...base, startOffsetMinutes: 14 * 60, durationMinutes: 120 };
+  assert.equal(stepEndsOnLaterDay(session, lateEvening), true);
+
+  const shortStep = { ...base, startOffsetMinutes: 30, durationMinutes: 60 };
+  assert.equal(stepEndsOnLaterDay(session, shortStep), false);
+});
+
+test('stepEndsOnLaterDay uses the real start and timer end while a step is running', () => {
+  const schedule = { ...createDefaultScheduleInput(defaultRecipeInput), mixDate: '2026-05-20' };
+  const base = createBakeSession({
+    savedRecipeId: null,
+    recipeName: 'Running past midnight',
+    recipeInput: defaultRecipeInput,
+    scheduleInput: schedule,
+  });
+  const step = { id: 'x', label: 'X', startTime: '', endTime: '', startOffsetMinutes: 0, durationMinutes: 60 };
+
+  const startedAt = new Date(2026, 4, 20, 23, 30);
+  const running = {
+    ...base,
+    currentStepStartedAt: startedAt.toISOString(),
+    activeTimerEndsAt: new Date(startedAt.getTime() + 60 * 60_000).toISOString(),
+  };
+  assert.equal(stepEndsOnLaterDay(running, step), true);
+
+  const earlier = new Date(2026, 4, 20, 10, 0);
+  const sameDay = {
+    ...base,
+    currentStepStartedAt: earlier.toISOString(),
+    activeTimerEndsAt: new Date(earlier.getTime() + 60 * 60_000).toISOString(),
+  };
+  assert.equal(stepEndsOnLaterDay(sameDay, step), false);
 });

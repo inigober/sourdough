@@ -244,6 +244,25 @@ export function getDisplayStepTimes(
   };
 }
 
+/**
+ * True when the step ends on a later calendar day than it starts, so the screen can say "next day"
+ * instead of showing an end time like "01:19" that looks earlier than the start.
+ */
+export function stepEndsOnLaterDay(session: BakeSession, step: TimelineStep): boolean {
+  let startMs: number;
+  let endMs: number;
+
+  if (isTimedStepRunning(session) && session.currentStepStartedAt && session.activeTimerEndsAt) {
+    startMs = new Date(session.currentStepStartedAt).getTime();
+    endMs = new Date(session.activeTimerEndsAt).getTime();
+  } else {
+    startMs = getStepPlannedStartMs(session.scheduleInput, step, session.scheduleDriftMinutes);
+    endMs = startMs + step.durationMinutes * 60_000;
+  }
+
+  return startOfDay(new Date(endMs)).getTime() > startOfDay(new Date(startMs)).getTime();
+}
+
 function formatDateLabelIfNotMixDay(schedule: ScheduleInput, date: Date): string | undefined {
   const mixDay = startOfDay(parseIsoDate(getMixDateIso(schedule)));
   const stepDay = startOfDay(date);

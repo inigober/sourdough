@@ -47,6 +47,11 @@ Then run from Xcode (⌘R) or:
 npm run cap:open:ios
 ```
 
+## Orientation and launch colour
+
+- iPhone is portrait only (`UISupportedInterfaceOrientations` in `Info.plist`); iPad keeps all four. The layout has no left or right safe-area insets, so landscape on iPhone would put content under the Dynamic Island.
+- `AppViewController.swift` paints the view and the web view in the page colour (light `#f8f1e8`, dark `#1a1511`, the same as `--color-bg` in `src/styles.css`) so there is no white frame before the page's first paint. Change both places together.
+
 ## Deep link
 
 Timer alerts can open bake mode via `sourdough://bake`. The URL scheme is declared in `ios/App/App/Info.plist`.
@@ -93,7 +98,7 @@ Bake mode distinguishes three alerting modes:
 | `notification` | End-of-step notification only (older iOS or alarms denied) |
 | `none` | In-app countdown only; notice with Open Settings |
 
-Permission is re-checked when the app returns to the foreground.
+Permission is re-checked when the app returns to the foreground. While the status is still `prompt` (never asked), no notice is shown; the system prompts appear when the first timer starts.
 
 ## Troubleshooting
 

@@ -1,6 +1,8 @@
+import { useEffect } from 'react';
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 
 import { RecipeBuilder } from '../features/recipe-builder/RecipeBuilder.tsx';
+import { installKeyboardScrollResetInBrowser } from '../lib/ui/keyboardScrollReset.ts';
 import { useRouteAccessibility } from './routeEffects.ts';
 
 const router = createBrowserRouter([
@@ -16,6 +18,7 @@ const router = createBrowserRouter([
 
 export function App() {
   useRouteAccessibility(router);
+  useEffect(() => installKeyboardScrollResetInBrowser(), []);
 
   return (
     <main className="app-shell">

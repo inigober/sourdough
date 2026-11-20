@@ -83,6 +83,10 @@ export function SavedRecipesView({
               </span>
               <input
                 type="search"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                enterKeyHint="search"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.currentTarget.value)}
                 placeholder="Recipe name"

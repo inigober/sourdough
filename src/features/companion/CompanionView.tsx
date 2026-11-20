@@ -38,6 +38,7 @@ import {
   getMinutesUntilStep,
   isTimedStepRunning,
   shouldConfirmEarlyStart,
+  stepEndsOnLaterDay,
 } from '../../lib/companion/liveSchedule.ts';
 import { getStepAmounts, getStepDetailWithoutAmounts } from '../../lib/companion/stepAmounts.ts';
 import { getStepScheduleEdit } from '../../lib/companion/stepScheduleEdits.ts';
@@ -142,6 +143,7 @@ export function CompanionView({
     ? getStepDetailWithoutAmounts(currentStep, currentStepAmounts !== null)
     : undefined;
   const currentStepTimes = currentStep ? getDisplayStepTimes(session, currentStep) : null;
+  const currentStepEndsNextDay = currentStep ? stepEndsOnLaterDay(session, currentStep) : false;
   const currentStepStartsInMinutes =
     currentStep && !stepIsRunning ? getMinutesUntilStep(session, currentStep, clockNow) : 0;
   const nextStepStartsInMinutes = nextStep ? getMinutesUntilStep(session, nextStep, clockNow) : 0;
@@ -375,7 +377,7 @@ export function CompanionView({
         ) : null}
         {session.scheduleDriftMinutes !== 0 ? (
           <p className="companion__drift" role="status">
-            Remaining schedule shifted by {formatDriftLabel(session.scheduleDriftMinutes)} based on actual timing.
+            {formatDriftNote(session.scheduleDriftMinutes)}
           </p>
         ) : null}
         {permissionNotice ? (
@@ -411,6 +413,7 @@ export function CompanionView({
               <span>
                 {formatStepTimeLabel(currentStepTimes.startTime, currentStepTimes.dateLabel)} –{' '}
                 {currentStepTimes.endTime}
+                {currentStepEndsNextDay ? ' (next day)' : ''}
               </span>
             ) : (
               <span>{formatStepTimeLabel(currentStepTimes.startTime, currentStepTimes.dateLabel)}</span>
@@ -601,7 +604,7 @@ export function CompanionView({
           message={`This step is planned for ${formatStepTimeLabel(
             currentStep.startTime,
             currentStep.dateLabel,
-          )}. Start now and shift the plan by -${formatDurationMinutes(pendingEarlyStartMinutes)}?`}
+          )}. Start now and move the rest of the plan ${formatDurationMinutes(pendingEarlyStartMinutes)} earlier?`}
           confirmLabel="Start now"
           onCancel={() => setPendingEarlyStartMinutes(null)}
           onConfirm={() => void startStepNow()}
@@ -642,6 +645,7 @@ function formatStepTimeLabel(time: string, dateLabel?: string): string {
   return dateLabel ? `${dateLabel} ${time}` : time;
 }
 
-function formatDriftLabel(driftMinutes: number): string {
-  return `${driftMinutes > 0 ? '+' : '-'}${formatDurationMinutes(driftMinutes)}`;
+function formatDriftNote(driftMinutes: number): string {
+  const direction = driftMinutes > 0 ? 'later' : 'earlier';
+  return `The remaining schedule moved ${formatDurationMinutes(driftMinutes)} ${direction}, based on your actual timing.`;
 }

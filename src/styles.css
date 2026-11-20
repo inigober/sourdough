@@ -3112,6 +3112,12 @@ textarea {
   resize: vertical;
 }
 
+/* The native date and time pickers take their selection colour from this; without it they use system blue. */
+input[type="date"],
+input[type="time"] {
+  accent-color: var(--color-primary);
+}
+
 input[type="checkbox"] {
   width: 24px;
   height: 24px;

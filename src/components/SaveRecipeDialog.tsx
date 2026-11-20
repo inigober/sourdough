@@ -59,6 +59,7 @@ export function SaveRecipeDialog({
         <span className="field-label-row">Recipe name</span>
         <input
           type="text"
+          enterKeyHint="done"
           value={name}
           maxLength={80}
           onChange={(event) => setName(event.currentTarget.value)}

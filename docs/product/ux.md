@@ -138,7 +138,7 @@ Purpose: one calm screen for what to do now, with timers that keep working when 
 Layout, top to bottom:
 
 - "Step N of M", and a collapsed **About this bake** (mix day, bake day, coach hint).
-- Notices, only when relevant: the web-build banner, a schedule drift note ("Remaining schedule shifted by +20m based on actual timing"), the native timer permission notice, and a test-timer note when a test override is set.
+- Notices, only when relevant: the web-build banner, a schedule drift note ("The remaining schedule moved 20m later, based on your actual timing"), the native timer permission notice, and a test-timer note when a test override is set.
 - **Previous** step card, then the **Current step** card: time range, step name (large), a coach button, "Starts in 2h 10m" for a future step, the step detail, an **Amounts** disclosure (see below), **Start timer** and an edit pen for steps whose timing can be adjusted, the timer (large, tabular digits, "Time's up" at zero, restart button), and "Next up: X at 17:15 (in 2h 10m)".
 - **Full schedule**: every step with its time and, for future steps, "Starts in ...". The current row is filled, with padding all round and the same text position as every other row. Tapping another row outlines it and reveals **Jump to this step**.
 - Footer: **Previous** and **Next step** (**Finish baking** on the last step). **Exit bake mode** keeps the session.
