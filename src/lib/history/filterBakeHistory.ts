@@ -2,6 +2,13 @@ import type { BakeHistorySessionSummary, BakeSessionAssessment } from './types.t
 
 export type BakeHistoryAssessmentFilter = 'all' | 'unset' | BakeSessionAssessment;
 
+/** The History list shows Search and Filter only from this many bakes; a short list needs neither. */
+export const HISTORY_SEARCH_MIN_BAKES = 6;
+
+export function shouldShowHistorySearch(bakeCount: number): boolean {
+  return bakeCount >= HISTORY_SEARCH_MIN_BAKES;
+}
+
 export function filterBakeHistoryEntries(
   entries: BakeHistorySessionSummary[],
   query: string,

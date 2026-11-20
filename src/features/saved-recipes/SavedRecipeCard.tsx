@@ -35,6 +35,7 @@ export function SavedRecipeCard({ recipe, bakeStats, onOpen, onStartBake, onDupl
             <button
               type="button"
               className="wizard-button wizard-button--primary saved-recipe-card__bake"
+              aria-label={`Start baking ${recipe.name}`}
               onClick={() => onStartBake(recipe.id)}
             >
               Start baking
@@ -43,6 +44,7 @@ export function SavedRecipeCard({ recipe, bakeStats, onOpen, onStartBake, onDupl
           <button
             type="button"
             className="wizard-button wizard-button--secondary saved-recipe-card__duplicate"
+            aria-label={`Duplicate ${recipe.name}`}
             onClick={() => onDuplicate(recipe.id)}
           >
             Duplicate

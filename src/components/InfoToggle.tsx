@@ -114,7 +114,7 @@ export function InfoToggle({ label, children }: InfoToggleProps) {
         type="button"
         className="wizard-icon-button wizard-icon-button--help info-toggle__button"
         aria-expanded={isOpen}
-        aria-controls={panelId}
+        aria-controls={isOpen ? panelId : undefined}
         onClick={() => setIsOpen((current) => !current)}
       >
         <span className="visually-hidden">Info about {label}</span>

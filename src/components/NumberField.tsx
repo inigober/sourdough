@@ -184,7 +184,12 @@ export function NumberField({
         {suffix ? <span className="input-suffix">{suffix}</span> : null}
       </span>
       {showMessage ? (
-        <span id={messageId} className={`field-message field-message--${status}`}>
+        // Appears when the baker leaves the field, so it is announced rather than waiting to be found.
+        <span
+          id={messageId}
+          className={`field-message field-message--${status}`}
+          role={status === 'error' ? 'alert' : 'status'}
+        >
           {message}
         </span>
       ) : null}

@@ -58,7 +58,7 @@ export function RecipeAssessment({ sections, isUnavailable, info, defaultOpen = 
         type="button"
         className="assessment-toggle"
         aria-expanded={isOpen}
-        aria-controls={detailsId}
+        aria-controls={isOpen ? detailsId : undefined}
         onClick={() => setIsOpen((current) => !current)}
       >
         <span>

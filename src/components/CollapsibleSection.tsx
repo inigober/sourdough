@@ -18,7 +18,7 @@ export function CollapsibleSection({ title, children, defaultOpen = false }: Col
         type="button"
         className="collapsible-section__trigger"
         aria-expanded={isOpen}
-        aria-controls={panelId}
+        aria-controls={isOpen ? panelId : undefined}
         onClick={() => setIsOpen((current) => !current)}
       >
         <span>{title}</span>

@@ -37,7 +37,7 @@ export function SaveRecipeDialog({
 
   return (
     <DialogCard
-      title={isUpdate ? 'Update saved recipe' : 'Save recipe'}
+      title={isUpdate ? 'Update recipe' : 'Save recipe'}
       titleId="save-recipe-dialog-title"
       onClose={onCancel}
       actions={

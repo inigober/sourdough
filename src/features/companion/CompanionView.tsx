@@ -11,6 +11,11 @@ import {
   getTimerRemainingSeconds,
 } from '../../lib/companion/bakeTimer.ts';
 import {
+  formatTimerSpokenRemaining,
+  getTimerFinishedAnnouncement,
+  getTimerStartedAnnouncement,
+} from '../../lib/companion/timerSpeech.ts';
+import {
   advanceBakeSession,
   getCurrentTimelineStep,
   getForwardStepSkipCount,
@@ -96,6 +101,11 @@ export function CompanionView({
   const [pendingJumpIndex, setPendingJumpIndex] = useState<number | null>(null);
   const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
   const [pendingEarlyStartMinutes, setPendingEarlyStartMinutes] = useState<number | null>(null);
+  // Held while a screen-reader cursor, finger or pointer is on the Undo toast, so it does not vanish mid-reach.
+  const [isUndoHeld, setIsUndoHeld] = useState(false);
+  // Screen-reader announcements. The countdown itself is silent; these say when a timer starts and ends.
+  const [timerStartedAnnouncement, setTimerStartedAnnouncement] = useState('');
+  const [timerFinishedAnnouncement, setTimerFinishedAnnouncement] = useState('');
 
   useBakeKeepAwake();
 
@@ -174,14 +184,40 @@ export function CompanionView({
 
   useEffect(() => {
     if (!undoAction) {
+      setIsUndoHeld(false);
+      return;
+    }
+
+    if (isUndoHeld) {
       return;
     }
 
     const timeout = window.setTimeout(() => setUndoAction(null), UNDO_TOAST_MS);
     return () => window.clearTimeout(timeout);
-  }, [undoAction]);
+  }, [isUndoHeld, undoAction]);
 
   const timerRemainingSeconds = getTimerRemainingSeconds(session.activeTimerEndsAt, timerNow);
+  const hasTimerFinished = timerRemainingSeconds === 0 && isTimedStepRunning(session);
+  const currentStepLabelForSpeech = currentStep?.label;
+
+  // Clear the "timer started" sentence after it was read, so starting the same timer again is announced again.
+  useEffect(() => {
+    if (!timerStartedAnnouncement) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => setTimerStartedAnnouncement(''), 4000);
+    return () => window.clearTimeout(timeout);
+  }, [timerStartedAnnouncement]);
+
+  // Tell a screen-reader user when the timer reaches zero (once per timer), without ticking every second.
+  useEffect(() => {
+    if (hasTimerFinished && currentStepLabelForSpeech) {
+      setTimerFinishedAnnouncement(getTimerFinishedAnnouncement(currentStepLabelForSpeech));
+    } else {
+      setTimerFinishedAnnouncement('');
+    }
+  }, [currentStepLabelForSpeech, hasTimerFinished, session.activeTimerEndsAt]);
 
   function offerUndo(message: string): void {
     setUndoAction({ message, snapshot: session });
@@ -268,6 +304,9 @@ export function CompanionView({
     await ensurePermissionForStartTimer();
     onSessionChange(startTimedStep(session, currentStep));
     setTimerNow(Date.now());
+    setTimerStartedAnnouncement(
+      getTimerStartedAnnouncement(currentStep.label, currentStep.durationMinutes * 60),
+    );
   }
 
   function handleRestartTimer(): void {
@@ -278,6 +317,9 @@ export function CompanionView({
     setUndoAction(null);
     onSessionChange(restartStepTimer(session, currentStep));
     setTimerNow(Date.now());
+    setTimerStartedAnnouncement(
+      getTimerStartedAnnouncement(currentStep.label, currentStep.durationMinutes * 60),
+    );
   }
 
   if (!currentStep) {
@@ -409,11 +451,16 @@ export function CompanionView({
         ) : null}
 
         {timerRemainingSeconds !== null && stepIsRunning ? (
-          <div className="companion__timer" role="timer" aria-live="polite">
+          <div className="companion__timer">
             <span className="companion__timer-label">Timer</span>
             <div className="companion__timer-display">
               <div className="companion__timer-main">
-                <strong className="companion__timer-value">{formatTimerRemaining(timerRemainingSeconds)}</strong>
+                {/* role=timer is silent by default (aria-live off), so the countdown is read only when focused.
+                    "12:30" would be spoken as a clock time, so the spoken text is words. */}
+                <strong className="companion__timer-value" role="timer" aria-live="off">
+                  <span aria-hidden="true">{formatTimerRemaining(timerRemainingSeconds)}</span>
+                  <span className="visually-hidden">{formatTimerSpokenRemaining(timerRemainingSeconds)}</span>
+                </strong>
                 {timerRemainingSeconds === 0 ? (
                   <span className="companion__timer-done">Time&apos;s up</span>
                 ) : null}
@@ -483,6 +530,7 @@ export function CompanionView({
                   ) : null}
                   <span className="timeline-row__time-compact">{stepTimes.startTime}</span>
                   <span className="timeline-row__label-compact">
+                    {variant === 'done' ? <span className="visually-hidden">Done: </span> : null}
                     {step.label}
                     {startsInMinutes > 0 ? (
                       <span className="timeline-row__starts-in">
@@ -565,9 +613,18 @@ export function CompanionView({
           message={undoAction.message}
           actionLabel="Undo"
           onAction={handleUndo}
+          onHoldChange={setIsUndoHeld}
           placement="above-footer"
         />
       ) : null}
+
+      {/* Always in the page, empty until there is something to say: that is what makes screen readers announce it. */}
+      <div className="visually-hidden" role="status" aria-live="polite">
+        {timerStartedAnnouncement}
+      </div>
+      <div className="visually-hidden" role="alert">
+        {timerFinishedAnnouncement}
+      </div>
 
       {isEditingStep && currentStep ? (
         <CompanionStepEditDialog

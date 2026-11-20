@@ -9,6 +9,7 @@ import {
   sortByRecentlyUpdated,
 } from '../../lib/storage/savedRecipeList.ts';
 import type { SavedRecipeSummary } from '../../lib/storage/types.ts';
+import { describeResultCount } from '../../lib/ui/resultCount.ts';
 import { SavedRecipeCard } from './SavedRecipeCard.tsx';
 
 type SavedRecipesViewProps = {
@@ -90,7 +91,16 @@ export function SavedRecipesView({
           ) : null}
 
           {savedRecipes.length > 0 && visibleRecipes.length === 0 ? (
-            <p className="saved-recipes__empty">No saved recipes match your search.</p>
+            <p className="saved-recipes__empty" role="status">
+              No saved recipes match your search.
+            </p>
+          ) : null}
+
+          {/* Screen readers: say how many recipes the search left, since only the list changes on screen. */}
+          {activeQuery && visibleRecipes.length > 0 ? (
+            <p className="visually-hidden" role="status">
+              {describeResultCount(visibleRecipes.length, 'recipe')}
+            </p>
           ) : null}
 
           {visibleRecipes.length > 0 ? (

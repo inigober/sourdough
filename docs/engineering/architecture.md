@@ -138,7 +138,7 @@ Local storage keys (all read defensively):
 | Key | Content |
 | --- | --- |
 | `sourdough:saved-recipes:v1` | Saved recipes while signed out |
-| `sourdough:builder-draft:v1` | The unfinished recipe and schedule. Written as the baker works, but never while the builder still holds its untouched starting state (`isUntouchedBuilderState`), so loading the app or a `/build/...` URL cannot replace a real draft with defaults |
+| `sourdough:builder-draft:v1` | The unfinished recipe and schedule. Written as the baker works, but never while the builder still holds its untouched starting state (`isUntouchedBuilderState`), so loading the app or a `/build/...` URL cannot replace a real draft with defaults. Restored on a refresh at a `/build/...` URL (see below) |
 | `sourdough:bake-session:v1` | The active bake session |
 | `sourdough:bake-history:v1` | Completed bakes while signed out |
 | `sourdough:auth-prompt-dismissed`, `sourdough:history-backup-nudge-dismissed` | Dismissed prompts |
@@ -146,6 +146,16 @@ Local storage keys (all read defensively):
 When signed in (and Supabase is configured), recipes go to `saved_recipes` and history to `bake_sessions` and `bake_session_steps`, both with row-level security so each user sees only their own rows (`supabase/migrations/`). On sign-in, recipes saved on the device are imported once per user, then bakes saved on the device are uploaded; the local copy is removed only after its upload succeeded. See [Bake history](../product/bake-history.md).
 
 The bake session lives on the device even when signed in: it is a working copy, and only the finished bake goes to history.
+
+### Draft restore on refresh
+
+The builder starts every page load with defaults. When the page is first loaded on a builder route (`/build/:step`, `/build/summary`, `/build/schedule`), `useRecipeWizard` puts the stored draft back into memory and **keeps the URL**. The rules are in `lib/storage/restoreBuilderDraft.ts` (`decideBuilderDraftRestore`, `resolveRestoredDraftState`, tested beside it):
+
+- Only a first load on a builder route restores. Home, Saved, History, `/recipe/:id` and `/bake` never do (Home keeps its Resume card), and neither does an in-app navigation later.
+- The URL wins over the draft's saved step. The restored content shows on whatever builder page the baker is on, and the next autosave records that step.
+- It restores only while the builder is still untouched. If the baker edits during the (async) saved-recipe lookup, their edit wins and the draft is left alone.
+- A draft linked to a saved recipe waits for sign-in to finish, then fetches that recipe by id (this device or the cloud) so the unsaved-changes check compares against the right recipe. If it is missing or unreachable, only the link is dropped: the work is kept and a later save creates a new recipe.
+- The stored schedule is normalized like a saved one, so older draft shapes still load. `resumeDraft` (Home Resume card) uses the same state builder and then navigates to the draft's own step.
 
 ### Persisted data must tolerate older shapes
 

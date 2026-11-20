@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { filterBakeHistoryEntries } from './filterBakeHistory.ts';
+import {
+  HISTORY_SEARCH_MIN_BAKES,
+  filterBakeHistoryEntries,
+  shouldShowHistorySearch,
+} from './filterBakeHistory.ts';
 import type { BakeHistorySessionSummary } from './types.ts';
 
 const entries: BakeHistorySessionSummary[] = [
@@ -37,4 +41,12 @@ test('filterBakeHistoryEntries matches recipe names and note previews', () => {
 test('filterBakeHistoryEntries filters by assessment', () => {
   assert.deepEqual(filterBakeHistoryEntries(entries, '', 'great').map((entry) => entry.id), ['1']);
   assert.deepEqual(filterBakeHistoryEntries(entries, '', 'unset').map((entry) => entry.id), ['3']);
+});
+
+test('search and filter appear only once the history holds enough bakes', () => {
+  assert.equal(HISTORY_SEARCH_MIN_BAKES, 6);
+  assert.equal(shouldShowHistorySearch(0), false);
+  assert.equal(shouldShowHistorySearch(5), false);
+  assert.equal(shouldShowHistorySearch(6), true);
+  assert.equal(shouldShowHistorySearch(20), true);
 });

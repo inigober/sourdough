@@ -20,6 +20,7 @@ export function RecipeTargetsSection({
   return (
     <section className="card">
       <SectionHeading
+        headingLevel={1}
         title={`${recipeInput.hydrationPercent}% hydration, ${recipeInput.saltPercent}% salt`}
         copy="Hydration and salt are baker&apos;s percentages based on total flour weight."
       />

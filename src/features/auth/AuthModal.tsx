@@ -1,8 +1,10 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { createPortal } from 'react-dom';
 
 import { CloseIcon, EyeIcon, EyeOffIcon } from '../../components/icons.tsx';
 import { CLOUD_SYNC_UNAVAILABLE_COPY } from '../../lib/auth/cloudSyncCopy.ts';
 import { useAuth } from '../../lib/auth/useAuth.ts';
+import { useModalSheet } from '../../lib/ui/useModalSheet.ts';
 
 type AuthModalStep = 'choose' | 'signIn' | 'signUp';
 
@@ -29,6 +31,15 @@ export function AuthModal({ onClose, initialStep = 'choose' }: AuthModalProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const sheetRef = useRef<HTMLDivElement>(null);
+
+  // Focus, Tab trap, Escape, inert page behind, and focus back to the opener on close.
+  useModalSheet(sheetRef, { onClose: () => onClose(true) });
+
+  // Each step swaps the whole body, which would drop focus onto the page. Start every step on its title.
+  useEffect(() => {
+    document.getElementById('auth-modal-title')?.focus({ preventScroll: true });
+  }, [step]);
 
   useEffect(() => {
     if (user) {
@@ -66,8 +77,9 @@ export function AuthModal({ onClose, initialStep = 'choose' }: AuthModalProps) {
     }
   }
 
-  return (
-    <div className="dialog-backdrop" role="presentation" onClick={handleBackdropClick}>
+  // Portaled to <body> so the page behind can be made inert while the modal is open.
+  return createPortal(
+    <div ref={sheetRef} className="dialog-backdrop" role="presentation" onClick={handleBackdropClick}>
       <div
         className="dialog-card auth-modal"
         role="dialog"
@@ -87,7 +99,9 @@ export function AuthModal({ onClose, initialStep = 'choose' }: AuthModalProps) {
         {!isConfigured ? (
           <>
             <div className="auth-modal__intro">
-              <h2 id="auth-modal-title">Cloud sync unavailable</h2>
+              <h2 id="auth-modal-title" tabIndex={-1} data-modal-initial-focus>
+                Cloud sync unavailable
+              </h2>
               <p className="section-copy">{CLOUD_SYNC_UNAVAILABLE_COPY}</p>
             </div>
             <button
@@ -99,11 +113,15 @@ export function AuthModal({ onClose, initialStep = 'choose' }: AuthModalProps) {
             </button>
           </>
         ) : isLoading ? (
-          <p className="auth-modal__status">Checking account…</p>
+          <p className="auth-modal__status" role="status">
+            Checking account…
+          </p>
         ) : step === 'choose' ? (
           <>
             <div className="auth-modal__intro">
-              <h2 id="auth-modal-title">Sync your recipes</h2>
+              <h2 id="auth-modal-title" tabIndex={-1} data-modal-initial-focus>
+                Sync your recipes
+              </h2>
               <p className="section-copy">
                 Save recipes in the cloud and pick them up on another device.
               </p>
@@ -131,7 +149,9 @@ export function AuthModal({ onClose, initialStep = 'choose' }: AuthModalProps) {
               <button type="button" className="auth-modal__back" onClick={() => goToStep('choose')}>
                 Back
               </button>
-              <h2 id="auth-modal-title">{step === 'signIn' ? 'Sign in' : 'Create account'}</h2>
+              <h2 id="auth-modal-title" tabIndex={-1} data-modal-initial-focus>
+                {step === 'signIn' ? 'Sign in' : 'Create account'}
+              </h2>
               <p className="section-copy">
                 {step === 'signIn'
                   ? 'Welcome back. Enter your account details.'
@@ -174,8 +194,12 @@ export function AuthModal({ onClose, initialStep = 'choose' }: AuthModalProps) {
                   <span className="field-hint">At least 6 characters.</span>
                 ) : null}
               </label>
-              {authMessage ? <p className="auth-modal__message">{authMessage}</p> : null}
-              {authError ? <p className="auth-modal__error">{authError}</p> : null}
+              {authMessage ? <p className="auth-modal__message" role="status">
+                  {authMessage}
+                </p> : null}
+              {authError ? <p className="auth-modal__error" role="alert">
+                  {authError}
+                </p> : null}
               <button
                 type="submit"
                 className="wizard-button wizard-button--primary auth-modal__submit"
@@ -187,6 +211,7 @@ export function AuthModal({ onClose, initialStep = 'choose' }: AuthModalProps) {
           </>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -69,6 +69,7 @@ export function RecipeBuilder() {
     fetchSavedRecipe,
     userId: user?.id,
     useCloudRecipes,
+    isAuthLoading,
   });
 
   const { isAuthModalOpen, openAuthModal, closeAuthModal, offerAuthAfterSave } = useAuthPrompt({

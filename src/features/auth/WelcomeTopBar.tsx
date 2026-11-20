@@ -28,8 +28,18 @@ export function WelcomeTopBar({ onOpenAuth, variant = 'header' }: WelcomeTopBarP
       setShowAccountMenu(false);
     }
 
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setShowAccountMenu(false);
+      }
+    }
+
     document.addEventListener('mousedown', handlePointerDown);
-    return () => document.removeEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, [showAccountMenu]);
 
   if (user) {
@@ -44,19 +54,17 @@ export function WelcomeTopBar({ onOpenAuth, variant = 'header' }: WelcomeTopBarP
             type="button"
             className="app-header__home wizard-icon-button"
             aria-expanded={showAccountMenu}
-            aria-haspopup="menu"
-            aria-label={`Account: ${user.email ?? 'signed in'}`}
+                       aria-label={`Account: ${user.email ?? 'signed in'}`}
             onClick={() => setShowAccountMenu((current) => !current)}
           >
             <UserIcon />
           </button>
           {showAccountMenu ? (
-            <div className="welcome-top-bar__menu" role="menu">
+            <div className="welcome-top-bar__menu">
               <p className="welcome-top-bar__menu-email">{user.email}</p>
               <button
                 type="button"
                 className="welcome-top-bar__menu-action"
-                role="menuitem"
                 onClick={() => void signOut()}
               >
                 Sign out

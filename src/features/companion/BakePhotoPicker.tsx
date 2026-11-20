@@ -11,6 +11,12 @@ type BakePhotoPickerProps = {
   disabled?: boolean;
   /** Heading above the picker. The bake detail screen passes its own wording. */
   label?: string;
+  /**
+   * Just the button, with no box or heading: for a bake that has no photo yet, where the picker
+   * would otherwise be a large empty card. Keep the same element mounted when this flips to
+   * false, so a chosen file is not lost.
+   */
+  compact?: boolean;
 };
 
 /**
@@ -23,6 +29,7 @@ export function BakePhotoPicker({
   onBusyChange,
   disabled = false,
   label = 'Photo of your loaf (optional)',
+  compact = false,
 }: BakePhotoPickerProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isCompressing, setIsCompressing] = useState(false);
@@ -71,8 +78,8 @@ export function BakePhotoPicker({
   }
 
   return (
-    <div className="field-card bake-photo-picker">
-      <span className="field-label-row">{label}</span>
+    <div className={compact ? 'bake-photo-picker bake-photo-picker--compact' : 'field-card bake-photo-picker'}>
+      {compact ? null : <span className="field-label-row">{label}</span>}
       {previewUrl ? (
         <div className="bake-photo-picker__preview">
           <img src={previewUrl} alt="Preview of your loaf photo" className="bake-photo-picker__image" />

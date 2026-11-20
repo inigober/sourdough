@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { DialogCard } from '../../components/DialogCard.tsx';
 import { NumberField } from '../../components/NumberField.tsx';
 import {
   applyStepScheduleEdit,
@@ -36,28 +37,12 @@ export function CompanionStepEditDialog({
   }
 
   return (
-    <div className="dialog-backdrop" role="presentation" onClick={onCancel}>
-      <div
-        className="dialog-card"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="companion-edit-title"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <h2 id="companion-edit-title">Adjust this step</h2>
-        <p className="dialog-card__message">
-          Changes apply to this bake only. Your saved recipe stays unchanged.
-        </p>
-        <NumberField
-          label={edit.label}
-          suffix={edit.suffix}
-          value={value}
-          min={edit.min}
-          max={edit.max}
-          step={edit.step}
-          showSteppers
-          onChange={setValue}
-        />
+    <DialogCard
+      title="Adjust this step"
+      titleId="companion-edit-title"
+      messageId="companion-edit-message"
+      onClose={onCancel}
+      actions={
         <div className="dialog-card__actions">
           <button type="button" className="wizard-button wizard-button--secondary" onClick={onCancel}>
             Cancel
@@ -66,7 +51,21 @@ export function CompanionStepEditDialog({
             Update step
           </button>
         </div>
-      </div>
-    </div>
+      }
+    >
+      <p id="companion-edit-message" className="dialog-card__message">
+        Changes apply to this bake only. Your saved recipe stays unchanged.
+      </p>
+      <NumberField
+        label={edit.label}
+        suffix={edit.suffix}
+        value={value}
+        min={edit.min}
+        max={edit.max}
+        step={edit.step}
+        showSteppers
+        onChange={setValue}
+      />
+    </DialogCard>
   );
 }

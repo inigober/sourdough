@@ -69,6 +69,8 @@ export function BakeHistoryDetailView({
   const [photoMessage, setPhotoMessage] = useState<string | null>(null);
   // Changing the key gives the picker a fresh, empty state after each save or cancel.
   const [photoPickerKey, setPhotoPickerKey] = useState(0);
+  // No photo and nothing chosen yet: show a compact "add a photo" row instead of an empty card.
+  const isPhotoEmpty = !photoUrl && !chosenPhoto && !isPreparingPhoto;
   const [draftNote, setDraftNote] = useState(session.overallNote ?? '');
   const [draftAssessment, setDraftAssessment] = useState<BakeSessionAssessment | undefined>(
     session.overallAssessment,
@@ -183,8 +185,13 @@ export function BakeHistoryDetailView({
         </button>
       </section>
 
-      <section className="card bake-history-detail__photo" aria-label="Loaf photo">
-        <h2 className="bake-history-detail__section-title">Loaf photo</h2>
+      <section
+        className={`card bake-history-detail__photo${isPhotoEmpty ? ' bake-history-detail__photo--empty' : ''}`}
+        aria-label="Loaf photo"
+      >
+        <h2 className={`bake-history-detail__section-title${isPhotoEmpty ? ' visually-hidden' : ''}`}>
+          Loaf photo
+        </h2>
         {photoUrl ? (
           <button
             type="button"
@@ -201,32 +208,35 @@ export function BakeHistoryDetailView({
             <BakePhotoPicker
               key={photoPickerKey}
               label={photoUrl ? 'New photo' : 'Add a photo of this loaf'}
+              compact={isPhotoEmpty}
               onChange={setChosenPhoto}
               onBusyChange={setIsPreparingPhoto}
               disabled={isSavingPhoto}
             />
-            <div className="bake-history-detail__photo-actions">
-              {chosenPhoto ? (
-                <button
-                  type="button"
-                  className="wizard-button wizard-button--primary"
-                  onClick={() => void handleSavePhoto()}
-                  disabled={isSavingPhoto || isPreparingPhoto}
-                >
-                  {isSavingPhoto ? 'Saving photo…' : 'Save photo'}
-                </button>
-              ) : null}
-              {photoUrl ? (
-                <button
-                  type="button"
-                  className="wizard-button wizard-button--secondary"
-                  onClick={closePhotoPicker}
-                  disabled={isSavingPhoto}
-                >
-                  Cancel
-                </button>
-              ) : null}
-            </div>
+            {chosenPhoto || photoUrl ? (
+              <div className="bake-history-detail__photo-actions">
+                {chosenPhoto ? (
+                  <button
+                    type="button"
+                    className="wizard-button wizard-button--primary"
+                    onClick={() => void handleSavePhoto()}
+                    disabled={isSavingPhoto || isPreparingPhoto}
+                  >
+                    {isSavingPhoto ? 'Saving photo…' : 'Save photo'}
+                  </button>
+                ) : null}
+                {photoUrl ? (
+                  <button
+                    type="button"
+                    className="wizard-button wizard-button--secondary"
+                    onClick={closePhotoPicker}
+                    disabled={isSavingPhoto}
+                  >
+                    Cancel
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
           </>
         ) : (
           <div className="bake-history-detail__photo-actions">
@@ -268,10 +278,12 @@ export function BakeHistoryDetailView({
               void handleSaveEdits();
             }}
           >
-            <label className="field-card">
-              <span className="field-label-row">Loaf assessment (optional)</span>
+            <div className="field-card">
+              <span className="field-label-row">
+                Loaf assessment (optional)
+              </span>
               <LoafAssessmentPicker value={draftAssessment} onChange={setDraftAssessment} />
-            </label>
+            </div>
             <label className="field-card">
               <span className="field-label-row">Bake notes (optional)</span>
               <textarea
@@ -281,7 +293,11 @@ export function BakeHistoryDetailView({
                 placeholder="What went well? Anything to adjust next time?"
               />
             </label>
-            {saveError ? <p className="auth-modal__error">{saveError}</p> : null}
+            {saveError ? (
+              <p className="auth-modal__error" role="alert">
+                {saveError}
+              </p>
+            ) : null}
             <div className="bake-history-detail__edit-actions">
               <button
                 type="button"
@@ -364,7 +380,11 @@ export function BakeHistoryDetailView({
       </section>
 
       <div className="bake-history-detail__footer">
-        {saveError && !isEditing ? <p className="auth-modal__error">{saveError}</p> : null}
+        {saveError && !isEditing ? (
+          <p className="auth-modal__error" role="alert">
+            {saveError}
+          </p>
+        ) : null}
         <button
           type="button"
           className="wizard-button bake-history-detail__delete"

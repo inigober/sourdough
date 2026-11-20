@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 
 import { RecipeBuilder } from '../features/recipe-builder/RecipeBuilder.tsx';
+import { useRouteAccessibility } from './routeEffects.ts';
 
 const router = createBrowserRouter([
   { path: '/', element: <RecipeBuilder /> },
@@ -14,6 +15,8 @@ const router = createBrowserRouter([
 ]);
 
 export function App() {
+  useRouteAccessibility(router);
+
   return (
     <main className="app-shell">
       <RouterProvider router={router} />

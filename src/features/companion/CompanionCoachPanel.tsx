@@ -7,6 +7,7 @@ import {
   type ChangeEvent,
   type FormEvent,
 } from 'react';
+import { createPortal } from 'react-dom';
 
 import { compressCoachPhoto, getCoachPhotoCompressionOptions } from '../../lib/companion/compressCoachPhoto.ts';
 import { buildCoachPrompt } from '../../lib/companion/buildCoachPrompt.ts';
@@ -28,6 +29,7 @@ import { requestCoachReply } from '../../lib/companion/requestCoachReply.ts';
 import type { BakeSession, CoachTranscriptMessage } from '../../lib/companion/types.ts';
 import { buildTimeline, formatTimelineForDisplay } from '../../lib/schedule/buildTimeline.ts';
 import { CameraIcon, CloseIcon } from '../../components/icons.tsx';
+import { useModalSheet } from '../../lib/ui/useModalSheet.ts';
 
 const PHOTO_ONLY_QUESTION = 'What can you tell me from this photo?';
 
@@ -66,6 +68,8 @@ export function CompanionCoachPanel({
   const [isPreparingPhoto, setIsPreparingPhoto] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [failure, setFailure] = useState<CoachFailure | null>(null);
+  const [announcement, setAnnouncement] = useState('');
+  const sheetRef = useRef<HTMLDivElement>(null);
   const transcriptRef = useRef<HTMLDivElement>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const textInputRef = useRef<HTMLInputElement>(null);
@@ -83,6 +87,7 @@ export function CompanionCoachPanel({
     [stepId, stepLabel, session.recipeInput],
   );
   const savedMessages = session.coachTranscript ?? [];
+  useModalSheet(sheetRef, { onClose });
   const pendingQuestionText = draft.trim() || PHOTO_ONLY_QUESTION;
 
   useEffect(() => {
@@ -127,6 +132,7 @@ export function CompanionCoachPanel({
     // The draft and photo stay in place until a reply succeeds, so a failure loses nothing.
     setFailure(null);
     setIsSending(true);
+    setAnnouncement('Coach is thinking.');
 
     try {
       const prompt = buildCoachPrompt({
@@ -168,9 +174,13 @@ export function CompanionCoachPanel({
         );
         setDraft('');
         setPendingPhoto(null);
+        // The reply is read out once, here, rather than making the whole transcript a live region
+        // (which would also read the baker's own question back to them).
+        setAnnouncement(`Coach says: ${result.reply}`);
         return;
       }
 
+      setAnnouncement('');
       setFailure({ reason: result.reason, message: result.message });
     } finally {
       if (isMountedRef.current) {
@@ -209,13 +219,22 @@ export function CompanionCoachPanel({
 
   let lastShownStepId = stepId;
 
-  return (
-    <div className="companion-coach" role="dialog" aria-modal="true" aria-labelledby="companion-coach-title">
+  // Portaled to <body> so the page behind can be made inert while the sheet is open (see useModalSheet).
+  return createPortal(
+    <div
+      ref={sheetRef}
+      className="companion-coach"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="companion-coach-title"
+    >
       <div className="companion-coach__backdrop" onClick={onClose} aria-hidden="true" />
       <section className="companion-coach__panel">
         <header className="companion-coach__header">
           <div>
-            <h2 id="companion-coach-title">Baking coach</h2>
+            <h2 id="companion-coach-title" data-modal-initial-focus>
+              Baking coach
+            </h2>
             <p className="companion-coach__subtitle">{stepLabel}</p>
             {needsSignIn ? null : (
               <p
@@ -236,6 +255,10 @@ export function CompanionCoachPanel({
             <CloseIcon />
           </button>
         </header>
+
+        <div className="visually-hidden" role="status" aria-live="polite">
+          {announcement}
+        </div>
 
         <div className="companion-coach__transcript" ref={transcriptRef}>
           <article className="companion-coach__message companion-coach__message--assistant">
@@ -331,6 +354,8 @@ export function CompanionCoachPanel({
                 type="file"
                 accept="image/*"
                 className="visually-hidden"
+                tabIndex={-1}
+                aria-hidden="true"
                 onChange={(event) => void handlePhotoChange(event)}
               />
               <button
@@ -344,7 +369,7 @@ export function CompanionCoachPanel({
               </button>
             </div>
             <label className="companion-coach__text-input" htmlFor={inputId}>
-              <span className="visually-hidden">Ask the coach</span>
+              <span className="visually-hidden">Ask about this step</span>
               <input
                 ref={textInputRef}
                 id={inputId}
@@ -362,13 +387,15 @@ export function CompanionCoachPanel({
               Send
             </button>
           </form>
-        ) : (
+        ) : needsSignIn ? null : (
+          // Signed-out bakers see the sign-in prompt above; "you used all your questions" would be false for them.
           <p className="companion-coach__limit" role="status">
             {getCoachFailureMessage('limit')}
           </p>
         )}
       </section>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

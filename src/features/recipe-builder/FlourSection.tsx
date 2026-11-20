@@ -43,6 +43,7 @@ export function FlourSection({
   return (
     <section className="card">
       <SectionHeading
+        headingLevel={1}
         title={isMultiFlour ? 'Which flours are you blending?' : 'Which flour are you using?'}
         copy={
           isMultiFlour
@@ -89,7 +90,12 @@ export function FlourSection({
         </ul>
 
         {blendMessage.message ? (
-          <p className={`field-message field-message--${blendMessage.status}`}>{blendMessage.message}</p>
+          <p
+            className={`field-message field-message--${blendMessage.status}`}
+            role={blendMessage.status === 'error' ? 'alert' : 'status'}
+          >
+            {blendMessage.message}
+          </p>
         ) : null}
 
         <button type="button" className="wizard-button wizard-button--secondary flour-add-button" onClick={onAddFlour}>
@@ -126,11 +132,13 @@ function FlourBlendRow({
   onRemoveFlour,
 }: FlourBlendRowProps) {
   const grams = getFlourGrams(entry.percent, totalFlourGrams);
+  // Rows repeat when blending, so every control names its flour: "Remove Whole wheat", not "Remove flour".
+  const flourLabel = flourOptions.find((option) => option.value === entry.flourType)?.label ?? 'flour';
 
   return (
     <li className={isMultiFlour ? 'flour-blend-row flour-blend-row--multi' : 'flour-blend-row flour-blend-row--single'}>
       <label className="flour-blend-row__select">
-        <span className="visually-hidden">Flour type</span>
+        <span className="visually-hidden">{isMultiFlour ? `Flour type, currently ${flourLabel}` : 'Flour type'}</span>
         <select
           value={entry.flourType}
           onChange={(event) => onFlourTypeChange(entry.id, event.currentTarget.value as FlourType)}
@@ -146,6 +154,7 @@ function FlourBlendRow({
       {isMultiFlour ? (
         <div className="flour-blend-row__meta">
           <FlourPercentStepper
+            flourLabel={flourLabel}
             value={entry.percent}
             grams={grams}
             onCommitPercent={(value) => onFlourPercentChange(entry.id, value)}
@@ -154,7 +163,7 @@ function FlourBlendRow({
           <button
             type="button"
             className="icon-button icon-button--delete"
-            aria-label="Remove flour"
+            aria-label={`Remove ${flourLabel}`}
             onClick={() => onRemoveFlour(entry.id)}
           >
             <BinIcon />
@@ -170,6 +179,7 @@ function FlourBlendRow({
 }
 
 type FlourPercentStepperProps = {
+  flourLabel: string;
   value: number;
   grams: number;
   onCommitPercent: (value: number) => void;
@@ -177,6 +187,7 @@ type FlourPercentStepperProps = {
 };
 
 function FlourPercentStepper({
+  flourLabel,
   value,
   grams,
   onCommitPercent,
@@ -219,18 +230,18 @@ function FlourPercentStepper({
   return (
     <div className="flour-blend-row__allocation">
       <div className="flour-percent-stepper">
-        <span className="visually-hidden">Share of total flour</span>
+        <span className="visually-hidden">Share of total flour: {flourLabel}</span>
         <button
           type="button"
           className="icon-button icon-button--step flour-percent-stepper__button"
-          aria-label="Decrease flour percentage"
+          aria-label={`Decrease ${flourLabel} percentage`}
           disabled={decrementDisabled}
           onClick={() => stepPercent(-1)}
         >
           <MinusIcon />
         </button>
         <label className="flour-percent-stepper__value">
-          <span className="visually-hidden">Flour percentage</span>
+          <span className="visually-hidden">{flourLabel} percentage</span>
           <input
             type="text"
             inputMode="numeric"
@@ -253,7 +264,7 @@ function FlourPercentStepper({
         <button
           type="button"
           className="icon-button icon-button--step flour-percent-stepper__button"
-          aria-label="Increase flour percentage"
+          aria-label={`Increase ${flourLabel} percentage`}
           disabled={incrementDisabled}
           onClick={() => stepPercent(1)}
         >

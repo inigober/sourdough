@@ -65,7 +65,7 @@ export function WelcomeStep({
   ) : null;
 
   const templatesSection = (
-    <section className="card welcome-templates" aria-label="Recipe templates">
+    <section className="welcome-templates"aria-label="Recipe templates">
       <div className="welcome-section__header">
         <h2>Start from a template</h2>
         <p className="section-copy">Six common bakes with sensible defaults you can adjust in the wizard.</p>

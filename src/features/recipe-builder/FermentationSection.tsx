@@ -41,6 +41,7 @@ export function FermentationSection({
   return (
     <section className="card">
       <SectionHeading
+        headingLevel={1}
         title="Timing and starter strength"
         copy="Bulk time, room temperature, and levain details shape how much prefermented flour the recipe needs."
       />

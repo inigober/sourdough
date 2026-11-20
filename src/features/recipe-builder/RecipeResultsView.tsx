@@ -192,7 +192,10 @@ function SummaryGroup({ icon, tone, title, info, value, stackedLines, onEdit }: 
         </span>
         {info ? <InfoToggle label={title}>{info}</InfoToggle> : null}
       </div>
-      <button type="button" className="summary-group__body" onClick={onEdit} aria-label={`Edit ${title}`}>
+      {/* Hidden text instead of aria-label: the name is "Edit Dough size: 500g · 2 loaves", so it says what the
+          current value is and still contains the visible value (Voice Control: "Tap 500g"). */}
+      <button type="button" className="summary-group__body" onClick={onEdit}>
+        <span className="visually-hidden">Edit {title}: </span>
         <span className="summary-group__value-row">
           {stackedLines && stackedLines.length > 1 ? (
             <span className="summary-group__stack">

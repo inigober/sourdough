@@ -27,6 +27,7 @@ export function SelectField<TValue extends string>({
   status,
 }: SelectFieldProps<TValue>) {
   const selectId = useId();
+  const messageId = useId();
   const classNames = ['field-card', className, status ? `field-card--${status}` : undefined]
     .filter(Boolean)
     .join(' ');
@@ -37,6 +38,8 @@ export function SelectField<TValue extends string>({
       <select
         id={selectId}
         value={value}
+        aria-invalid={message && status === 'error' ? true : undefined}
+        aria-describedby={message ? messageId : undefined}
         onChange={(event) => onChange(event.currentTarget.value as TValue)}
       >
         {options.map((option) => (
@@ -45,7 +48,15 @@ export function SelectField<TValue extends string>({
           </option>
         ))}
       </select>
-      {message ? <span className={`field-message field-message--${status}`}>{message}</span> : null}
+      {message ? (
+        <span
+          id={messageId}
+          className={`field-message field-message--${status}`}
+          role={status === 'error' ? 'alert' : 'status'}
+        >
+          {message}
+        </span>
+      ) : null}
     </div>
   );
 }

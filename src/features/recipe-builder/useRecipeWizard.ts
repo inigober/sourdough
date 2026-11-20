@@ -36,6 +36,11 @@ import {
   saveBuilderDraft,
   type BuilderDraftSummary,
 } from '../../lib/storage/draftStorage.ts';
+import {
+  decideBuilderDraftRestore,
+  resolveRestoredDraftState,
+  type RestoredBuilderState,
+} from '../../lib/storage/restoreBuilderDraft.ts';
 import type { SavedRecipe } from '../../lib/storage/types.ts';
 import type { DoughSizeNumberField } from './DoughSizeSection.tsx';
 import type { FermentationNumberField } from './FermentationSection.tsx';
@@ -63,6 +68,8 @@ type UseRecipeWizardOptions = {
   fetchSavedRecipe: (id: string) => Promise<SavedRecipe | null>;
   userId: string | undefined;
   useCloudRecipes: boolean;
+  /** True while sign-in is still being checked, so saved recipes cannot be looked up yet. */
+  isAuthLoading: boolean;
 };
 
 export function useRecipeWizard({
@@ -75,6 +82,7 @@ export function useRecipeWizard({
   fetchSavedRecipe,
   userId,
   useCloudRecipes,
+  isAuthLoading,
 }: UseRecipeWizardOptions) {
   const [hasCompletedWizard, setHasCompletedWizard] = useState(false);
   const [editingFromResults, setEditingFromResults] = useState(false);
@@ -86,6 +94,28 @@ export function useRecipeWizard({
   const [draftSummary, setDraftSummary] = useState<BuilderDraftSummary | null>(null);
   // What the builder starts with, to tell "nothing happened yet" from a real recipe in progress.
   const initialBuilderStateRef = useRef({ recipeInput, scheduleInput });
+  // The latest builder state, readable from async code that must not act on a stale render.
+  const latestBuilderStateRef = useRef({
+    recipeInput,
+    scheduleInput,
+    hasCompletedWizard,
+    editingFromResults,
+    hasOpenedSchedule,
+    activeSavedRecipeId,
+  });
+  latestBuilderStateRef.current = {
+    recipeInput,
+    scheduleInput,
+    hasCompletedWizard,
+    editingFromResults,
+    hasOpenedSchedule,
+    activeSavedRecipeId,
+  };
+  // Only a page that first loaded on a builder route (a refresh of /build/...) restores its draft.
+  const startedOnBuilderRouteRef = useRef(
+    phase !== 'companion' && !(phase === 'wizard' && routeStep === 'welcome'),
+  );
+  const hasSettledDraftRestoreRef = useRef(false);
 
   const validationIssues = useMemo(() => validateRecipeInput(recipeInput), [recipeInput]);
   const hasBlockingIssues = hasBlockingValidationIssue(validationIssues);
@@ -154,6 +184,82 @@ export function useRecipeWizard({
     activeSavedRecipeId,
   ]);
 
+  const applyRestoredState = useCallback(
+    (restored: RestoredBuilderState): void => {
+      setRecipeInput(restored.recipeInput);
+      setScheduleInput(restored.scheduleInput);
+      setActiveSavedRecipeId(restored.activeSavedRecipeId);
+      setActiveSavedRecipe(restored.activeSavedRecipe);
+      setHasCompletedWizard(restored.hasCompletedWizard);
+      setEditingFromResults(restored.editingFromResults);
+      setHasOpenedSchedule(restored.hasOpenedSchedule);
+    },
+    [setActiveSavedRecipe, setActiveSavedRecipeId],
+  );
+
+  // A browser refresh on /build/... starts with an empty builder. Put the stored draft back, but stay on the
+  // page the baker is on. Decision rules live in lib/storage/restoreBuilderDraft.ts.
+  useEffect(() => {
+    if (hasSettledDraftRestoreRef.current) {
+      return;
+    }
+
+    const isUntouched = (): boolean =>
+      isUntouchedBuilderState(latestBuilderStateRef.current, initialBuilderStateRef.current);
+
+    const decision = decideBuilderDraftRestore({
+      startedOnBuilderRoute: startedOnBuilderRouteRef.current,
+      isBuilderUntouched: isUntouched(),
+      isAuthLoading,
+      draft: loadBuilderDraft(),
+    });
+
+    if (decision.action === 'wait') {
+      return;
+    }
+
+    if (decision.action === 'skip') {
+      hasSettledDraftRestoreRef.current = true;
+      return;
+    }
+
+    const { draft } = decision;
+    if (!draft.activeSavedRecipeId) {
+      hasSettledDraftRestoreRef.current = true;
+      applyRestoredState(resolveRestoredDraftState(draft, null));
+      return;
+    }
+
+    // Looking up the linked saved recipe is async. It only counts as settled once it finishes, so a cancelled
+    // run (StrictMode re-run, or the signed-in user changing mid-lookup) is simply started again.
+    let isCancelled = false;
+    const linkedRecipeId = draft.activeSavedRecipeId;
+    void (async () => {
+      let savedRecipe: SavedRecipe | null = null;
+      try {
+        savedRecipe = await fetchSavedRecipe(linkedRecipeId);
+      } catch {
+        // Unreachable counts as missing: keep the work, drop the link.
+      }
+
+      // The baker may have started editing while the lookup ran. Their edit wins over the stored draft.
+      if (isCancelled) {
+        return;
+      }
+
+      hasSettledDraftRestoreRef.current = true;
+      if (!isUntouched()) {
+        return;
+      }
+
+      applyRestoredState(resolveRestoredDraftState(draft, savedRecipe));
+    })();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [applyRestoredState, fetchSavedRecipe, isAuthLoading]);
+
   const resetToWelcome = useCallback((): void => {
     setEditingFromResults(false);
   }, []);
@@ -199,16 +305,10 @@ export function useRecipeWizard({
       savedRecipe = await fetchSavedRecipe(draft.activeSavedRecipeId);
     }
 
-    setRecipeInput(draft.recipeInput);
-    setScheduleInput(withoutCalendarDate(draft.scheduleInput));
-    setActiveSavedRecipeId(draft.activeSavedRecipeId);
-    setActiveSavedRecipe(savedRecipe);
-    setHasCompletedWizard(draft.hasCompletedWizard);
-    setEditingFromResults(draft.editingFromResults);
-    setHasOpenedSchedule(draft.hasOpenedSchedule);
+    applyRestoredState(resolveRestoredDraftState(draft, savedRecipe));
     routes.toPath(buildAppPathFromDraft(draft));
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-  }, [fetchSavedRecipe, refreshDraftSummary, routes, setActiveSavedRecipe, setActiveSavedRecipeId]);
+  }, [applyRestoredState, fetchSavedRecipe, refreshDraftSummary, routes]);
 
   const loadSavedRecipe = useCallback(
     (saved: SavedRecipe): void => {

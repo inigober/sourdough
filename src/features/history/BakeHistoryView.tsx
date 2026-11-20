@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react';
 
 import { ScreenChrome } from '../../components/ScreenChrome.tsx';
-import { FilterIcon, LoafIcon, SearchIcon } from '../../components/icons.tsx';
+import { CloseIcon, FilterIcon, LoafIcon, SearchIcon } from '../../components/icons.tsx';
 import { LoafAssessmentPicker } from '../../components/LoafAssessmentPicker.tsx';
 import { getLoafAssessmentLabel } from '../../lib/history/assessment.ts';
 import { buildBakeSummaryLine } from '../../lib/history/bakeSummaryLine.ts';
 import {
   filterBakeHistoryEntries,
+  shouldShowHistorySearch,
   type BakeHistoryAssessmentFilter,
 } from '../../lib/history/filterBakeHistory.ts';
 import { formatHistoryDate } from '../../lib/history/formatHistory.ts';
@@ -16,6 +17,7 @@ import {
 } from '../../lib/history/historyBackupNudgeStorage.ts';
 import type { BakeHistorySessionSummary } from '../../lib/history/types.ts';
 import { useBakePhotoUrls } from '../../lib/history/useBakePhotoUrls.ts';
+import { describeResultCount } from '../../lib/ui/resultCount.ts';
 
 type BakeHistoryViewProps = {
   isSignedIn: boolean;
@@ -46,9 +48,13 @@ export function BakeHistoryView({
 
   const photoUrls = useBakePhotoUrls(entries, { size: 'thumbnail' });
 
+  // A short list needs neither control. Ignore a stale query or filter if deleting bakes hides them.
+  const showSearch = shouldShowHistorySearch(entries.length);
+
   const filteredEntries = useMemo(
-    () => filterBakeHistoryEntries(entries, searchQuery, assessmentFilter),
-    [assessmentFilter, entries, searchQuery],
+    () =>
+      showSearch ? filterBakeHistoryEntries(entries, searchQuery, assessmentFilter) : entries,
+    [assessmentFilter, entries, searchQuery, showSearch],
   );
 
   return (
@@ -64,24 +70,23 @@ export function BakeHistoryView({
       <section className="card bake-history" aria-label="Bake history list">
         {showBackupNudge ? (
           <div className="bake-history__backup-nudge" role="note">
-            <p className="saved-recipes__empty">
-              Your bakes are saved on this device. Sign in to back them up.
+            <p className="bake-history__backup-nudge-text">
+              Saved on this device.{' '}
+              <button type="button" className="bake-history__backup-nudge-link" onClick={onOpenAuth}>
+                Sign in to back up
+              </button>
             </p>
-            <div className="bake-history__backup-nudge-actions">
-              <button type="button" className="wizard-button wizard-button--secondary" onClick={onOpenAuth}>
-                Sign in
-              </button>
-              <button
-                type="button"
-                className="wizard-button wizard-button--secondary"
-                onClick={() => {
-                  dismissHistoryBackupNudge();
-                  setIsBackupNudgeDismissed(true);
-                }}
-              >
-                Not now
-              </button>
-            </div>
+            <button
+              type="button"
+              className="icon-button bake-history__backup-nudge-dismiss"
+              aria-label="Dismiss backup reminder"
+              onClick={() => {
+                dismissHistoryBackupNudge();
+                setIsBackupNudgeDismissed(true);
+              }}
+            >
+              <CloseIcon />
+            </button>
           </div>
         ) : null}
         {loadError ? (
@@ -92,41 +97,52 @@ export function BakeHistoryView({
             </button>
           </div>
         ) : null}
-        <div className="bake-history__filters">
-          <label className="field-card bake-history__search">
-            <span className="field-label-row field-label-row--with-icon">
-              <SearchIcon />
-              <span>Search</span>
-            </span>
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.currentTarget.value)}
-              placeholder="Recipe name or notes"
-            />
-          </label>
-          <label className="field-card bake-history__filter">
-            <span className="field-label-row field-label-row--with-icon">
-              <FilterIcon />
-              <span>Filter</span>
-            </span>
-            <select
-              value={assessmentFilter}
-              onChange={(event) =>
-                setAssessmentFilter(event.currentTarget.value as BakeHistoryAssessmentFilter)
-              }
-            >
-              <option value="all">All bakes</option>
-              <option value="great">Great loaf</option>
-              <option value="ok">OK</option>
-              <option value="needsWork">Needs work</option>
-              <option value="unset">No assessment</option>
-            </select>
-          </label>
-        </div>
+        {showSearch ? (
+          <div className="bake-history__filters">
+            <label className="field-card bake-history__search">
+              <span className="field-label-row field-label-row--with-icon">
+                <SearchIcon />
+                <span>Search</span>
+              </span>
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.currentTarget.value)}
+                placeholder="Recipe name or notes"
+              />
+            </label>
+            <label className="field-card bake-history__filter">
+              <span className="field-label-row field-label-row--with-icon">
+                <FilterIcon />
+                <span>Filter</span>
+              </span>
+              <select
+                value={assessmentFilter}
+                onChange={(event) =>
+                  setAssessmentFilter(event.currentTarget.value as BakeHistoryAssessmentFilter)
+                }
+              >
+                <option value="all">All bakes</option>
+                <option value="great">Great loaf</option>
+                <option value="ok">OK</option>
+                <option value="needsWork">Needs work</option>
+                <option value="unset">No assessment</option>
+              </select>
+            </label>
+          </div>
+        ) : null}
 
         {entries.length > 0 && filteredEntries.length === 0 ? (
-          <p className="saved-recipes__empty">No bakes match your search or filter.</p>
+          <p className="saved-recipes__empty" role="status">
+            No bakes match your search or filter.
+          </p>
+        ) : null}
+
+        {/* Screen readers: say how many bakes the search or filter left. */}
+        {filteredEntries.length > 0 && (searchQuery || assessmentFilter !== 'all') ? (
+          <p className="visually-hidden" role="status">
+            {describeResultCount(filteredEntries.length, 'bake')}
+          </p>
         ) : null}
 
         {filteredEntries.length > 0 ? (
@@ -161,14 +177,9 @@ export function BakeHistoryView({
                       <span className="saved-recipe-card__meta">
                         Baked {formatHistoryDate(entry.completedAt)}
                         {assessmentLabel ? (
-                          <>
-                            <span className="saved-recipe-card__meta-sep" aria-hidden="true">
-                              ·
-                            </span>
-                            <span className="bake-history__assessment-badge">
-                              Assessment · {assessmentLabel}
-                            </span>
-                          </>
+                          <span className="bake-history__assessment-badge">
+                            Assessment · {assessmentLabel}
+                          </span>
                         ) : null}
                       </span>
                       {summaryLine ? (

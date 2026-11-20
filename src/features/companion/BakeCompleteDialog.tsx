@@ -71,10 +71,13 @@ export function BakeCompleteDialog({
         Nice work finishing <strong>{recipeName}</strong>. Your loaf is ready to cool and enjoy.
       </p>
       <div className="dialog-card__fields">
-        <label className="field-card">
-          <span className="field-label-row">Loaf assessment (optional)</span>
+        {/* A div, not a label: a label around buttons would forward taps on its text to the first button. */}
+        <div className="field-card">
+          <span className="field-label-row">
+            Loaf assessment (optional)
+          </span>
           <LoafAssessmentPicker value={assessment} onChange={setAssessment} />
-        </label>
+        </div>
         <label className="field-card">
           <span className="field-label-row">Bake notes (optional)</span>
           <textarea
@@ -86,7 +89,11 @@ export function BakeCompleteDialog({
         </label>
         <BakePhotoPicker onChange={setPhoto} onBusyChange={setIsPreparingPhoto} disabled={isSaving} />
       </div>
-      {saveError ? <p className="auth-modal__error">{saveError}</p> : null}
+      {saveError ? (
+        <p className="auth-modal__error" role="alert">
+          {saveError}
+        </p>
+      ) : null}
       <p className="dialog-card__message">
         Closing this window keeps your bake, and you can finish saving it later from Home.
       </p>

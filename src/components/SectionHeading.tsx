@@ -14,6 +14,12 @@ type SectionHeadingProps = {
   copy?: string;
   info?: string;
   toggle?: SectionToggleProps;
+  /**
+   * 1 for the title of a screen that has no other level-1 heading (the wizard steps); 2 otherwise.
+   * Level 1 keeps the h2 element so the existing styles apply, and says level 1 through aria-level.
+   * When styles.css is split, switch this to a real h1.
+   */
+  headingLevel?: 1 | 2;
   children?: ReactNode;
 };
 
@@ -23,13 +29,14 @@ export function SectionHeading({
   copy,
   info,
   toggle,
+  headingLevel = 2,
   children,
 }: SectionHeadingProps) {
   return (
     <div className="section-heading">
       {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
       <div className="section-heading__title-row">
-        <h2>{title}</h2>
+        <h2 aria-level={headingLevel === 1 ? 1 : undefined}>{title}</h2>
         {info ? <InfoToggle label={title}>{info}</InfoToggle> : null}
         {toggle ? (
           <label className="section-heading__toggle">

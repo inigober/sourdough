@@ -48,7 +48,7 @@ export function LeaveRecipeDialog({
   const isUpdate = Boolean(updateRecipeId);
 
   const title =
-    mode === 'unsaved' ? 'Save changes?' : isUpdate ? 'Update saved recipe' : 'Save recipe';
+    mode === 'unsaved' ? 'Save changes?' : isUpdate ? 'Update recipe' : 'Save recipe';
 
   return (
     <DialogCard
@@ -66,7 +66,7 @@ export function LeaveRecipeDialog({
               disabled={isSavingExistingRecipe}
               onClick={onSaveBeforeLeaving}
             >
-              {isSavingExistingRecipe ? 'Saving…' : 'Save recipe'}
+              {isSavingExistingRecipe ? 'Saving…' : activeSavedRecipeId ? 'Update recipe' : 'Save recipe'}
             </button>
             <button
               type="button"

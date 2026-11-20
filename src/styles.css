@@ -43,9 +43,7 @@
   --color-primary: #a15b2a;
   --color-primary-border: #8f4f24;
   --color-primary-text: #a15b2a;
-  --color-primary-text-strong: #8f4f24;
   --color-on-primary: #fffaf4;
-  --color-accent: #9c5a2b;
 
   /* Help (blue) */
   --color-help: #2a5f8f;
@@ -94,9 +92,7 @@
   --shadow-color-knob: rgb(47 36 28 / 18%);
 
   --radius-card: 16px;
-  --radius-button: 999px;
   --space-section: 20px;
-  --space-card: 24px;
   --icon-button-size: 2.75rem;
   --number-field-width: 10.25rem;
   --touch-target-min: 44px;
@@ -153,8 +149,6 @@
     /* Brand. Fills keep the light-theme colour (white text on it still passes);
        the *-text tokens are the lighter versions used when brown is the text colour. */
     --color-primary-text: #e8a672;
-    --color-primary-text-strong: #f0b98a;
-    --color-accent: #d79a62;
 
     /* Help (blue) */
     --color-help: #8fbfe8;
@@ -248,17 +242,14 @@ p {
   -webkit-backdrop-filter: var(--app-chrome-blur);
 }
 
-.page-shell__body,
-.wizard-shell__content {
+.page-shell__body {
   display: grid;
   gap: var(--space-section);
   flex: 1;
   min-width: 0;
 }
 
-.page-shell__footer,
-.wizard-shell__footer,
-.companion__footer {
+.page-shell__footer {
   position: sticky;
   bottom: 0;
   z-index: 20;
@@ -285,7 +276,7 @@ p {
   cursor: pointer;
   font: inherit;
   font-size: 0.92rem;
-  font-weight: 800;
+  font-weight: 600;
   padding: 4px 0;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -424,9 +415,14 @@ p {
   grid-row: 2;
 }
 
-.timeline-row--interactive:hover,
 .timeline-row--interactive:focus-visible {
   background: var(--color-row-focus-bg);
+}
+
+@media (hover: hover) {
+  .timeline-row--interactive:hover {
+    background: var(--color-row-focus-bg);
+  }
 }
 
 .timeline-row--interactive:focus-visible {
@@ -464,7 +460,10 @@ p {
 
 .wizard-progress-bar__track {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  /* One equal column per segment, however many steps there are. A fixed repeat(5, ...) left a
+     fifth empty column, so the bar stopped at 80% of its width. */
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
   gap: 6px;
 }
 
@@ -493,13 +492,13 @@ p {
 
 .wizard-progress-bar__separator {
   color: var(--color-separator);
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .wizard-progress-bar__count {
   color: var(--color-text-subtle);
   font-size: 0.82rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.04em;
   white-space: nowrap;
 }
@@ -507,7 +506,7 @@ p {
 .wizard-progress-bar__label {
   color: var(--color-text);
   font-size: 0.95rem;
-  font-weight: 800;
+  font-weight: 600;
   min-width: 0;
 }
 
@@ -553,19 +552,6 @@ p {
   margin-bottom: 0;
 }
 
-.welcome-section__header--with-action {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.welcome-section__header--with-action > div {
-  display: grid;
-  gap: 6px;
-  min-width: 0;
-}
-
 .screen-chrome,
 .app-header {
   position: sticky;
@@ -581,8 +567,7 @@ p {
   -webkit-backdrop-filter: var(--app-chrome-blur);
 }
 
-.screen-chrome--trailing-only,
-.app-header--home-only {
+.screen-chrome--trailing-only {
   justify-content: flex-end;
 }
 
@@ -590,8 +575,7 @@ p {
   justify-content: flex-start;
 }
 
-.screen-chrome__title,
-.app-header__title {
+.screen-chrome__title {
   flex: 1;
   min-width: 0;
   margin: 0;
@@ -637,10 +621,16 @@ p {
   letter-spacing: -0.03em;
 }
 
-.welcome-template-card:hover,
 .welcome-template-card:focus-visible {
   border-color: var(--color-border-strong);
   background: var(--color-surface-muted);
+}
+
+@media (hover: hover) {
+  .welcome-template-card:hover {
+    border-color: var(--color-border-strong);
+    background: var(--color-surface-muted);
+  }
 }
 
 .welcome-template-card:focus-visible {
@@ -703,11 +693,6 @@ p {
   line-height: 1.45;
 }
 
-.saved-recipes__header h2 {
-  margin: 0;
-  font-size: 1.15rem;
-}
-
 .saved-recipes__empty {
   margin: 16px 0 0;
   color: var(--color-text-subtle);
@@ -722,16 +707,52 @@ p {
   margin-bottom: 16px;
 }
 
+/* Backup reminder: one line of text with an inline Sign in link and a dismiss button. */
 .bake-history__backup-nudge {
-  display: grid;
-  gap: 12px;
-  justify-items: start;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-left: 4px;
 }
 
-.bake-history__backup-nudge-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+.bake-history__backup-nudge-text {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.bake-history__backup-nudge-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary-text);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.bake-history__backup-nudge-link:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.bake-history__backup-nudge-dismiss {
+  flex-shrink: 0;
+  border-color: transparent;
+  background: transparent;
+  color: var(--color-text-subtle);
+}
+
+/* One line each for the date and the assessment, so no separator can dangle at a line end. */
+.bake-history__entry-text .saved-recipe-card__meta {
+  display: grid;
+  gap: 2px;
 }
 
 .main-screen {
@@ -775,7 +796,7 @@ p {
   cursor: pointer;
   font: inherit;
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 600;
   padding: 8px 10px;
 }
 
@@ -855,7 +876,7 @@ p {
   margin: 0;
   color: var(--color-text-subtle);
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -937,7 +958,7 @@ p {
 
 .bake-history-detail__assessment-label {
   color: var(--color-text-subtle);
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
   font-size: 0.78rem;
@@ -968,12 +989,14 @@ p {
   border-color: var(--color-danger-border);
   background: var(--color-danger-bg);
   color: var(--color-danger);
-  font-weight: 800;
+  font-weight: 600;
 }
 
-.bake-history-detail__delete:hover:not(:disabled) {
-  background: var(--color-danger-bg-strong);
-  filter: none;
+@media (hover: hover) {
+  .bake-history-detail__delete:hover:not(:disabled) {
+    background: var(--color-danger-bg-strong);
+    filter: none;
+  }
 }
 
 .bake-history-detail__delete:disabled {
@@ -1019,9 +1042,14 @@ p {
   text-align: left;
 }
 
-.saved-recipe-card__open:hover strong,
 .saved-recipe-card__open:focus-visible strong {
   color: var(--color-primary-text);
+}
+
+@media (hover: hover) {
+  .saved-recipe-card__open:hover strong {
+    color: var(--color-primary-text);
+  }
 }
 
 .saved-recipe-card__open:focus-visible {
@@ -1067,10 +1095,6 @@ p {
   padding: 10px 14px;
   font-size: 0.92rem;
   white-space: nowrap;
-}
-
-.saved-recipe-card__delete {
-  flex-shrink: 0;
 }
 
 .welcome-draft__resume,
@@ -1128,8 +1152,10 @@ p {
   font-weight: 700;
 }
 
-.welcome-top-bar__sign-in:hover {
-  background: var(--color-surface-muted);
+@media (hover: hover) {
+  .welcome-top-bar__sign-in:hover {
+    background: var(--color-surface-muted);
+  }
 }
 
 .welcome-top-bar__account {
@@ -1178,31 +1204,6 @@ p {
   text-underline-offset: 2px;
 }
 
-.welcome-top-bar__label {
-  color: var(--color-success);
-  font-weight: 800;
-}
-
-.welcome-top-bar__email {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 14rem;
-}
-
-.welcome-top-bar__action {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--color-primary-text);
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.84rem;
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
 .auth-modal {
   position: relative;
 }
@@ -1226,8 +1227,10 @@ p {
   line-height: 1;
 }
 
-.auth-modal__close:hover {
-  background: var(--color-surface-muted);
+@media (hover: hover) {
+  .auth-modal__close:hover {
+    background: var(--color-surface-muted);
+  }
 }
 
 .auth-modal__intro {
@@ -1328,13 +1331,6 @@ p {
   text-align: center;
 }
 
-.schedule-export__message {
-  margin: 12px 0 0;
-  color: var(--color-success);
-  font-size: 0.92rem;
-  font-weight: 700;
-}
-
 .dialog-backdrop {
   position: fixed;
   inset: 0;
@@ -1377,9 +1373,11 @@ div.dialog-backdrop {
   font-size: 1.25rem;
 }
 
+/* Bake complete: a warm neutral card. The green tint made it read as a form result, and the
+   fields inside are already tinted, so the card itself stays on the plain surface. */
 .dialog-card--success {
-  border-color: var(--color-success-border);
-  background: var(--color-success-bg);
+  border-color: var(--color-border-strong);
+  background: var(--color-surface);
 }
 
 .dialog-card__actions {
@@ -1408,11 +1406,6 @@ div.dialog-backdrop {
   font-weight: 700;
 }
 
-.wizard-step {
-  display: grid;
-  gap: 24px;
-}
-
 .wizard-nav {
   display: flex;
   align-items: center;
@@ -1429,22 +1422,6 @@ div.dialog-backdrop {
 
 .wizard-nav--split .wizard-button {
   width: 100%;
-}
-
-.wizard-nav--triple {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.wizard-nav--triple .wizard-button {
-  width: 100%;
-  padding-inline: 10px;
-  font-size: 0.88rem;
-}
-
-@media (max-width: 640px) {
-  .wizard-nav--triple {
-    grid-template-columns: 1fr;
-  }
 }
 
 .icon {
@@ -1480,20 +1457,16 @@ div.dialog-backdrop {
   opacity: 0.45;
 }
 
-.wizard-icon-button--primary {
-  border-color: var(--color-primary-border);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-}
-
 .wizard-icon-button--accent {
-  border-color: var(--color-accent);
-  color: var(--color-primary-text-strong);
+  border-color: var(--color-primary-text);
+  color: var(--color-primary-text);
 }
 
-.wizard-icon-button--accent:hover:not(:disabled) {
-  background: var(--color-hover-accent);
-  filter: none;
+@media (hover: hover) {
+  .wizard-icon-button--accent:hover:not(:disabled) {
+    background: var(--color-hover-accent);
+    filter: none;
+  }
 }
 
 .wizard-icon-button--help {
@@ -1502,16 +1475,23 @@ div.dialog-backdrop {
   color: var(--color-help);
 }
 
-.wizard-icon-button--help:hover:not(:disabled) {
-  background: var(--color-help-hover);
-  filter: none;
+@media (hover: hover) {
+  .wizard-icon-button--help:hover:not(:disabled) {
+    background: var(--color-help-hover);
+    filter: none;
+  }
 }
 
 .wizard-icon-button:focus-visible,
-.icon-button:focus-visible,
-.wizard-icon-button:hover:not(:disabled),
-.icon-button:hover:not(:disabled) {
+.icon-button:focus-visible {
   filter: brightness(0.97);
+}
+
+@media (hover: hover) {
+  .wizard-icon-button:hover:not(:disabled),
+  .icon-button:hover:not(:disabled) {
+    filter: brightness(0.97);
+  }
 }
 
 .wizard-icon-button--accent:focus-visible,
@@ -1532,7 +1512,7 @@ div.dialog-backdrop {
   cursor: pointer;
   font: inherit;
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 600;
   padding: 12px 22px;
 }
 
@@ -1559,9 +1539,11 @@ div.dialog-backdrop {
   color: var(--color-on-primary);
 }
 
-.wizard-button--secondary:hover:not(:disabled),
-.wizard-button--primary:hover:not(:disabled) {
-  filter: brightness(0.97);
+@media (hover: hover) {
+  .wizard-button--secondary:hover:not(:disabled),
+  .wizard-button--primary:hover:not(:disabled) {
+    filter: brightness(0.97);
+  }
 }
 
 .wizard-button:focus-visible {
@@ -1592,7 +1574,7 @@ div.dialog-backdrop {
 .eyebrow {
   color: var(--color-primary-text);
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -1642,7 +1624,7 @@ div.dialog-backdrop {
   height: 28px;
   margin: 0;
   appearance: none;
-  border: 1px solid var(--color-accent);
+  border: 1px solid var(--color-primary-text);
   border-radius: 999px;
   background: var(--color-track);
   cursor: pointer;
@@ -1694,40 +1676,19 @@ div.dialog-backdrop {
   line-height: 1.45;
 }
 
-.schedule-starter-prep__note {
-  margin: 8px 0 0;
-  color: var(--color-text-muted);
-  font-size: 0.88rem;
-  line-height: 1.4;
-}
-
 .section-heading h2,
 .card h2 {
   font-size: 1.35rem;
   letter-spacing: -0.03em;
 }
 
-.hero__title-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.hero__title-row h1 {
-  flex: 1;
-  min-width: 0;
-  margin: 0;
-}
-
 .field-grid,
-.metadata-grid,
 .summary-grid {
   display: grid;
   gap: 16px;
 }
 
-.field-grid--stacked,
-.metadata-grid {
+.field-grid--stacked {
   grid-template-columns: 1fr;
 }
 
@@ -1814,17 +1775,6 @@ div.dialog-backdrop {
   gap: 16px;
 }
 
-.metadata-grid div {
-  display: grid;
-  gap: 6px;
-  min-height: 96px;
-  align-content: space-between;
-  padding: 16px;
-  border: 1px solid var(--color-border-soft);
-  border-radius: 20px;
-  background: var(--color-surface-muted);
-}
-
 .field-card {
   display: grid;
   gap: 10px;
@@ -1834,7 +1784,7 @@ div.dialog-backdrop {
   border-radius: 20px;
   background: var(--color-surface-muted);
   color: var(--color-text-subtle);
-  font-weight: 650;
+  font-weight: 500;
   position: relative;
   overflow: visible;
 }
@@ -1852,7 +1802,7 @@ div.dialog-backdrop {
   gap: 8px;
   color: var(--color-text-subtle);
   font-size: 0.82rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -1888,7 +1838,6 @@ div.dialog-backdrop {
   font-size: 1.2rem;
 }
 
-.reference-chip__hint,
 .summary-group__edit {
   color: var(--color-primary-text);
   display: inline-flex;
@@ -1896,7 +1845,6 @@ div.dialog-backdrop {
   justify-content: center;
   flex-shrink: 0;
 }
-
 
 .flour-context-strip {
   display: flex;
@@ -1908,14 +1856,6 @@ div.dialog-backdrop {
 .flour-context-strip .reference-chip {
   flex: 1 1 12rem;
   margin-bottom: 0;
-}
-
-.reference-chip__label-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  width: 100%;
 }
 
 .reference-chip__label {
@@ -1946,37 +1886,8 @@ div.dialog-backdrop {
   border: 0;
 }
 
-.flour-context-banners {
-  display: grid;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
 .reference-chip--static {
   cursor: default;
-}
-
-.reference-chip__value-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.edit-chip-button {
-  border: 1px solid var(--color-accent);
-  border-radius: 999px;
-  background: var(--color-surface);
-  color: var(--color-primary-text-strong);
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.82rem;
-  font-weight: 800;
-  padding: 6px 12px;
-}
-
-.edit-chip-button:hover {
-  background: var(--color-hover-accent);
 }
 
 .field-label-row {
@@ -2027,21 +1938,10 @@ div.dialog-backdrop {
   margin: 0;
 }
 
-.flour-gram-stepper {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
 .icon-button--step {
   width: 2rem;
   height: 2rem;
   font-size: 1.1rem;
-}
-
-.flour-alloc-input {
-  width: 5.25rem;
-  min-width: 5.25rem;
 }
 
 .flour-blend-list {
@@ -2122,7 +2022,7 @@ div.dialog-backdrop {
   min-width: 2ch;
   padding: 0;
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1.2;
   text-align: right;
   border: 0;
@@ -2137,14 +2037,14 @@ div.dialog-backdrop {
 .flour-percent-stepper__suffix {
   color: var(--color-text-subtle);
   font-size: 0.9rem;
-  font-weight: 800;
+  font-weight: 600;
   flex-shrink: 0;
 }
 
 .flour-blend-row__grams {
   color: var(--color-text);
   font-size: 0.95rem;
-  font-weight: 800;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -2157,7 +2057,7 @@ div.dialog-backdrop {
   margin: 0;
   color: var(--color-text);
   font-size: 0.95rem;
-  font-weight: 800;
+  font-weight: 600;
   text-align: center;
   justify-self: center;
   white-space: nowrap;
@@ -2166,36 +2066,6 @@ div.dialog-backdrop {
 .flour-blend-row--single {
   grid-template-columns: 1fr;
   gap: 8px;
-}
-
-.flour-alloc-field {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.flour-alloc-input {
-  padding: 10px 8px;
-  font-size: 1.05rem;
-  font-weight: 800;
-  text-align: right;
-}
-
-.flour-alloc-suffix {
-  color: var(--color-text-subtle);
-  font-size: 0.82rem;
-  font-weight: 800;
-}
-
-.flour-blend-total {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-weight: 650;
-}
-
-.flour-blend-total__warning {
-  color: var(--color-danger-text-bright);
-  font-weight: 800;
 }
 
 .flour-add-button {
@@ -2207,7 +2077,6 @@ div.dialog-backdrop {
 }
 
 .flour-add-button,
-.saved-recipes__create,
 .schedule-builder__back,
 .schedule-builder__start {
   display: inline-flex;
@@ -2216,65 +2085,16 @@ div.dialog-backdrop {
   gap: 8px;
 }
 
-.button-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.25rem;
-  height: 1.25rem;
-  border-radius: 999px;
-  background: var(--color-tint-primary);
-  font-size: 1.1rem;
-  font-weight: 900;
-  line-height: 1;
-}
-
 .icon-button--delete {
   color: var(--color-danger);
   border-color: var(--color-danger-border-soft);
 }
 
-.icon-button--delete:hover:not(:disabled) {
-  background: var(--color-danger-bg);
-  filter: none;
-}
-
-.return-to-summary {
-  justify-self: start;
-  border: 0;
-  background: transparent;
-  color: var(--color-primary-text);
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.95rem;
-  font-weight: 800;
-  padding: 0;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.flour-summary-line {
-  display: grid;
-  gap: 4px;
-  width: 100%;
-  margin: 0 0 16px;
-  padding: 12px 14px;
-  border: 1px solid var(--color-border-soft);
-  border-radius: 16px;
-  background: var(--color-surface-muted);
-  color: var(--color-text);
-  cursor: pointer;
-  font: inherit;
-  text-align: left;
-}
-
-.flour-summary-line__stack {
-  display: grid;
-  gap: 4px;
-}
-
-.flour-summary-line strong {
-  font-weight: 800;
+@media (hover: hover) {
+  .icon-button--delete:hover:not(:disabled) {
+    background: var(--color-danger-bg);
+    filter: none;
+  }
 }
 
 .summary-group__icon {
@@ -2293,7 +2113,7 @@ div.dialog-backdrop {
 .summary-group__stack-line {
   color: var(--color-text);
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1.35;
 }
 
@@ -2381,7 +2201,7 @@ div.dialog-backdrop {
   cursor: pointer;
   font: inherit;
   font-size: 1.35rem;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -0.03em;
   padding: 24px;
   text-align: left;
@@ -2423,7 +2243,7 @@ div.dialog-backdrop {
 .summary-group__label {
   color: var(--color-text-subtle);
   font-size: 0.82rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -2514,7 +2334,7 @@ div.dialog-backdrop {
   flex: 0 0 auto;
   color: inherit;
   font-size: 0.72rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -2564,16 +2384,6 @@ div.dialog-backdrop {
 
 .recipe-view__hero {
   margin-bottom: 0;
-}
-
-.recipe-view__amounts {
-  margin-top: 0;
-}
-
-@media (min-width: 640px) {
-  .recipe-view__amounts {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 .recipe-view__day {
@@ -2676,19 +2486,6 @@ div.dialog-backdrop {
   display: grid;
   gap: 16px;
 }
-
-.companion__time-separator {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text-subtle);
-}
-
-.companion__time-separator .icon {
-  width: 0.875rem;
-  height: 0.875rem;
-}
-
 
 .field-card--toggle {
   grid-template-columns: 1fr auto;
@@ -2799,9 +2596,11 @@ div.dialog-backdrop {
   height: 1rem;
 }
 
-.number-field__stepper:hover:not(:disabled) {
-  background: var(--color-hover-stepper);
-  color: var(--color-text);
+@media (hover: hover) {
+  .number-field__stepper:hover:not(:disabled) {
+    background: var(--color-hover-stepper);
+    color: var(--color-text);
+  }
 }
 
 .number-field__stepper:disabled {
@@ -2890,7 +2689,7 @@ div.dialog-backdrop {
 .companion__section-label {
   color: var(--color-text-subtle);
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -2903,7 +2702,7 @@ div.dialog-backdrop {
   display: grid;
   gap: 6px;
   opacity: 0.55;
-  background: var(--color-surface-neutral);
+  background: var(--color-surface-muted);
 }
 
 .companion__previous strong {
@@ -3209,12 +3008,6 @@ div.dialog-backdrop {
   line-height: 1.45;
 }
 
-.companion__complete {
-  margin: 8px 0 0;
-  color: var(--color-success);
-  font-weight: 700;
-}
-
 .companion__timer {
   display: grid;
   gap: 4px;
@@ -3227,7 +3020,7 @@ div.dialog-backdrop {
 .companion__timer-label {
   color: var(--color-success);
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -3262,7 +3055,6 @@ div.dialog-backdrop {
   font-size: 0.92rem;
   font-weight: 700;
 }
-
 
 .companion__overview {
   display: grid;
@@ -3310,7 +3102,7 @@ select {
 
 input,
 select {
-  font-weight: 800;
+  font-weight: 600;
 }
 
 textarea {
@@ -3326,11 +3118,24 @@ input[type="checkbox"] {
   accent-color: var(--color-primary);
 }
 
+/* Chevron so a select does not look like a text field. A data URI cannot read CSS variables, so the
+   stroke colour is written out: it equals --color-text-muted in each palette (#6f5d4e light,
+   #cdbcab dark). This is the one place a colour literal is allowed; change both if the token changes. */
 select {
   appearance: none;
   overflow: hidden;
-  padding-right: 28px;
+  padding-right: 40px;
   text-overflow: ellipsis;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236f5d4e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 8 5 5 5-5'/%3E%3C/svg%3E");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+}
+
+@media (prefers-color-scheme: dark) {
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23cdbcab' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 8 5 5 5-5'/%3E%3C/svg%3E");
+  }
 }
 
 input:focus,
@@ -3342,7 +3147,7 @@ textarea:focus {
 
 .input-suffix {
   color: var(--color-text);
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .recipe-list {
@@ -3386,7 +3191,7 @@ textarea:focus {
 }
 
 .assessment-section span {
-  font-weight: 750;
+  font-weight: 600;
 }
 
 .assessment-section p {
@@ -3425,13 +3230,13 @@ textarea:focus {
 
 dt {
   color: var(--color-text-subtle);
-  font-weight: 650;
+  font-weight: 400;
 }
 
 dd {
   margin: 0;
   color: var(--color-text);
-  font-weight: 800;
+  font-weight: 600;
 }
 
 @media (max-width: 640px) {
@@ -3536,8 +3341,7 @@ dd {
     padding-bottom: 18px;
   }
 
-  .page-shell__footer,
-  .wizard-shell__footer {
+  .page-shell__footer {
     margin-inline: -14px;
     margin-bottom: calc(-40px - env(safe-area-inset-bottom, 0px));
     padding-inline: 14px;
@@ -3548,8 +3352,7 @@ dd {
   }
 
   .hero h1,
-  .screen-chrome__title,
-  .app-header__title {
+  .screen-chrome__title {
     font-size: clamp(1.55rem, 6vw, 2rem);
     line-height: 1.15;
   }
@@ -3588,20 +3391,13 @@ dd {
     white-space: normal;
   }
 
-  .saved-recipe-card__delete {
-    grid-column: 2;
-    align-self: stretch;
-    justify-self: stretch;
-  }
-
   .welcome-draft__resume,
   .welcome-bake-session__resume {
     width: 100%;
     padding: 13px 18px;
   }
 
-  .welcome-top-bar__sign-in,
-  .welcome-top-bar__action {
+  .welcome-top-bar__sign-in {
     padding: 12px 16px;
     font-size: 0.92rem;
   }
@@ -3624,11 +3420,6 @@ dd {
     grid-template-columns: 1fr;
   }
 
-  .reference-chip__value-row {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
   .schedule-builder__back,
   .schedule-builder__start,
   .wizard-button--block {
@@ -3636,9 +3427,7 @@ dd {
     padding: 13px 18px;
   }
 
-
   .flour-add-button,
-  .saved-recipes__create,
   .auth-modal__choice,
   .auth-modal__submit,
   .companion__start-step {
@@ -3646,12 +3435,6 @@ dd {
     padding: 13px 18px;
   }
 
-  .wizard-nav--triple {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
-  .wizard-nav--triple .wizard-button,
   .wizard-nav--split .wizard-button {
     width: 100%;
     padding: 13px 18px;
@@ -3904,7 +3687,7 @@ dd {
   color: var(--color-primary-text);
   cursor: pointer;
   font: inherit;
-  font-weight: 800;
+  font-weight: 600;
   text-decoration: underline;
 }
 
@@ -3945,11 +3728,6 @@ dd {
     justify-self: start;
     min-width: 220px;
   }
-}
-
-/* --- Recipe view: whole-recipe flour and water line under the amount cards (UX review 2.12). --- */
-.recipe-view__totals {
-  margin: 0;
 }
 
 /* ==========================================================================
@@ -4003,7 +3781,7 @@ dd {
 
 .schedule-presets__label {
   color: var(--color-text);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .schedule-presets__description {
@@ -4079,7 +3857,7 @@ dd {
 .info-toggle__button,
 .summary-group__body,
 .page-shell__secondary-link,
-.edit-chip-button,
+.bake-history__backup-nudge-link,
 .saved-recipe-card__open {
   position: relative;
 }
@@ -4087,7 +3865,7 @@ dd {
 .info-toggle__button::after,
 .summary-group__body::after,
 .page-shell__secondary-link::after,
-.edit-chip-button::after,
+.bake-history__backup-nudge-link::after,
 .saved-recipe-card__open::after {
   content: '';
   position: absolute;
@@ -4112,6 +3890,123 @@ dd {
   }
 }
 
+/* ==========================================================================
+   Native web view feel (UI review, quick wins 3 and 4). One block, tokens only.
+   - Pressed states: the only feedback a finger gets on a phone, because :hover is not reliable
+     on touch (hover rules are wrapped in `@media (hover: hover)` above).
+   - Web view tells: grey tap flash, long-press callout, text selection on buttons and chrome,
+     and rubber-banding of the whole page. Text content and inputs stay selectable.
+   ========================================================================== */
+html {
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+summary,
+label.wizard-button {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+button,
+summary,
+label.wizard-button,
+.app-bottom-nav,
+.screen-chrome,
+.app-header,
+.wizard-shell__header,
+.page-shell__footer {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* iOS can make inputs unusable when a parent is user-select: none, so restore them explicitly. */
+input,
+textarea,
+select {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+button,
+summary,
+label.wizard-button,
+.schedule-presets__option {
+  transition:
+    opacity 80ms ease-out,
+    transform 80ms ease-out;
+}
+
+/* :where() keeps this at the lowest specificity, so the tile rules below can override it. */
+:where(button:not(:disabled), summary, label.wizard-button):active {
+  opacity: 0.7;
+}
+
+/* Large tiles (photo cards, plan options) shrink a little instead of fading, so the photo stays readable. */
+.welcome-template-card:active,
+.schedule-presets__option:active {
+  opacity: 1;
+  transform: scale(0.98);
+}
+
+.timeline-row--interactive:active {
+  opacity: 1;
+  background: var(--color-row-active-bg);
+}
+
+/* Dialogs and the coach sheet: a short fade plus a slight slide (200ms) when they open. They are
+   only animated in, not out: both are unmounted by React the moment they close.
+   Everything sits inside no-preference, so reduced motion shows them instantly. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes dialog-card-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes sheet-in {
+    from {
+      opacity: 0;
+      transform: translateY(32px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scrim-in {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  .dialog-card {
+    animation: dialog-card-in 200ms ease-out;
+  }
+
+  .dialog-backdrop::backdrop,
+  .companion-coach__backdrop {
+    animation: scrim-in 200ms ease-out;
+  }
+
+  .companion-coach__panel {
+    animation: sheet-in 200ms ease-out;
+  }
+}
 
 /* ==========================================================================
    Loaf photos on bakes: picker in the bake-complete dialog, thumbnail in the
@@ -4307,7 +4202,7 @@ body {
 .companion-amounts__row dd {
   margin: 0;
   color: var(--color-text);
-  font-weight: 800;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
@@ -4443,7 +4338,6 @@ body {
   gap: 4px 16px;
 }
 
-
 /* ==========================================================================
    Summary and wizard chrome pass: sticky footer fix, wizard footer layout,
    ingredient breakdown card, compact recipe assessment, flour blend line.
@@ -4551,7 +4445,7 @@ body {
 .flour-blend-summary__label {
   color: var(--color-text-subtle);
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -4665,7 +4559,7 @@ body {
 .ingredient-group__heading h3 {
   color: var(--color-text);
   font-size: 1.05rem;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .ingredient-group__heading p {
@@ -4708,7 +4602,7 @@ body {
 .ingredient-feeding__header h4 {
   color: var(--color-text-subtle);
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -4721,7 +4615,7 @@ body {
   color: var(--color-primary-text);
   font-size: 0.82rem;
   font-variant-numeric: tabular-nums;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .ingredient-rows {
@@ -4756,7 +4650,7 @@ body {
   margin: 0;
   color: var(--color-text);
   font-variant-numeric: tabular-nums;
-  font-weight: 800;
+  font-weight: 600;
   text-align: right;
 }
 
@@ -4862,7 +4756,7 @@ body {
 
 .assessment-verdict__level {
   font-size: 0.76rem;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -4902,7 +4796,7 @@ body {
   cursor: pointer;
   font: inherit;
   font-size: 0.92rem;
-  font-weight: 800;
+  font-weight: 600;
   text-align: left;
 }
 
@@ -5033,9 +4927,14 @@ body {
   color: var(--color-text);
 }
 
-.saved-shortcut-row__open:hover strong,
 .saved-shortcut-row__open:focus-visible strong {
   color: var(--color-primary-text);
+}
+
+@media (hover: hover) {
+  .saved-shortcut-row__open:hover strong {
+    color: var(--color-primary-text);
+  }
 }
 
 .saved-shortcut-row__meta {
@@ -5085,8 +4984,10 @@ body {
   font-weight: 700;
 }
 
-.recipe-view__delete:hover {
-  background: var(--color-danger-bg);
+@media (hover: hover) {
+  .recipe-view__delete:hover {
+    background: var(--color-danger-bg);
+  }
 }
 
 .recipe-view__delete:focus-visible {
@@ -5162,6 +5063,25 @@ body {
   gap: 12px;
 }
 
+/* No photo yet: drop the card, so the screen shows one 44px "add a photo" button, not an empty box. */
+.bake-history-detail__photo.bake-history-detail__photo--empty {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.bake-photo-picker--compact {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+
+.bake-photo-picker--compact .bake-photo-picker__choose {
+  width: auto;
+  padding-block: 8px;
+}
+
 .bake-history-detail__photo-actions {
   display: flex;
   flex-wrap: wrap;
@@ -5185,4 +5105,69 @@ body {
 
 .bake-history-detail__photo .bake-history-detail__section-title {
   margin: 0;
+}
+
+/* ==========================================================================
+   Accessibility pass (2026-11-20). One block, appended, so it merges cleanly.
+   See docs/product/accessibility.md. Colour tokens only, so the dark theme follows.
+   ========================================================================== */
+
+/* Script-focused landmarks and headings (screen title after navigation, dialog titles, the coach
+   heading) are focus targets for screen readers, not controls: no ring around a heading. */
+[tabindex='-1']:focus {
+  outline: none;
+}
+
+/* Differentiate without colour: a finished step gets a check mark and the current step a bar on
+   its left edge, so state is not carried by text colour or tint alone. The check has an empty
+   alternative text because the button already says "Done:" to screen readers. */
+.companion__overview-list .timeline-row--done .timeline-row__time-compact::after {
+  content: '\00a0✓';
+  content: '\00a0✓' / '';
+}
+
+.companion__overview-list .timeline-row--current.timeline-row--interactive {
+  box-shadow: inset 4px 0 0 var(--color-primary-text);
+}
+
+/* Increase Contrast (iOS Settings > Accessibility > Display & Text Size). Control outlines go from
+   about 1.5:1 to at least 4:1, and the soft grey-brown text steps up to the muted text colour. */
+@media (prefers-contrast: more) {
+  :root {
+    --color-border: #8a7260;
+    --color-border-strong: #8a7260;
+    --color-border-soft: #8a7260;
+    --color-border-faint: #8a7260;
+    --color-border-notice: #8a7260;
+    --color-text-subtle: var(--color-text-muted);
+  }
+}
+
+@media (prefers-contrast: more) and (prefers-color-scheme: dark) {
+  :root {
+    --color-border: #9d8773;
+    --color-border-strong: #9d8773;
+    --color-border-soft: #9d8773;
+    --color-border-faint: #9d8773;
+    --color-border-notice: #9d8773;
+  }
+}
+
+/* Reduce Transparency: the blurred, see-through bars become solid. */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --app-chrome-blur: none;
+    --app-chrome-bg: var(--color-bg);
+    --color-nav-bg: var(--color-surface);
+  }
+}
+
+/* Windows high contrast and similar forced-colour modes: keep selected states visible without colour fills. */
+@media (forced-colors: active) {
+  .loaf-assessment-picker__chip[aria-pressed='true'],
+  .schedule-presets__option--selected,
+  .app-bottom-nav__item[aria-current='page'] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
 }

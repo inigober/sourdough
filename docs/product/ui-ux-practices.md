@@ -120,6 +120,12 @@ That flags an intentional product choice so we can discuss tradeoffs once instea
 | Never dim text with `opacity` to de-emphasise it; pick a muted colour token that still passes 4.5:1. | Opacity silently lowers contrast (the old Previous card was 55%). |
 | Honour `prefers-reduced-motion`: transitions are switched off in one block at the end of `styles.css`; JS must not force `behavior: 'smooth'` without checking the setting. | Motion can cause discomfort and an explicit smooth scroll ignores the CSS rule. |
 | A control's visible text must be part of its accessible name (`aria-label` contains the visible label). | Voice Control and screen-reader users refer to controls by what they see. |
+| A dialog or sheet moves focus in when it opens, keeps Tab inside, closes on Escape and returns focus to what opened it. Use `DialogCard`; a custom sheet must be portaled to `<body>` and use `useModalSheet`. | Without it, VoiceOver and keyboard users end up in the page behind. |
+| Anything that changes by itself (timers, toasts, replies) is announced once through a live region that is already on the page and empty, never every tick. | A countdown that speaks every second is unusable; a live region inserted with its text is often not read. |
+| Repeated controls name what they act on ("Start baking Country loaf"), and every screen has one level-1 heading. | VoiceOver and Voice Control users navigate by name and by heading. |
+| State is never colour alone (add an icon, mark or text). | Differentiate Without Color, colour-blind users, bright kitchens. |
+
+Full audit, open items and the on-device test script: [accessibility.md](./accessibility.md), [accessibility-testing.md](./accessibility-testing.md).
 
 ---
 
@@ -154,6 +160,23 @@ Light and dark ratios were checked with a throwaway script over the main text/su
 
 ---
 
+## Pressed States, Weights, Motion And Native Web View
+
+Added from the UI review (quick wins). They keep the app from feeling like a web page in a frame.
+
+| Practice | Why |
+| --- | --- |
+| Every tappable control has a pressed state. Buttons, summaries and file-input labels fade to 0.7 on `:active`; photo tiles and plan options shrink to 0.98; tappable rows get the active row tint. The generic rule uses `:where()` so a specific rule can override it. | On a phone the pressed state is the only feedback a finger gets. |
+| Hover styling is wrapped in `@media (hover: hover)`. Focus styling stays outside it. | iOS applies `:hover` after a tap and it sticks. |
+| Selects get a chevron (a data-URI background, two colours for light and dark). It is the one place a colour literal is allowed; it must equal `--color-text-muted`. | Without it a select looks like a text field. |
+| Weights: 400 for secondary text and labels in a label and value pair, 500 for field labels, 600 for buttons, inputs, values and small caps labels, 700 for titles. Do not use 650, 750, 800 or 900. | Everything bold means nothing has hierarchy. |
+| Motion: dialogs and the coach sheet fade and slide in over 200ms. Put new motion inside `@media (prefers-reduced-motion: no-preference)`. Exit animations are not built (React unmounts on close). | Reduced-motion users get none; the plain state is always the fallback. |
+| Native web view CSS (one block next to the reduced-motion block): `-webkit-tap-highlight-color: transparent`, `-webkit-touch-callout: none` and `user-select: none` on buttons and chrome (never on text content or inputs), `overscroll-behavior-y: none` on `html`. | Removes the grey tap flash, long-press menus on buttons and page rubber-banding. |
+| Primary and secondary labels for saving a recipe are one pair everywhere (buttons, dialog titles, dialogs): **Save recipe** for a new recipe and **Update recipe** for a saved one. | The same action had two names. |
+| Search and Filter on a list appear only when the list is long enough to need them (History: six bakes). | Two controls that do nothing on a short list are noise. |
+
+---
+
 ## Agent Checklist Before Shipping UI
 
 When adding or changing UI, verify:
@@ -178,3 +201,5 @@ Add a line here when a practice is added or changed after a product discussion.
 - 2026-11-19: Forms never silently clamp or revert typed numbers; messages show on blur.
 - 2026-11-19: Accessibility pass: full dark theme following the system setting; text contrast at least 4.5:1; 44px hit areas; labelled Back/Continue; steppers are − value + in one row; reduced motion honoured.
 - 2026-11-20: Sticky footer fix (wrap is the sticky element); wizard footer has one primary action and equal buttons; flour step title is a question; assessment collapsed to a one-line verdict with a disclosure.
+- 2026-11-20: UI review quick wins: pressed states and `(hover: hover)` for hover, select chevrons, native web view CSS, calmer font weights (no 650/750/800/900), dialog and sheet motion, one Save recipe / Update recipe pair, History search from six bakes, flat template list on Home, two browns merged into `--color-primary-text`.
+- 2026-11-20: Accessibility audit and fixes (dialog and sheet focus, bake timer announcements, headings, page titles, Increase Contrast); new rows in Accessibility Basics.

@@ -52,7 +52,7 @@ Content, top to bottom:
 - Title "Plan your sourdough bake" with the sign-in control, a one-line promise ("Hour by hour, with alerts when it is time to act"), and **New recipe**.
 - **Continue where you left off** (an unfinished builder draft) and **Resume baking** (an unfinished bake). When either card is showing it owns the filled primary button and New recipe becomes secondary.
 - **Saved recipes shortcut** (only when the baker has saved recipes): a compact card with the count, a **See all** link to the Saved tab, and the three most recently updated recipes as slim rows. A row shows the name and one meta line ("Updated 19 Nov", or "Baked 3x · last: Great loaf" once the recipe has history; a recipe without a schedule says "No schedule yet" first). Tapping the row opens the recipe view; **Start baking** on the row opens the same "When are you mixing?" dialog as everywhere else. With no saved recipes there is no card at all, so a first-time baker sees only New recipe and the templates.
-- **Start from a template**: six templates with a photo, below the shortcut.
+- **Start from a template**: a heading and six photo tiles below the shortcut, with no outer card around them. Tapping a tile loads that template into the wizard.
 
 Home stays short on purpose: a long saved list lives on the Saved tab, never here.
 
@@ -181,7 +181,7 @@ The full list of saved recipes, newest updated first. Each card shows the name, 
 
 ### 12. History
 
-A searchable list of completed bakes (search by recipe name or notes, filter by assessment) with a detail view showing notes, the assessment, the recipe snapshot, the planned schedule, step timings with drift, **Bake again**, and Delete. History is local first, and signing in uploads it. See [Bake history](./bake-history.md).
+A list of completed bakes (search by recipe name or notes and filter by assessment, shown from six bakes) with a detail view showing notes, the assessment, the recipe snapshot, the planned schedule, step timings with drift, **Bake again**, and Delete. History is local first, and signing in uploads it. See [Bake history](./bake-history.md).
 
 ## Navigation
 

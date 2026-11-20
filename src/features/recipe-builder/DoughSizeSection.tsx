@@ -21,6 +21,7 @@ export function DoughSizeSection({
   return (
     <section className="card">
       <SectionHeading
+        headingLevel={1}
         title="How much dough are you making?"
         copy="Set the total dough weight and how many loaves you plan to bake. Flour blend is next, then hydration and salt."
       />
