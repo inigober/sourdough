@@ -242,13 +242,22 @@
 
 .step-edit {
   display: grid;
+  grid-template-columns: minmax(0, 1fr); /* a grid item's minimum width is its content; without this a wide native input pushes past the row */
   gap: var(--space-4);
 }
 
 .step-edit__field {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-1);
   justify-items: start;
+}
+
+/* The iOS time input is intrinsically wide: make it fill the column and never exceed it. */
+.step-edit__field input[type='time'] {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .step-edit__label {

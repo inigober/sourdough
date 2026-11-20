@@ -48,4 +48,8 @@ for (const [name, palette] of [
   test(`${name} palette: text on a primary-coloured fill is at least 4.5:1`, () => {
     assert.ok(contrastRatio(palette['on-primary'], palette.primary) >= 4.5);
   });
+
+  test(`${name} palette: brown text on the warm tint (Start baking on a Saved row) is at least 4.5:1`, () => {
+    assert.ok(contrastRatio(palette['primary-text'], palette['hover-accent']) >= 4.5);
+  });
 }

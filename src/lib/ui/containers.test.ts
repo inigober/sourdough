@@ -54,3 +54,24 @@ test('Sheet: dialogs and the coach slide up from the bottom edge', () => {
   assert.match(css, /\.dialog-card\s*\{\s*animation:\s*sheet-in/);
   assert.doesNotMatch(css, /@keyframes dialog-card-in/);
 });
+
+test('the step edit panel cannot be pushed wider than its row by a native time input', () => {
+  const [panel] = rulesFor('.step-edit');
+  assert.match(panel, /grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+
+  const [field] = rulesFor('.step-edit__field');
+  assert.match(field, /grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+
+  const [time] = rulesFor(".step-edit__field input[type='time']");
+  assert.match(time, /width:\s*100%/);
+  assert.match(time, /min-width:\s*0/);
+  assert.match(time, /max-width:\s*100%/);
+});
+
+test('Start baking on a Saved row has a tinted brand look without being the solid primary button', () => {
+  // Two classes: components/buttons.css loads later, so a one-class rule here would lose to `.button`.
+  const [bake] = rulesFor('.saved-recipe-row__actions .saved-recipe-row__bake');
+  assert.match(bake, /background:\s*var\(--color-hover-accent\)/);
+  assert.match(bake, /color:\s*var\(--color-primary-text\)/);
+  assert.match(bake, /border-color:\s*var\(--color-primary-text\)/);
+});

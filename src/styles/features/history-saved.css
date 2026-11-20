@@ -391,6 +391,16 @@
   flex: 2 1 0;
 }
 
+/* Saved has no solid primary button (Home owns that), but Start baking is still the row's main action, so it
+   carries a tinted brown look. Two classes, because components/buttons.css loads after this file and its
+   `.button` rule (one class) would otherwise win. Brown text on this tint is 4.5:1 or better in both themes
+   (contrast.test.ts). */
+.saved-recipe-row__actions .saved-recipe-row__bake {
+  border-color: var(--color-primary-text);
+  background: var(--color-hover-accent);
+  color: var(--color-primary-text);
+}
+
 .saved-recipe-row__duplicate {
   flex: 1 1 0;
 }

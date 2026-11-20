@@ -226,3 +226,4 @@ Add a line here when a practice is added or changed after a product discussion.
 - 2026-11-20: UI review phase 5: Saved rows have no primary button (Start baking and Duplicate are both secondary; the primary action lives on Home), and their meta line leads with hydration, dough size and flour. Sheets close by dragging the header down.
 - 2026-11-20: UI review phase 5: an edited timeline step offers "Undo changes to this step".
 - 2026-11-20: Launch screen: the dark splash uses the page colour `#1a1511` and a loaf with no cream square (generated from `assets/splash*.png`, see ios-native-setup.md). Not yet checked on a device.
+- 2026-11-20: Device pass 1 fixes: the step edit panel's time field fills its column and cannot exceed it (the iOS time input is intrinsically wide); Start baking on a Saved row has a tinted brown look (warm tint, brown text and border; 4.5:1 in both themes) while still not being a solid primary button.
