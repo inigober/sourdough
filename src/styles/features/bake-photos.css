@@ -6,13 +6,13 @@
 
 .bake-photo-picker {
   display: grid;
-  gap: 10px;
+  gap: var(--space-3);
 }
 
 .bake-photo-picker__preview {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .bake-photo-picker__image {
@@ -20,7 +20,7 @@
   height: 96px;
   flex-shrink: 0;
   border: 1px solid var(--color-border);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   object-fit: cover;
 }
 
@@ -29,7 +29,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
   min-height: 44px;
   text-align: center;
 }
@@ -45,7 +45,7 @@
   min-height: 44px;
   padding: 0;
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: transparent;
   cursor: pointer;
 }
@@ -59,7 +59,7 @@
   display: block;
   width: 100%;
   max-height: 320px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   object-fit: cover;
 }
 
@@ -67,18 +67,18 @@
   display: block;
   width: 100%;
   max-height: 70dvh;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   object-fit: contain;
 }
 
 /* --- Coach: sign-in prompt shown to signed-out bakers (the coach server only answers signed-in users). --- */
 .companion-coach__sign-in {
   display: grid;
-  gap: 12px;
-  margin: 0 16px 16px;
-  padding: 14px 16px;
+  gap: var(--space-3);
+  margin: 0 var(--space-4) var(--space-4);
+  padding: var(--space-4) var(--space-4);
   border: 1px solid var(--color-border);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: var(--color-surface-muted);
 }
 

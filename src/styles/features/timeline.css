@@ -1,7 +1,7 @@
 .timeline-list {
   display: grid;
-  gap: 12px;
-  margin: 16px 0 0;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 0;
   padding: 0;
   list-style: none;
 }
@@ -9,9 +9,9 @@
 .timeline-row {
   display: grid;
   gap: 0;
-  padding: 12px 14px;
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-border-soft);
-  border-radius: var(--radius-card);
+  border-radius: var(--radius-lg);
   background: var(--color-surface-muted);
 }
 
@@ -19,13 +19,13 @@
   --timeline-time-width: 7.75rem;
   display: grid;
   grid-template-columns: var(--timeline-time-width) minmax(0, 1fr);
-  gap: 4px 10px;
+  gap: var(--space-1) var(--space-3);
   align-items: start;
 }
 
 .timeline-row__content-col {
   display: grid;
-  gap: 4px;
+  gap: var(--space-1);
   min-width: 0;
   grid-column: 2;
   grid-row: 1;
@@ -73,7 +73,7 @@
   --timeline-time-width: 7.75rem;
   display: grid;
   grid-template-columns: var(--timeline-time-width) minmax(0, 1fr);
-  gap: 4px 7px;
+  gap: var(--space-1) var(--space-2);
   align-items: start;
   width: 100%;
   border: 0;
@@ -82,7 +82,7 @@
   cursor: pointer;
   font: inherit;
   min-height: var(--touch-target-min);
-  padding: 10px 0;
+  padding: var(--space-3) 0;
   text-align: left;
 }
 
@@ -119,7 +119,7 @@
 .timeline-row--interactive:focus-visible {
   outline: 3px solid var(--color-focus-ring);
   outline-offset: 2px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
 }
 
 .timeline-row--current.timeline-row--interactive {

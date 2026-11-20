@@ -1,7 +1,7 @@
 .welcome-draft__resume,
 .welcome-bake-session__resume {
   width: 100%;
-  margin-top: 16px;
+  margin-top: var(--space-4);
 }
 
 .welcome-draft,
@@ -16,9 +16,9 @@
 
 .welcome-import-message {
   margin: 0;
-  padding: 12px 14px;
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-success-border);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: var(--color-success-bg);
   color: var(--color-success);
   font-size: var(--text-sm);
@@ -27,7 +27,7 @@
 
 .welcome-top-bar__sign-in-group {
   display: grid;
-  gap: 6px;
+  gap: var(--space-2);
   justify-items: end;
   max-width: min(16rem, 42vw);
 }
@@ -42,9 +42,9 @@
 
 .welcome-top-bar__sign-in {
   width: auto;
-  padding: 10px 16px;
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-surface);
   color: var(--color-text);
   cursor: pointer;
@@ -71,12 +71,12 @@
   right: 0;
   z-index: 30;
   display: grid;
-  gap: 10px;
+  gap: var(--space-3);
   min-width: 12rem;
   max-width: min(18rem, calc(100vw - 28px));
-  padding: 12px 14px;
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-border);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: var(--color-surface);
   box-shadow: 0 12px 32px var(--shadow-color-popover);
 }
@@ -120,7 +120,7 @@
   height: 2rem;
   padding: 0;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--color-text-muted);
   cursor: pointer;
@@ -136,7 +136,7 @@
 
 .auth-modal__intro {
   display: grid;
-  gap: 6px;
+  gap: var(--space-2);
   padding-right: 2rem;
 }
 
@@ -154,7 +154,7 @@
 
 .auth-modal__choices {
   display: grid;
-  gap: 10px;
+  gap: var(--space-3);
 }
 
 .auth-modal__choice {
@@ -163,7 +163,7 @@
 
 .auth-modal__form {
   display: grid;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .auth-modal__submit {

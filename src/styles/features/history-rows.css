@@ -7,14 +7,14 @@
 .bake-history__entry-open {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   min-height: 64px;
   width: 100%;
 }
 
 .bake-history__entry-text {
   display: grid;
-  gap: 3px;
+  gap: var(--space-1);
   min-width: 0;
 }
 
@@ -27,7 +27,7 @@
   flex-shrink: 0;
   overflow: hidden;
   border: 1px solid var(--color-border-soft);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--color-surface-muted);
   color: var(--color-text-subtle);
 }
@@ -58,7 +58,7 @@
 
 .bake-history-detail__photo {
   display: grid;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 /* No photo yet: drop the card, so the screen shows one 44px "add a photo" button, not an empty box. */
@@ -71,26 +71,26 @@
 
 .bake-photo-picker--compact {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
   justify-items: start;
 }
 
 .bake-photo-picker--compact .bake-photo-picker__choose {
   width: auto;
-  padding-block: 8px;
+  padding-block: var(--space-2);
 }
 
 .bake-history-detail__photo-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .bake-history-detail__photo-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
   min-height: 44px;
 }
 

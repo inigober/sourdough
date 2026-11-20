@@ -4,12 +4,12 @@ textarea {
   width: 100%;
   min-width: 0;
   border: 1px solid var(--color-border);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-text);
   font: inherit;
   font-size: var(--text-md);
-  padding: 10px 12px;
+  padding: var(--space-3) var(--space-3);
 }
 
 input:not([type='checkbox']):not([type='radio']),
@@ -75,12 +75,12 @@ textarea:focus {
 
 .recipe-list {
   display: grid;
-  gap: 14px;
-  margin: 20px 0 0;
+  gap: var(--space-4);
+  margin: var(--space-5) 0 0;
 }
 
 .recipe-assessment {
-  margin-top: 16px;
+  margin-top: var(--space-4);
 }
 
 .recipe-assessment > p {
@@ -90,17 +90,17 @@ textarea:focus {
 
 .recipe-assessment ul {
   display: grid;
-  gap: 10px;
+  gap: var(--space-3);
   padding: 0;
-  margin: 18px 0 0;
+  margin: var(--space-5) 0 0;
   list-style: none;
 }
 
 .assessment-section {
   display: grid;
-  gap: 5px;
-  padding: 12px 14px;
-  border-radius: 16px;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
   line-height: 1.4;
 }
 
@@ -146,7 +146,7 @@ textarea:focus {
 }
 
 .card--notice p {
-  margin-top: 10px;
+  margin-top: var(--space-3);
   color: var(--color-text-muted);
   line-height: 1.5;
 }

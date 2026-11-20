@@ -11,12 +11,12 @@
 
 /* Saved tab. */
 .saved-recipes__search {
-  margin: 16px 0 0;
+  margin: var(--space-4) 0 0;
 }
 
 .saved-recipes__empty-state {
   display: grid;
-  gap: 16px;
+  gap: var(--space-4);
   justify-items: start;
 }
 
@@ -29,7 +29,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .saved-shortcut__header .page-shell__secondary-link {
@@ -40,8 +40,8 @@
 
 .saved-shortcut__list {
   display: grid;
-  gap: 8px;
-  margin: 14px 0 0;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 0;
   padding: 0;
   list-style: none;
 }
@@ -49,18 +49,18 @@
 .saved-shortcut-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-3);
   min-height: var(--touch-target-min);
-  padding: 8px 8px 8px 12px;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
   border: 1px solid var(--color-border-soft);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: var(--color-surface-muted);
 }
 
 .saved-shortcut-row__open {
   display: grid;
   flex: 1;
-  gap: 2px;
+  gap: var(--space-1);
   min-width: 0;
   min-height: var(--touch-target-min);
   align-content: center;
@@ -76,7 +76,7 @@
 .saved-shortcut-row__open:focus-visible {
   outline: 3px solid var(--color-focus-ring);
   outline-offset: 2px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
 }
 
 .saved-shortcut-row__open strong,
@@ -111,7 +111,7 @@
   flex: 0 0 auto;
   width: auto;
   min-height: var(--touch-target-min);
-  padding: 8px 12px;
+  padding: var(--space-2) var(--space-3);
   font-size: var(--text-sm);
   white-space: nowrap;
 }
@@ -120,8 +120,8 @@
 .recipe-view__danger-zone {
   display: flex;
   justify-content: center;
-  margin: 28px 0 20px;
-  padding-top: 20px;
+  margin: var(--space-8) 0 var(--space-5);
+  padding-top: var(--space-5);
   border-top: 1px solid var(--color-border-soft);
 }
 
@@ -134,11 +134,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
   min-height: var(--touch-target-min);
-  padding: 8px 16px;
+  padding: var(--space-2) var(--space-4);
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--color-danger);
   cursor: pointer;

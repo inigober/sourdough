@@ -18,7 +18,7 @@
   top: 0;
   z-index: 20;
   display: grid;
-  gap: 10px;
+  gap: var(--space-3);
   margin: calc(-1 * (var(--app-shell-pad-top) + env(safe-area-inset-top, 0px))) calc(-1 * var(--app-shell-pad-inline)) 0;
   padding: calc(var(--app-shell-pad-top) + env(safe-area-inset-top, 0px)) var(--app-shell-pad-inline) 20px;
   background: var(--app-chrome-header-bg);
@@ -45,14 +45,14 @@
 
 .page-shell__footer-wrap {
   display: grid;
-  gap: 10px;
+  gap: var(--space-3);
 }
 
 .page-shell__secondary-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
   align-self: start;
   border: 0;
   background: transparent;
@@ -61,7 +61,7 @@
   font: inherit;
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
-  padding: 4px 0;
+  padding: var(--space-1) 0;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -79,7 +79,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .dialog-card__header h2 {

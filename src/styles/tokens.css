@@ -91,7 +91,6 @@
   --shadow-color-card-soft: rgb(91 54 26 / 6%);
   --shadow-color-knob: rgb(47 36 28 / 18%);
 
-  --radius-card: 16px;
   --space-section: 20px;
   --icon-button-size: 2.75rem;
   --number-field-width: 10.25rem;
@@ -217,4 +216,31 @@
   --weight-regular: 400;
   --weight-semibold: 600; /* labels, buttons, inputs */
   --weight-bold: 700; /* titles */
+}
+
+/*
+  Radius scale (UI review 6.2). An inner radius is the outer radius minus the padding between them,
+  so nested shapes look concentric. src/lib/ui/radiusScale.test.ts keeps border-radius on these tokens.
+*/
+:root {
+  --radius-sm: 8px; /* chips, small badges, thumbnails */
+  --radius-md: 12px; /* inputs, rows, nested panels */
+  --radius-lg: 16px; /* cards and grouped containers */
+  --radius-xl: 24px; /* dialogs, sheets, hero containers */
+  --radius-pill: 999px; /* buttons, tabs, chips */
+}
+
+/*
+  Spacing scale (UI review 6.2), a 4px grid. gap, padding and margin use these (src/lib/ui/spacingScale.test.ts).
+  Not every number has a token on purpose: there is no 10px, 14px or 18px.
+*/
+:root {
+  --space-1: 4px; /* icon and label gaps */
+  --space-2: 8px; /* tight groups, chip gaps */
+  --space-3: 12px; /* row gaps, control padding */
+  --space-4: 16px; /* default card padding and gap */
+  --space-5: 20px; /* page gutter, section gap */
+  --space-6: 24px; /* large card padding */
+  --space-8: 32px; /* between major blocks */
+  --space-12: 48px; /* bottom page padding */
 }

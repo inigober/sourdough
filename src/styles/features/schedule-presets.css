@@ -6,7 +6,7 @@
 
 .schedule-presets__group {
   display: grid;
-  gap: 12px;
+  gap: var(--space-3);
   margin: 0;
   padding: 0;
   border: 0;
@@ -16,11 +16,11 @@
 .schedule-presets__option {
   position: relative;
   display: grid;
-  gap: 4px;
-  padding: 14px 16px;
+  gap: var(--space-1);
+  padding: var(--space-4) var(--space-4);
   min-height: 44px;
   border: 1px solid var(--color-border);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   background: var(--color-surface);
   cursor: pointer;
 }
@@ -59,7 +59,7 @@
 }
 
 .schedule-presets__status {
-  margin: 16px 0 0;
+  margin: var(--space-4) 0 0;
   color: var(--color-text-muted);
   font-size: var(--text-sm);
   line-height: 1.4;
@@ -72,7 +72,7 @@
 }
 
 .schedule-customise__copy {
-  margin: 0 0 16px;
+  margin: 0 0 var(--space-4);
 }
 
 /* Customise groups: the sections inside "Customise" are flat rows, not cards inside a card. */
@@ -86,14 +86,14 @@
 }
 
 .schedule-customise .collapsible-section .collapsible-section__trigger {
-  padding: 16px 0;
+  padding: var(--space-4) 0;
   font-size: var(--text-md);
 }
 
 .schedule-customise .collapsible-section .collapsible-section__panel {
   display: grid;
-  gap: 16px;
-  padding: 0 0 20px;
+  gap: var(--space-4);
+  padding: 0 0 var(--space-5);
 }
 
 .schedule-customise .collapsible-section .collapsible-section__panel .section-copy {
@@ -102,12 +102,12 @@
 
 .schedule-fold-groups {
   display: grid;
-  gap: 20px;
+  gap: var(--space-5);
 }
 
 .schedule-fold-group {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .schedule-field-hint {

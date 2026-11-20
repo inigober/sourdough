@@ -39,13 +39,13 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: stretch;
-  gap: 10px;
+  gap: var(--space-3);
 }
 
 .wizard-nav--steps .wizard-button {
   width: 100%;
   min-height: 48px;
-  padding: 10px 12px;
+  padding: var(--space-3) var(--space-3);
   font-size: var(--text-md);
   line-height: 1.2;
   text-align: center;
@@ -77,8 +77,8 @@
 
 @media (max-width: 360px) {
   .wizard-nav--steps .wizard-button {
-    gap: 6px;
-    padding-inline: 8px;
+    gap: var(--space-2);
+    padding-inline: var(--space-2);
     font-size: var(--text-sm);
   }
 }
@@ -94,11 +94,11 @@
 /* Flour step: the live blend summary is a labelled line below the inputs. */
 .flour-blend-summary {
   display: grid;
-  gap: 2px;
-  margin: 16px 0 0;
-  padding: 12px 14px;
+  gap: var(--space-1);
+  margin: var(--space-4) 0 0;
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-border-soft);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: var(--color-surface-muted);
 }
 
@@ -122,8 +122,8 @@
   justify-content: center;
   width: 28px;
   height: 28px;
-  margin-right: 8px;
-  border-radius: 9px;
+  margin-right: var(--space-2);
+  border-radius: var(--radius-sm);
   background: var(--color-tint-primary);
   color: var(--color-primary-text);
 }
@@ -146,28 +146,28 @@
 /* Ingredient breakdown: levain panel, then the dough list. Every row is icon | name | amount. */
 .ingredient-breakdown {
   display: grid;
-  gap: 16px;
+  gap: var(--space-4);
   align-content: start;
 }
 
 .ingredient-group {
   display: grid;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .ingredient-group--levain {
-  gap: 12px;
-  padding: 14px;
+  gap: var(--space-3);
+  padding: var(--space-4);
   border: 1px solid var(--color-border-soft);
   border-left: 3px solid var(--color-success-border);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: var(--color-surface-muted);
 }
 
 .ingredient-group__header {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .ingredient-group__icon,
@@ -178,7 +178,7 @@
   justify-content: center;
   width: 28px;
   height: 28px;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   background: var(--color-success-bg-soft);
   color: var(--color-success);
 }
@@ -186,7 +186,7 @@
 .ingredient-group__icon {
   width: 36px;
   height: 36px;
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
 }
 
 .ingredient-group__icon--dough {
@@ -249,14 +249,14 @@
 
 .ingredient-feeding {
   display: grid;
-  gap: 2px;
+  gap: var(--space-1);
 }
 
 .ingredient-feeding__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .ingredient-feeding__header h4 {
@@ -268,9 +268,9 @@
 }
 
 .ingredient-feeding__ratio {
-  padding: 2px 10px;
+  padding: var(--space-1) var(--space-3);
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-surface);
   color: var(--color-primary-text);
   font-size: var(--text-sm);
@@ -287,7 +287,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
   min-height: 44px;
   border-top: 1px solid var(--color-border-faint);
 }
@@ -299,7 +299,7 @@
 .ingredient-row dt {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-3);
   min-width: 0;
   color: var(--color-text-body);
   font-weight: var(--weight-bold);
@@ -355,7 +355,7 @@
 .ingredient-group__meta {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: var(--space-2);
   margin: 0;
   color: var(--color-text-muted);
   font-size: var(--text-sm);
@@ -371,7 +371,7 @@
 }
 
 .ingredient-breakdown__totals {
-  padding-top: 12px;
+  padding-top: var(--space-3);
   border-top: 1px solid var(--color-border-faint);
   color: var(--color-text-muted);
   font-size: var(--text-sm);
@@ -382,10 +382,10 @@
 .recipe-assessment .assessment-verdict {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  margin: 12px 0 0;
-  padding: 12px 14px;
-  border-radius: 14px;
+  gap: var(--space-3);
+  margin: var(--space-3) 0 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
   font-size: var(--text-md);
   line-height: 1.4;
   font-weight: var(--weight-bold);
@@ -445,11 +445,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
   width: 100%;
   min-height: var(--touch-target-min);
-  margin-top: 4px;
-  padding: 0 2px;
+  margin-top: var(--space-1);
+  padding: 0 var(--space-1);
   border: 0;
   background: transparent;
   color: var(--color-primary-text);
@@ -463,7 +463,7 @@
 .assessment-toggle:focus-visible {
   outline: 3px solid var(--color-focus-ring);
   outline-offset: 2px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
 }
 
 .assessment-toggle__chevron {
@@ -476,7 +476,7 @@
 
 .assessment-details {
   display: grid;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .recipe-assessment .assessment-details__intro {
@@ -486,12 +486,12 @@
 }
 
 .recipe-assessment .assessment-details ul {
-  margin-top: 10px;
+  margin-top: var(--space-3);
 }
 
 .assessment-section strong {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 

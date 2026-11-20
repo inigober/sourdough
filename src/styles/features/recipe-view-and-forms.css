@@ -1,6 +1,6 @@
 .recipe-view {
   display: grid;
-  gap: 20px;
+  gap: var(--space-5);
 }
 
 .recipe-view__hero {
@@ -8,11 +8,11 @@
 }
 
 .recipe-view__day {
-  margin-top: 16px;
+  margin-top: var(--space-4);
 }
 
 .recipe-view__day-label {
-  margin: 0 0 4px;
+  margin: 0 0 var(--space-1);
   color: var(--color-primary-text);
   font-size: var(--text-sm);
   font-weight: var(--weight-bold);
@@ -29,9 +29,9 @@
 .recipe-view__step {
   display: grid;
   grid-template-columns: 3.25rem minmax(0, 1fr) auto;
-  gap: 10px;
+  gap: var(--space-3);
   align-items: baseline;
-  padding: 8px 0;
+  padding: var(--space-2) 0;
   border-top: 1px solid var(--color-border-soft);
 }
 
@@ -58,7 +58,7 @@
 }
 
 .bake-start__fields {
-  margin-top: 12px;
+  margin-top: var(--space-3);
 }
 
 /* --- Input sanity: bake start timing (past-time warning + "Start now") --- */
@@ -66,8 +66,8 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 10px;
-  margin-top: 12px;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
 }
 
 .bake-start__timing .field-message {
@@ -80,10 +80,10 @@
 /* --- end input sanity block --- */
 
 .bake-start__preview {
-  margin-top: 16px;
-  padding: 12px 14px;
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-border-soft);
-  border-radius: var(--radius-card);
+  border-radius: var(--radius-lg);
   background: var(--color-surface-muted);
 }
 
@@ -100,12 +100,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .schedule-bake-form {
   display: grid;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .field-card--toggle {
@@ -136,7 +136,7 @@
 
 .field-description {
   display: block;
-  margin-top: 4px;
+  margin-top: var(--space-1);
   color: var(--color-text-subtle);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
@@ -160,7 +160,7 @@
 .input-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .input-row--stepper {
@@ -175,7 +175,7 @@
   max-width: var(--number-field-width);
   min-width: 0;
   border: 1px solid var(--color-border);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--color-surface);
 }
@@ -183,7 +183,7 @@
 /* The value sits between a decrease and an increase button, each a full 44px target. */
 .number-field__control input {
   flex: 1 1 auto;
-  padding-inline: 4px;
+  padding-inline: var(--space-1);
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -230,7 +230,7 @@
 }
 
 .saved-recipe-card__bake {
-  padding: 10px 14px;
+  padding: var(--space-3) var(--space-4);
   font-size: var(--text-sm);
   white-space: nowrap;
 }

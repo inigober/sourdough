@@ -1,16 +1,16 @@
 /* --- Bake mode: "Amounts" disclosure on the current step, and padding for the Full schedule rows --- */
 .companion-amounts {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .companion-amounts__toggle {
   display: inline-flex;
   align-items: center;
   justify-self: start;
-  gap: 4px;
+  gap: var(--space-1);
   min-height: var(--touch-target-min);
-  padding: 0 4px;
+  padding: 0 var(--space-1);
   border: 0;
   background: transparent;
   color: var(--color-primary-text);
@@ -23,7 +23,7 @@
 .companion-amounts__toggle:focus-visible {
   outline: 3px solid var(--color-focus-ring);
   outline-offset: 2px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
 }
 
 .companion-amounts__chevron {
@@ -40,16 +40,16 @@
 
 .companion-amounts__panel {
   display: grid;
-  gap: 8px;
-  padding: 10px 14px;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-border-soft);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: var(--color-surface-muted);
 }
 
 .companion-amounts__list {
   display: grid;
-  gap: 6px;
+  gap: var(--space-2);
   margin: 0;
 }
 
@@ -57,7 +57,7 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .companion-amounts__row dt {
@@ -72,7 +72,7 @@
 }
 
 .companion-amounts__row--total {
-  padding-top: 6px;
+  padding-top: var(--space-2);
   border-top: 1px solid var(--color-border-soft);
 }
 
@@ -94,8 +94,8 @@
 }
 
 .companion__overview-list .timeline-row--interactive {
-  padding: 10px 12px;
-  border-radius: 12px;
+  padding: var(--space-3) var(--space-3);
+  border-radius: var(--radius-md);
 }
 
 .companion__overview-list .timeline-row--current.timeline-row--interactive {
@@ -115,7 +115,7 @@
 
 /* The Jump button sits under its row, indented to the same inner edge as the row text. */
 .companion__overview-list .companion__row-actions {
-  padding: 6px 12px 10px;
+  padding: var(--space-2) var(--space-3) var(--space-3);
 }
 /* --- end bake mode amounts and Full schedule --- */
 

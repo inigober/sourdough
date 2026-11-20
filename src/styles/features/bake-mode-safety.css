@@ -31,7 +31,7 @@
 
 /* "About this bake" disclosure replaces the hero paragraph */
 .companion__about {
-  margin: 6px 0 0;
+  margin: var(--space-2) 0 0;
 }
 
 .companion__about summary {
@@ -45,15 +45,15 @@
 }
 
 .companion__about .hero-copy {
-  margin: 0 0 6px;
+  margin: 0 0 var(--space-2);
 }
 
 /* Web build: no alerts with the screen off */
 .companion__web-banner {
-  margin: 10px 0 0;
-  padding: 10px 12px;
+  margin: var(--space-3) 0 0;
+  padding: var(--space-3) var(--space-3);
   border: 1px solid var(--color-border-notice);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--color-surface-notice);
   color: var(--color-text);
   font-size: var(--text-sm);
@@ -69,8 +69,8 @@
 }
 
 .companion__next-up {
-  margin: 4px 0 0;
-  padding-top: 12px;
+  margin: var(--space-1) 0 0;
+  padding-top: var(--space-3);
   border-top: 1px solid var(--color-border-soft);
   color: var(--color-text-muted);
   font-size: var(--text-md);
@@ -83,7 +83,7 @@
 
 .timeline-row__label-compact {
   display: grid;
-  gap: 2px;
+  gap: var(--space-1);
 }
 
 .timeline-row__starts-in {
@@ -100,14 +100,14 @@
 .companion__row-actions {
   display: flex;
   justify-content: flex-end;
-  padding: 0 0 10px;
+  padding: 0 0 var(--space-3);
 }
 
 /* Toast with an action (Undo), lifted above the sticky bake-mode footer */
 .toast--with-action {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: var(--space-4);
 }
 
 .toast--above-footer {
@@ -116,7 +116,7 @@
 
 .toast__action {
   min-height: 2.75rem;
-  padding: 0 8px;
+  padding: 0 var(--space-2);
   border: 0;
   background: transparent;
   color: var(--color-primary-text);
@@ -143,7 +143,7 @@
 .toast--with-action {
   width: min(calc(100vw - 28px), 22rem);
   justify-content: space-between;
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   text-align: left;
 }
 
@@ -152,7 +152,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
   width: 100%;
   min-height: 48px;
 }

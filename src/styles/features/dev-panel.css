@@ -5,7 +5,7 @@
 
 .dev-panel__storage {
   display: grid;
-  gap: 10px;
+  gap: var(--space-3);
 }
 
 .dev-panel__section-title {
@@ -15,7 +15,7 @@
 
 .dev-panel__key-list {
   display: grid;
-  gap: 10px;
+  gap: var(--space-3);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -23,7 +23,7 @@
 
 .dev-panel__key-list li {
   display: grid;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .dev-panel__key-label {

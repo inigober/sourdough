@@ -2,14 +2,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--space-4);
   margin-top: 0;
 }
 
 .wizard-nav--split {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .wizard-nav--split .wizard-button {
@@ -30,7 +30,7 @@
   width: var(--icon-button-size);
   height: var(--icon-button-size);
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-surface);
   color: var(--color-text);
   cursor: pointer;
@@ -98,14 +98,14 @@
 
 .wizard-button {
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-surface);
   color: var(--color-text);
   cursor: pointer;
   font: inherit;
   font-size: var(--text-md);
   font-weight: var(--weight-semibold);
-  padding: 12px 22px;
+  padding: var(--space-3) var(--space-6);
 }
 
 .wizard-button .icon {
@@ -117,7 +117,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .wizard-button:disabled {
