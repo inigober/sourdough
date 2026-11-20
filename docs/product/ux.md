@@ -152,10 +152,10 @@ Behaviours:
 
 #### Coach
 
-The sparkles button opens an AI baking coach for the current step (a Supabase edge function, so it needs Supabase configured).
+The sparkles button opens an AI baking coach for the current step (a Supabase edge function, so it needs Supabase configured). **It answers signed-in bakers only**: signed out, the sheet shows the step tips and a Sign in prompt.
 
 - It opens with a static tip for the step, a one-line framing ("AI guidance based on your recipe and photo. When unsure, trust the dough."), and tap-to-fill quick questions per step.
-- Up to 5 questions per bake; the remaining count is shown, and the last question is flagged. A question only counts once a reply succeeds.
+- Up to 5 questions per bake and 25 per user per rolling 24 hours, both counted on the server; the remaining count is shown, and the last question is flagged. A question only counts once a reply succeeds.
 - The conversation is saved in the bake session (`coachTranscript`, last 10 messages; photos are not stored, only a "Photo shared" note) and is there when the sheet is reopened.
 - On failure the draft and photo stay in the box, friendly copy is shown with a Retry button for retryable failures, and no quota is spent. Raw errors only go to the developer console.
 - The prompt includes live bake progress (step number, planned vs actual time, drift, steps already logged). The coach is told never to recommend adding or removing water, flour, salt, or starter, or to change the hydration or any amount; for sticky, wet, stiff or slack dough it explains what is normal for the step and suggests technique only. A photo can be attached; it is compressed before upload.

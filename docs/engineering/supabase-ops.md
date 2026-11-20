@@ -133,3 +133,14 @@ Storage space, download traffic (egress) and project pausing are limited on the 
 ### Cleaning up
 
 Deleting a bake in the app also deletes its photo. If a photo is ever left behind (for example the delete request failed), you can remove it from the dashboard under Storage, `bake-photos`.
+
+## Coach limits (sign-in and server-side counting)
+
+The `coach` edge function only answers signed-in users and counts questions in `public.coach_usage` (migration `supabase/migrations/20260619120000_coach_usage.sql`). Apply the migration and deploy the function together:
+
+```bash
+supabase db push
+supabase functions deploy coach
+```
+
+Verify: calling the function with only the public key (signed out) returns 401 "Sign in required to use the coach."; `coach_usage` exists with row level security on. The `OPENAI_API_KEY` secret must already be set on the project. Tune the limits in `supabase/functions/coach/usageRules.ts`.

@@ -15,7 +15,10 @@ type CoachReplyResponse = {
 };
 
 export type CoachReplyRequest = CoachPromptParts & {
+  /** Used only for the quick local check; the server counts questions itself and is the real limit. */
   coachQuestionsAsked: number;
+  /** Lets the server count questions per bake. */
+  bakeSessionId: string;
   /** JPEG data URL, already compressed client-side for vision API cost control. */
   photoDataUrl?: string;
 };
@@ -55,6 +58,12 @@ export async function requestCoachReply(request: CoachReplyRequest): Promise<Coa
   const supabase = getSupabaseClient();
   if (!supabase) {
     return failure('not-configured');
+  }
+
+  // The server only answers signed-in users. Check here too so a signed-out tap does not make a pointless call.
+  const { data: authData } = await supabase.auth.getSession();
+  if (!authData.session) {
+    return failure('sign-in');
   }
 
   const { data, error } = await supabase.functions.invoke<CoachReplyResponse>('coach', {

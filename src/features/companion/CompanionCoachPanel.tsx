@@ -42,6 +42,9 @@ type CompanionCoachPanelProps = {
   stepId: string;
   stepLabel: string;
   stepDetail?: string;
+  /** The coach answers signed-in bakers only; signed out, the step tips still show and a sign-in prompt replaces the composer. */
+  needsSignIn: boolean;
+  onSignIn: () => void;
   onClose: () => void;
   onSessionChange: (session: BakeSession) => void;
 };
@@ -52,6 +55,8 @@ export function CompanionCoachPanel({
   stepId,
   stepLabel,
   stepDetail,
+  needsSignIn,
+  onSignIn,
   onClose,
   onSessionChange,
 }: CompanionCoachPanelProps) {
@@ -141,6 +146,7 @@ export function CompanionCoachPanel({
         ...prompt,
         photoDataUrl,
         coachQuestionsAsked: session.coachQuestionsAsked,
+        bakeSessionId: session.id,
       });
 
       // The sheet was closed mid-request: saving on a stale session could undo step progress,
@@ -211,15 +217,17 @@ export function CompanionCoachPanel({
           <div>
             <h2 id="companion-coach-title">Baking coach</h2>
             <p className="companion-coach__subtitle">{stepLabel}</p>
-            <p
-              className={
-                isLastCoachQuestion(session.coachQuestionsAsked)
-                  ? 'companion-coach__quota companion-coach__quota--last'
-                  : 'companion-coach__quota'
-              }
-            >
-              {questionsRemainingLabel}
-            </p>
+            {needsSignIn ? null : (
+              <p
+                className={
+                  isLastCoachQuestion(session.coachQuestionsAsked)
+                    ? 'companion-coach__quota companion-coach__quota--last'
+                    : 'companion-coach__quota'
+                }
+              >
+                {questionsRemainingLabel}
+              </p>
+            )}
             <p className="companion-coach__framing">
               AI guidance based on your recipe and photo. When unsure, trust the dough.
             </p>
@@ -290,7 +298,16 @@ export function CompanionCoachPanel({
           </div>
         ) : null}
 
-        {canAskQuestion && !isSending ? (
+        {needsSignIn ? (
+          <div className="companion-coach__sign-in">
+            <p>Sign in to ask the baking coach questions about your dough. The step tips above work without an account.</p>
+            <button type="button" className="wizard-button wizard-button--primary" onClick={onSignIn}>
+              Sign in
+            </button>
+          </div>
+        ) : null}
+
+        {!needsSignIn && canAskQuestion && !isSending ? (
           <ul className="companion-coach__chips" aria-label="Suggested questions">
             {quickQuestions.map((question) => (
               <li key={question}>
@@ -306,7 +323,7 @@ export function CompanionCoachPanel({
           </ul>
         ) : null}
 
-        {canAskQuestion ? (
+        {!needsSignIn && canAskQuestion ? (
           <form className="companion-coach__composer" onSubmit={(event) => void handleSubmit(event)}>
             <div className="companion-coach__photo-input">
               <input

@@ -69,6 +69,9 @@ type CompanionViewProps = {
   saveBakeError: string | null;
   /** `discardBake: true` deletes the bake session; false keeps it so the bake can be resumed. */
   onExit: (discardBake: boolean) => void;
+  /** The coach only answers signed-in bakers (the server enforces it); this just lets the sheet say so. */
+  coachNeedsSignIn: boolean;
+  onSignInForCoach: () => void;
 };
 
 export function CompanionView({
@@ -78,6 +81,8 @@ export function CompanionView({
   isSavingBake,
   saveBakeError,
   onExit,
+  coachNeedsSignIn,
+  onSignInForCoach,
 }: CompanionViewProps) {
   const [isEditingStep, setIsEditingStep] = useState(false);
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
@@ -502,6 +507,8 @@ export function CompanionView({
           stepId={currentStep.id}
           stepLabel={currentStep.label}
           stepDetail={currentStep.detail}
+          needsSignIn={coachNeedsSignIn}
+          onSignIn={onSignInForCoach}
           onClose={() => setIsCoachOpen(false)}
           onSessionChange={onSessionChange}
         />

@@ -1,4 +1,12 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
+import { createClient } from 'jsr:@supabase/supabase-js@2';
+
+import {
+  DAY_MS,
+  checkRequestSize,
+  checkUsageLimits,
+  readBearerToken,
+} from './usageRules.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,13 +15,13 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
 };
 
-const MAX_QUESTIONS_PER_BAKE = 5;
 const MAX_OUTPUT_TOKENS = 280;
 
 type CoachRequest = {
   system: string;
   user: string;
-  coachQuestionsAsked?: number;
+  /** Lets the server count questions per bake. */
+  bakeSessionId?: string;
   photoDataUrl?: string;
 };
 
@@ -49,41 +57,84 @@ function buildUserMessage(user: string, photoDataUrl?: string): OpenAiChatMessag
   };
 }
 
+function json(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
+
+// Access to this function is checked here, not by the gateway's `verify_jwt` (see supabase/config.toml):
+// the check needs a clear 401 message for the app, and it has to work with the project's key setup.
+// The service-role client is used only to look up the user and to read and write `coach_usage`,
+// a table the app's own keys cannot touch.
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    const { system, user, coachQuestionsAsked = 0, photoDataUrl } = (await req.json()) as CoachRequest;
-
-    if (!system?.trim() || !user?.trim()) {
-      return new Response(JSON.stringify({ error: 'Missing coach prompt content.' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    if (coachQuestionsAsked >= MAX_QUESTIONS_PER_BAKE) {
-      return new Response(
-        JSON.stringify({
-          error: `Question limit reached (${MAX_QUESTIONS_PER_BAKE} per bake).`,
-        }),
-        {
-          status: 429,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        },
-      );
-    }
-
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     const apiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'Coach is not configured on the server.' }), {
-        status: 503,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    if (!supabaseUrl || !serviceRoleKey || !apiKey) {
+      return json({ error: 'Coach is not configured on the server.' }, 503);
     }
 
+    const admin = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false } });
+
+    // 1. Only signed-in users. A signed-out app sends the public key as the bearer, which is not a user token.
+    const token = readBearerToken(req.headers.get('Authorization'));
+    const { data: authData, error: authError } = token
+      ? await admin.auth.getUser(token)
+      : { data: { user: null }, error: null };
+    const user = authData.user;
+    if (authError || !user) {
+      return json({ error: 'Sign in required to use the coach.' }, 401);
+    }
+
+    // 2. Request shape and size.
+    const { system, user: question, bakeSessionId, photoDataUrl } = (await req.json()) as CoachRequest;
+    if (!system?.trim() || !question?.trim()) {
+      return json({ error: 'Missing coach prompt content.' }, 400);
+    }
+
+    const sizeCheck = checkRequestSize({ system, user: question, photoDataUrl, bakeSessionId });
+    if (!sizeCheck.ok) {
+      return json({ error: sizeCheck.error }, sizeCheck.status);
+    }
+
+    // 3. Limits, counted from rows this function wrote (never from numbers the app sends).
+    const dayStart = new Date(Date.now() - DAY_MS).toISOString();
+    const [bakeCount, dayCount] = await Promise.all([
+      bakeSessionId
+        ? admin
+            .from('coach_usage')
+            .select('id', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('bake_session_id', bakeSessionId)
+        : Promise.resolve(null),
+      admin
+        .from('coach_usage')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .gte('asked_at', dayStart),
+    ]);
+
+    if (bakeCount?.error || dayCount.error) {
+      console.error('coach usage lookup failed', bakeCount?.error ?? dayCount.error);
+      return json({ error: 'Coach is temporarily unavailable.' }, 500);
+    }
+
+    const limitCheck = checkUsageLimits({
+      askedForBake: bakeCount ? (bakeCount.count ?? 0) : null,
+      askedToday: dayCount.count ?? 0,
+    });
+    if (!limitCheck.ok) {
+      return json({ error: limitCheck.error }, limitCheck.status);
+    }
+
+    // 4. Ask the model.
     const model = Deno.env.get('OPENAI_MODEL') ?? 'gpt-4o-mini';
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -93,37 +144,36 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         model,
-        messages: [{ role: 'system', content: system }, buildUserMessage(user, photoDataUrl)],
+        messages: [{ role: 'system', content: system }, buildUserMessage(question, photoDataUrl)],
         max_tokens: MAX_OUTPUT_TOKENS,
         temperature: 0.5,
       }),
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      return new Response(JSON.stringify({ error: errorText || 'OpenAI request failed.' }), {
-        status: 502,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      console.error('OpenAI request failed', response.status, await response.text());
+      return json({ error: 'Coach request failed.' }, 502);
     }
 
     const payload = await response.json();
     const reply = payload.choices?.[0]?.message?.content?.trim();
 
     if (!reply) {
-      return new Response(JSON.stringify({ error: 'OpenAI returned an empty reply.' }), {
-        status: 502,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return json({ error: 'OpenAI returned an empty reply.' }, 502);
     }
 
-    return new Response(JSON.stringify({ reply }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    // 5. Count the question only now that it was answered, so a failed call never costs the baker a slot.
+    const { error: insertError } = await admin
+      .from('coach_usage')
+      .insert({ user_id: user.id, bake_session_id: bakeSessionId ?? null });
+    if (insertError) {
+      // The reply is still returned; the question just is not counted. Worth knowing about.
+      console.error('coach usage insert failed', insertError);
+    }
+
+    return json({ reply });
   } catch (error) {
-    return new Response(JSON.stringify({ error: String(error) }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    console.error('coach function error', error);
+    return json({ error: 'Coach request failed.' }, 500);
   }
 });

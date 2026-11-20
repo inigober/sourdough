@@ -1,12 +1,27 @@
 import { coachQuestionLimitMessage } from './coachLimits.ts';
 
-export type CoachFailureReason = 'limit' | 'not-configured' | 'empty-reply' | 'unavailable';
+export type CoachFailureReason =
+  | 'limit'
+  | 'daily-limit'
+  | 'sign-in'
+  | 'not-configured'
+  | 'empty-reply'
+  | 'unavailable';
 
 /** Maps a raw server or network error string to a reason the UI can explain. Raw text is never shown to bakers. */
 export function classifyCoachErrorDetail(detail: string): CoachFailureReason {
   // Match the server's own wording only: an OpenAI "Rate limit reached" is not the baker's quota.
   if (/question limit reached/i.test(detail)) {
     return 'limit';
+  }
+
+  // The server's own wording again (supabase/functions/coach/usageRules.ts).
+  if (/daily coach limit reached/i.test(detail)) {
+    return 'daily-limit';
+  }
+
+  if (/sign in required/i.test(detail)) {
+    return 'sign-in';
   }
 
   if (/not configured/i.test(detail)) {
@@ -24,6 +39,10 @@ export function getCoachFailureMessage(reason: CoachFailureReason): string {
   switch (reason) {
     case 'limit':
       return coachQuestionLimitMessage();
+    case 'daily-limit':
+      return "You've reached today's coach limit. Try again tomorrow. The tips above still work.";
+    case 'sign-in':
+      return 'Sign in to ask the baking coach. The tips above work without an account.';
     case 'not-configured':
       return 'The baking coach is not available right now. Use the tips above and trust what you see in the dough.';
     case 'empty-reply':

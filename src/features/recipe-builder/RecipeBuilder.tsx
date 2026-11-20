@@ -333,6 +333,8 @@ export function RecipeBuilder() {
           isSavingBake={isSavingBakeHistory}
           saveBakeError={saveBakeHistoryError}
           onExit={(discardBake) => bakeFlow.exitCompanion({ discardBake })}
+          coachNeedsSignIn={isConfigured && !isAuthLoading && !user}
+          onSignInForCoach={openAuthModal}
         />
         {dialogs}
         {devPanel}

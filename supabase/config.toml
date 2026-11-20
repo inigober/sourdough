@@ -2,4 +2,5 @@
 # Link this folder to your remote project with: supabase link --project-ref YOUR_PROJECT_REF
 
 [functions.coach]
+# The coach checks the signed-in user itself (supabase/functions/coach/index.ts) so it can return a clear 401.
 verify_jwt = false

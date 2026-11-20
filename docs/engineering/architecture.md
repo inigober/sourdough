@@ -154,7 +154,7 @@ Bake sessions store a snapshot of the recipe and schedule, and their timeline ca
 
 ## Coach
 
-The coach is a Supabase edge function (`supabase/functions/coach`) that calls an OpenAI model with the prompt built in `lib/companion/buildCoachPrompt.ts` and rejects a request once the question count the app sends has reached 5 per bake. The count itself is kept on the device (in the bake session), so the limit is a courtesy check, not a hard server-side quota. The client (`requestCoachReply.ts`) maps errors to friendly copy. The coach only explains and suggests technique; its prompt forbids changing any ingredient amount. It needs Supabase configured; without it the sheet says the coach is not available and the step tips still work. Prompts, UI, and state are kept in separate files.
+The coach is a Supabase edge function (`supabase/functions/coach`) that calls an OpenAI model with the prompt built in `lib/companion/buildCoachPrompt.ts`. The function checks the user's sign-in token itself and answers 401 otherwise, caps request sizes, and enforces 5 questions per bake and 25 per user per rolling 24 hours by counting rows in `public.coach_usage` (written only by the function with the service role; the table has row level security and no policies). A question is recorded only after OpenAI answers. The rules are pure code in `supabase/functions/coach/usageRules.ts`, tested from `src/lib/companion/coachServerRules.test.ts`. Known limit: the prompt is still built in the app, so a signed-in user could send their own instructions within the caps; moving prompt building to the server is a follow-up.
 
 ## Native iOS
 
