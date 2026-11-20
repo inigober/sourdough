@@ -28,6 +28,7 @@ import {
   type StepChange,
   type StepEditResult,
 } from '../../lib/schedule/stepEditPanel.ts';
+import { collectOriginals, restoreOriginals, type ScheduleOriginals } from '../../lib/schedule/stepOriginals.ts';
 import { getColdRetardHours, roundColdRetardHoursUp } from '../../lib/schedule/scheduleTiming.ts';
 import {
   formatBakeDayLabel,
@@ -65,6 +66,8 @@ export function useScheduleBuilder({
   // True once the baker picked Custom or edited a value. It keeps the field groups on screen even if
   // the values happen to equal a preset, so the groups never vanish while they are being edited.
   const [customChosen, setCustomChosen] = useState(false);
+  // What each edited step looked like before the baker edited it, so "Undo changes" can put it back.
+  const [stepOriginals, setStepOriginals] = useState<Record<string, ScheduleOriginals>>({});
 
   const autolyseAdvice = useMemo(() => getAutolyseRecommendation(recipeInput), [recipeInput]);
   const autolyseTimeAdvice = useMemo(() => getAutolyseTimeAdvice(recipeInput), [recipeInput]);
@@ -201,6 +204,7 @@ export function useScheduleBuilder({
   const editSchedule = useCallback(
     (patch: Partial<ScheduleInput>): void => {
       setCustomChosen(true);
+      setStepOriginals({}); // a change made in the Custom groups would be overwritten by an old undo
       // Changing the fold layout makes any per-fold override stale, so it is dropped here.
       onScheduleChange(withFoldOverridesCleared(patch));
     },
@@ -219,16 +223,51 @@ export function useScheduleBuilder({
       const result = applyStepEdit(scheduleInput, recipeInput, rawTimeline, displayStepId, change);
       if (result.ok) {
         setCustomChosen(true);
+        const originals = collectOriginals(scheduleInput, result.schedule, stepOriginals[displayStepId]);
+        if (Object.keys(originals).length > 0) {
+          setStepOriginals((current) => ({ ...current, [displayStepId]: originals }));
+        }
         onScheduleChange(result.schedule);
       }
       return result;
     },
-    [onScheduleChange, rawTimeline, recipeInput, scheduleInput],
+    [onScheduleChange, rawTimeline, recipeInput, scheduleInput, stepOriginals],
+  );
+
+  const canResetStep = useCallback(
+    (displayStepId: string): boolean => Object.keys(stepOriginals[displayStepId] ?? {}).length > 0,
+    [stepOriginals],
+  );
+
+  /** Puts back what this step's edits changed. Nothing else in the plan is touched. */
+  const resetStep = useCallback(
+    (displayStepId: string): void => {
+      const originals = stepOriginals[displayStepId];
+      if (!originals) {
+        return;
+      }
+      const restored = restoreOriginals(scheduleInput, originals) as unknown as Record<string, unknown>;
+      const current = scheduleInput as unknown as Record<string, unknown>;
+      const patch: Record<string, unknown> = {};
+      for (const key of new Set([...Object.keys(current), ...Object.keys(restored)])) {
+        if (current[key] !== restored[key]) {
+          patch[key] = restored[key];
+        }
+      }
+      onScheduleChange(patch as Partial<ScheduleInput>);
+      setStepOriginals((existing) => {
+        const next = { ...existing };
+        delete next[displayStepId];
+        return next;
+      });
+    },
+    [onScheduleChange, scheduleInput, stepOriginals],
   );
 
   const applyPreset = useCallback(
     (presetId: SchedulePresetId): void => {
       setCustomChosen(false);
+      setStepOriginals({});
       // A preset starts from its own folds, so earlier per-fold edits go.
       onScheduleChange({ ...getSchedulePresetPatch(presetId, recipeInput), foldRestMinutesByStep: undefined });
     },
@@ -290,6 +329,8 @@ export function useScheduleBuilder({
     editSchedule,
     isStepEditable,
     editStep,
+    canResetStep,
+    resetStep,
     confirmPendingPreset,
     cancelPendingPreset,
     autolyseAdvice,

@@ -12,12 +12,14 @@ type StepEditPanelProps = {
   step: TimelineStep;
   /** Applies the change to the schedule. The panel shows what moved, or why it was refused. */
   onApply: (change: StepChange) => StepEditResult;
+  /** Present only when this step has been edited: puts back what those edits changed. */
+  onReset?: () => void;
 };
 
 const DURATION_STEP_MINUTES = 5;
 
 /** Flat panel under an open timeline row: start time, duration, and what the change moved. */
-export function StepEditPanel({ step, onApply }: StepEditPanelProps) {
+export function StepEditPanel({ step, onApply, onReset }: StepEditPanelProps) {
   const startId = useId();
   const durationId = useId();
   const [durationDraft, setDurationDraft] = useState(String(step.durationMinutes));
@@ -132,6 +134,19 @@ export function StepEditPanel({ step, onApply }: StepEditPanelProps) {
         >
           {feedback.text}
         </p>
+      ) : null}
+
+      {onReset ? (
+        <button
+          type="button"
+          className="button button--secondary step-edit__reset"
+          onClick={() => {
+            onReset();
+            setFeedback({ kind: 'summary', text: 'Changes to this step are undone.' });
+          }}
+        >
+          Undo changes to this step
+        </button>
       ) : null}
     </div>
   );

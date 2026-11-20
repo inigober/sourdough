@@ -15,6 +15,9 @@ type BakePlanTimelineProps = {
    */
   isStepEditable?: (step: TimelineStep) => boolean;
   onEditStep?: (stepId: string, change: StepChange) => StepEditResult;
+  /** Shows an "Undo changes" button in the open row's panel when the baker has edited that step. */
+  canResetStep?: (stepId: string) => boolean;
+  onResetStep?: (stepId: string) => void;
 };
 
 export function BakePlanTimeline({
@@ -23,6 +26,8 @@ export function BakePlanTimeline({
   embedded = false,
   isStepEditable,
   onEditStep,
+  canResetStep,
+  onResetStep,
 }: BakePlanTimelineProps) {
   // One row open at a time; tapping the open row closes it.
   const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
@@ -56,7 +61,11 @@ export function BakePlanTimeline({
         isStepSelectable={canEdit ? isStepEditable : undefined}
         onSelectStep={(step) => setSelectedStepId((current) => (current === step.id ? null : step.id))}
         renderPanel={(step) =>
-          onEditStep ? <StepEditPanel step={step} onApply={(change) => onEditStep(step.id, change)} /> : null
+          onEditStep ? <StepEditPanel
+              step={step}
+              onApply={(change) => onEditStep(step.id, change)}
+              onReset={canResetStep?.(step.id) && onResetStep ? () => onResetStep(step.id) : undefined}
+            /> : null
         }
       />
     </>

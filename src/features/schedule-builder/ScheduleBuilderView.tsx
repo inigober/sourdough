@@ -60,6 +60,8 @@ export function ScheduleBuilderView({
     editSchedule,
     isStepEditable,
     editStep,
+    canResetStep,
+    resetStep,
     confirmPendingPreset,
     cancelPendingPreset,
     autolyseAdvice,
@@ -495,6 +497,8 @@ export function ScheduleBuilderView({
         caption={`Times follow your start time. ${mixAndBakeSentence}`}
         isStepEditable={isStepEditable}
         onEditStep={editStep}
+        canResetStep={canResetStep}
+        onResetStep={resetStep}
       />
 
       <div className="schedule-export">
