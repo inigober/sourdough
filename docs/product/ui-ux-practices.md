@@ -156,6 +156,7 @@ Light and dark ratios were checked with a throwaway script over the main text/su
 | Collapse advanced or secondary detail on results (e.g. formula breakdown) when it supports scanning. | Summary first, detail on demand. |
 | Wizard footer: buttons share one height and equal columns; the primary action is Continue, or Save when editing from the summary (Continue becomes secondary). | Three equally loud buttons made the bar clunky. |
 | A sticky footer must be the sticky element itself, not a child of a wrapper that is only as tall as the footer. | A sticky child cannot leave its parent's box, so it scrolled away with the page. |
+| Type: use only the scale tokens in `src/styles/tokens.css` (`--text-xs` to `--title-1`, `--display` for the bake timer) and the three weights (`--weight-regular` 400, `--weight-semibold` 600, `--weight-bold` 700). No raw `font-size` or `font-weight`; `typeScale.test.ts` fails if one appears. | Eight sizes instead of 27 give a clear hierarchy, and one place to change when Dynamic Type arrives. |
 | Wizard step titles are questions, not derived values; live summaries sit in a labelled line inside the step. | Consistent steps; derived data in a heading reads as noise. |
 
 ---
@@ -205,3 +206,4 @@ Add a line here when a practice is added or changed after a product discussion.
 - 2026-11-20: Accessibility audit and fixes (dialog and sheet focus, bake timer announcements, headings, page titles, Increase Contrast); new rows in Accessibility Basics.
 - 2026-11-20: Status bar strip for screens without a sticky header (Home, Saved, History); the "Timer alerts are off" notice waits until the baker has been asked.
 - 2026-11-20: iPhone portrait only; the page goes back to its scroll position when the keyboard closes (touch devices); search fields have no auto-capitalise or autocorrect; date and time pickers use the brand colour; bake mode copy has no signed durations and says "next day" for an end time past midnight.
+- 2026-11-20: UI review phase 1 and 2.1: `styles.css` split into `src/styles/`; type scale (8 sizes) and weights (400/600/700) as tokens, enforced by a test. Values snapped to the nearest token, so some text moved by 1 to 2px; metadata text went from 500 to 400.

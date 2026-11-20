@@ -8,7 +8,7 @@ textarea {
   background: var(--color-surface);
   color: var(--color-text);
   font: inherit;
-  font-size: 1rem;
+  font-size: var(--text-md);
   padding: 10px 12px;
 }
 
@@ -19,12 +19,12 @@ select {
 
 input,
 select {
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 textarea {
   min-height: 6rem;
-  font-weight: 500;
+  font-weight: var(--weight-semibold);
   line-height: 1.45;
   resize: vertical;
 }
@@ -70,7 +70,7 @@ textarea:focus {
 
 .input-suffix {
   color: var(--color-text);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .recipe-list {
@@ -114,7 +114,7 @@ textarea:focus {
 }
 
 .assessment-section span {
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .assessment-section p {
@@ -153,12 +153,12 @@ textarea:focus {
 
 dt {
   color: var(--color-text-subtle);
-  font-weight: 400;
+  font-weight: var(--weight-regular);
 }
 
 dd {
   margin: 0;
   color: var(--color-text);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 

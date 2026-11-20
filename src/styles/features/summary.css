@@ -46,7 +46,7 @@
   width: 100%;
   min-height: 48px;
   padding: 10px 12px;
-  font-size: 0.95rem;
+  font-size: var(--text-md);
   line-height: 1.2;
   text-align: center;
 }
@@ -79,7 +79,7 @@
   .wizard-nav--steps .wizard-button {
     gap: 6px;
     padding-inline: 8px;
-    font-size: 0.9rem;
+    font-size: var(--text-sm);
   }
 }
 
@@ -104,15 +104,15 @@
 
 .flour-blend-summary__label {
   color: var(--color-text-subtle);
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .flour-blend-summary strong {
   color: var(--color-text);
-  font-size: 1rem;
+  font-size: var(--text-md);
 }
 
 /* Summary input cards: tinted icon chips. */
@@ -218,13 +218,13 @@
 
 .ingredient-group__heading h3 {
   color: var(--color-text);
-  font-size: 1.05rem;
-  font-weight: 700;
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
 }
 
 .ingredient-group__heading p {
   color: var(--color-text-muted);
-  font-size: 0.86rem;
+  font-size: var(--text-sm);
   line-height: 1.35;
 }
 
@@ -238,13 +238,13 @@
 
 .ingredient-group__total strong {
   color: var(--color-text);
-  font-size: 1.05rem;
+  font-size: var(--text-md);
   font-variant-numeric: tabular-nums;
 }
 
 .ingredient-group__total span {
   color: var(--color-text-subtle);
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
 }
 
 .ingredient-feeding {
@@ -261,8 +261,8 @@
 
 .ingredient-feeding__header h4 {
   color: var(--color-text-subtle);
-  font-size: 0.78rem;
-  font-weight: 700;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -273,9 +273,9 @@
   border-radius: 999px;
   background: var(--color-surface);
   color: var(--color-primary-text);
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .ingredient-rows {
@@ -302,7 +302,7 @@
   gap: 10px;
   min-width: 0;
   color: var(--color-text-body);
-  font-weight: 700;
+  font-weight: var(--weight-bold);
 }
 
 .ingredient-row dd {
@@ -310,7 +310,7 @@
   margin: 0;
   color: var(--color-text);
   font-variant-numeric: tabular-nums;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   text-align: right;
 }
 
@@ -323,14 +323,14 @@
 
 .ingredient-row__label small {
   color: var(--color-text-subtle);
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
 }
 
 .ingredient-row--total dt,
 .ingredient-row--total dd {
   color: var(--color-text-muted);
-  font-size: 0.88rem;
+  font-size: var(--text-sm);
 }
 
 .ingredient-row--total dt {
@@ -358,7 +358,7 @@
   gap: 8px;
   margin: 0;
   color: var(--color-text-muted);
-  font-size: 0.86rem;
+  font-size: var(--text-sm);
   line-height: 1.4;
 }
 
@@ -374,7 +374,7 @@
   padding-top: 12px;
   border-top: 1px solid var(--color-border-faint);
   color: var(--color-text-muted);
-  font-size: 0.88rem;
+  font-size: var(--text-sm);
   line-height: 1.4;
 }
 
@@ -386,9 +386,9 @@
   margin: 12px 0 0;
   padding: 12px 14px;
   border-radius: 14px;
-  font-size: 0.95rem;
+  font-size: var(--text-md);
   line-height: 1.4;
-  font-weight: 700;
+  font-weight: var(--weight-bold);
 }
 
 .assessment-verdict__icon,
@@ -415,8 +415,8 @@
 }
 
 .assessment-verdict__level {
-  font-size: 0.76rem;
-  font-weight: 700;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -455,8 +455,8 @@
   color: var(--color-primary-text);
   cursor: pointer;
   font: inherit;
-  font-size: 0.92rem;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
   text-align: left;
 }
 

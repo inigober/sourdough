@@ -21,7 +21,7 @@
   border-radius: 16px;
   background: var(--color-success-bg);
   color: var(--color-success);
-  font-size: 0.92rem;
+  font-size: var(--text-sm);
   line-height: 1.4;
 }
 
@@ -35,7 +35,7 @@
 .welcome-top-bar__sync-hint {
   margin: 0;
   color: var(--color-text-subtle);
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   line-height: 1.35;
   text-align: right;
 }
@@ -49,8 +49,8 @@
   color: var(--color-text);
   cursor: pointer;
   font: inherit;
-  font-size: 0.92rem;
-  font-weight: 700;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
 }
 
 @media (hover: hover) {
@@ -87,7 +87,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--color-text-muted);
-  font-size: 0.88rem;
+  font-size: var(--text-sm);
   line-height: 1.35;
 }
 
@@ -99,8 +99,8 @@
   color: var(--color-primary-text);
   cursor: pointer;
   font: inherit;
-  font-size: 0.88rem;
-  font-weight: 700;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -124,7 +124,7 @@
   background: transparent;
   color: var(--color-text-muted);
   cursor: pointer;
-  font-size: 1.5rem;
+  font-size: var(--title-2);
   line-height: 1;
 }
 
@@ -148,8 +148,8 @@
   color: var(--color-primary-text);
   cursor: pointer;
   font: inherit;
-  font-size: 0.88rem;
-  font-weight: 700;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
 }
 
 .auth-modal__choices {
@@ -173,20 +173,20 @@
 .auth-modal__error {
   margin: 0;
   color: var(--color-danger);
-  font-size: 0.92rem;
+  font-size: var(--text-sm);
   line-height: 1.4;
 }
 
 .auth-modal__message {
   margin: 0;
   color: var(--color-success);
-  font-size: 0.92rem;
+  font-size: var(--text-sm);
   line-height: 1.4;
 }
 
 .auth-modal__status {
   margin: 0;
   color: var(--color-text-muted);
-  font-size: 0.92rem;
+  font-size: var(--text-sm);
 }
 

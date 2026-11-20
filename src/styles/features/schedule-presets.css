@@ -49,19 +49,19 @@
 
 .schedule-presets__label {
   color: var(--color-text);
-  font-weight: 700;
+  font-weight: var(--weight-bold);
 }
 
 .schedule-presets__description {
   color: var(--color-text-muted);
-  font-size: 0.92rem;
+  font-size: var(--text-sm);
   line-height: 1.4;
 }
 
 .schedule-presets__status {
   margin: 16px 0 0;
   color: var(--color-text-muted);
-  font-size: 0.92rem;
+  font-size: var(--text-sm);
   line-height: 1.4;
 }
 
@@ -87,7 +87,7 @@
 
 .schedule-customise .collapsible-section .collapsible-section__trigger {
   padding: 16px 0;
-  font-size: 1.05rem;
+  font-size: var(--text-md);
 }
 
 .schedule-customise .collapsible-section .collapsible-section__panel {
@@ -113,7 +113,7 @@
 .schedule-field-hint {
   margin: 0;
   color: var(--color-text-muted);
-  font-size: 0.86rem;
+  font-size: var(--text-sm);
   line-height: 1.4;
 }
 

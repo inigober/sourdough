@@ -198,3 +198,23 @@
   }
 }
 
+
+/*
+  Type scale (UI review 6.1). Eight sizes and three weights; every font-size and font-weight in the
+  other files must use one of these (src/lib/ui/typeScale.test.ts checks it). Sizes are in rem so they
+  can follow the user's text size later. Line heights are not tokenised yet.
+*/
+:root {
+  --text-xs: 0.75rem; /* eyebrow labels, badges, nav labels (12px) */
+  --text-sm: 0.875rem; /* helper text, meta lines, field labels (14px) */
+  --text-md: 1rem; /* body, inputs, buttons (16px; inputs stay at 16px so iOS does not zoom) */
+  --text-lg: 1.125rem; /* list titles, card titles in rows (18px) */
+  --title-3: 1.25rem; /* card and section headings (20px) */
+  --title-2: 1.5rem; /* screen titles on a phone, dialog titles (24px) */
+  --title-1: 1.875rem; /* Home hero, large numbers (30px) */
+  --display: clamp(2.5rem, 14vw, 3.5rem); /* the bake timer only */
+
+  --weight-regular: 400;
+  --weight-semibold: 600; /* labels, buttons, inputs */
+  --weight-bold: 700; /* titles */
+}

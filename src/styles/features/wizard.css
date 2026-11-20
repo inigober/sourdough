@@ -37,21 +37,21 @@
 
 .wizard-progress-bar__separator {
   color: var(--color-separator);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .wizard-progress-bar__count {
   color: var(--color-text-subtle);
-  font-size: 0.82rem;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.04em;
   white-space: nowrap;
 }
 
 .wizard-progress-bar__label {
   color: var(--color-text);
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
   min-width: 0;
 }
 

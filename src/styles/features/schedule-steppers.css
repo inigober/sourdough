@@ -58,8 +58,8 @@
   color: var(--color-text-muted);
   cursor: pointer;
   font: inherit;
-  font-size: 0.85rem;
-  font-weight: 700;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
   text-decoration: underline;
   text-underline-offset: 3px;
 }

@@ -14,8 +14,8 @@
 .recipe-view__day-label {
   margin: 0 0 4px;
   color: var(--color-primary-text);
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
   letter-spacing: 0.02em;
 }
 
@@ -41,8 +41,8 @@
 
 .recipe-view__step-time {
   color: var(--color-text-subtle);
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
   white-space: nowrap;
 }
 
@@ -53,7 +53,7 @@
 
 .recipe-view__step-duration {
   color: var(--color-text-subtle);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   white-space: nowrap;
 }
 
@@ -138,14 +138,14 @@
   display: block;
   margin-top: 4px;
   color: var(--color-text-subtle);
-  font-size: 0.86rem;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
   line-height: 1.35;
 }
 
 .field-message {
-  font-size: 0.86rem;
-  font-weight: 700;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
   line-height: 1.35;
 }
 
@@ -231,7 +231,7 @@
 
 .saved-recipe-card__bake {
   padding: 10px 14px;
-  font-size: 0.92rem;
+  font-size: var(--text-sm);
   white-space: nowrap;
 }
 

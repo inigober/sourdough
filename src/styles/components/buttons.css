@@ -103,8 +103,8 @@
   color: var(--color-text);
   cursor: pointer;
   font: inherit;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
   padding: 12px 22px;
 }
 

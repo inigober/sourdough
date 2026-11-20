@@ -6,13 +6,13 @@
 
 /* Glanceable timer and step title */
 .companion__timer-value {
-  font-size: 3.5rem;
+  font-size: var(--display);
   font-variant-numeric: tabular-nums;
   line-height: 1.05;
 }
 
 .companion__step-label {
-  font-size: 1.85rem;
+  font-size: var(--title-1);
   line-height: 1.15;
 }
 
@@ -40,8 +40,8 @@
   align-items: center;
   color: var(--color-primary-text);
   cursor: pointer;
-  font-size: 0.92rem;
-  font-weight: 700;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
 }
 
 .companion__about .hero-copy {
@@ -56,7 +56,7 @@
   border-radius: 12px;
   background: var(--color-surface-notice);
   color: var(--color-text);
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
   line-height: 1.45;
 }
 
@@ -64,8 +64,8 @@
 .companion__starts-in {
   margin: 0;
   color: var(--color-text-muted);
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
 }
 
 .companion__next-up {
@@ -73,7 +73,7 @@
   padding-top: 12px;
   border-top: 1px solid var(--color-border-soft);
   color: var(--color-text-muted);
-  font-size: 1rem;
+  font-size: var(--text-md);
   line-height: 1.4;
 }
 
@@ -88,8 +88,8 @@
 
 .timeline-row__starts-in {
   color: var(--color-text-muted);
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
 }
 
 /* Full schedule: tap a row to select it, then confirm with an explicit Jump button */
@@ -122,7 +122,7 @@
   color: var(--color-primary-text);
   cursor: pointer;
   font: inherit;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   text-decoration: underline;
 }
 
@@ -136,7 +136,7 @@
 }
 
 .companion__timer-value {
-  font-size: clamp(2.5rem, 14vw, 3.5rem);
+  font-size: var(--display);
 }
 
 /* The base .toast shrinks to fit when centred with left: 50%; give action toasts a stable width. */

@@ -10,7 +10,7 @@
 
 .dev-panel__section-title {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: var(--text-md);
 }
 
 .dev-panel__key-list {
@@ -27,19 +27,19 @@
 }
 
 .dev-panel__key-label {
-  font-size: 0.92rem;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
 }
 
 .dev-panel__key-code {
   overflow-wrap: anywhere;
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   color: var(--color-text-muted);
 }
 
 .dev-panel__empty {
   margin: 0;
-  font-size: 0.92rem;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
 

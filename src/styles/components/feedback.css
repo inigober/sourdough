@@ -18,7 +18,7 @@
 
 .field-hint {
   color: var(--color-text-subtle);
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   line-height: 1.35;
 }
 
@@ -35,8 +35,8 @@
   background: var(--color-success-bg);
   box-shadow: 0 12px 32px var(--shadow-color-overlay);
   color: var(--color-success);
-  font-size: 0.92rem;
-  font-weight: 700;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
   text-align: center;
 }
 
@@ -79,7 +79,7 @@ div.dialog-backdrop {
 
 .dialog-card h2 {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: var(--title-3);
 }
 
 /* Bake complete: a warm neutral card. The green tint made it read as a form result, and the
@@ -111,7 +111,7 @@ div.dialog-backdrop {
   border-radius: 0;
   background: transparent;
   color: var(--color-text-muted);
-  font-size: 0.88rem;
-  font-weight: 700;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
 }
 

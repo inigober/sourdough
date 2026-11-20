@@ -57,7 +57,7 @@
   min-width: 0;
   margin: 0;
   max-width: 720px;
-  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-size: var(--title-1);
   line-height: 1.08;
   letter-spacing: -0.035em;
   white-space: nowrap;
@@ -94,7 +94,7 @@
 
 .welcome-section__header h2 {
   margin: 0;
-  font-size: 1.35rem;
+  font-size: var(--title-3);
   letter-spacing: -0.03em;
 }
 
@@ -155,12 +155,12 @@
 
 .welcome-template-card strong {
   color: var(--color-text);
-  font-size: 0.98rem;
+  font-size: var(--text-md);
 }
 
 .welcome-template-card__copy {
   color: var(--color-text-muted);
-  font-size: 0.84rem;
+  font-size: var(--text-sm);
   line-height: 1.35;
 }
 

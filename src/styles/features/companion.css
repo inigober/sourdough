@@ -19,14 +19,14 @@
 .companion__progress {
   margin: 0;
   color: var(--color-primary-text);
-  font-size: 0.92rem;
-  font-weight: 700;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
 }
 
 .companion__drift {
   margin: 6px 0 0;
   color: var(--color-text-subtle);
-  font-size: 0.86rem;
+  font-size: var(--text-sm);
   line-height: 1.4;
 }
 
@@ -37,14 +37,14 @@
   border-radius: 12px;
   background: var(--color-surface-notice);
   color: var(--color-text-notice);
-  font-size: 0.86rem;
+  font-size: var(--text-sm);
   line-height: 1.45;
 }
 
 .companion__permission-notice-title {
   display: block;
   margin: 0 0 4px;
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
 }
 
 .companion__permission-notice-body {
@@ -72,8 +72,8 @@
 
 .companion__section-label {
   color: var(--color-text-subtle);
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -91,13 +91,13 @@
 
 .companion__previous strong {
   color: var(--color-text-muted);
-  font-size: 0.98rem;
+  font-size: var(--text-md);
 }
 
 .companion__previous-time {
   color: var(--color-text-subtle);
-  font-size: 0.86rem;
-  font-weight: 700;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
 }
 
 .companion__current {
@@ -110,8 +110,8 @@
   align-items: center;
   gap: 8px;
   color: var(--color-text-muted);
-  font-size: 0.92rem;
-  font-weight: 700;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
 }
 
 .companion__step-header {
@@ -171,20 +171,20 @@
 
 .companion-coach__header h2 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: var(--text-lg);
 }
 
 .companion-coach__subtitle {
   margin: 4px 0 0;
   color: var(--color-text-subtle);
-  font-size: 0.86rem;
+  font-size: var(--text-sm);
 }
 
 .companion-coach__quota {
   margin: 4px 0 0;
   color: var(--color-text-subtle);
-  font-size: 0.82rem;
-  font-weight: 700;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
 }
 
 .companion-coach__limit {
@@ -193,7 +193,7 @@
   border-radius: 14px;
   background: var(--color-surface-chip);
   color: var(--color-text-muted);
-  font-size: 0.92rem;
+  font-size: var(--text-sm);
   line-height: 1.45;
 }
 
@@ -243,7 +243,7 @@
 .companion-coach__typing {
   margin: 0;
   color: var(--color-text-subtle);
-  font-size: 0.88rem;
+  font-size: var(--text-sm);
   font-style: italic;
 }
 
@@ -258,7 +258,7 @@
 .companion-coach__photo-error {
   margin: 0;
   padding: 0 16px 10px;
-  font-size: 0.86rem;
+  font-size: var(--text-sm);
 }
 
 .companion-coach__photo-status {
@@ -283,8 +283,8 @@
   color: var(--color-primary-text);
   cursor: pointer;
   font: inherit;
-  font-size: 0.86rem;
-  font-weight: 700;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -306,7 +306,7 @@
 .companion-coach__text-input input {
   width: 100%;
   padding: 12px 14px;
-  font-size: 1rem;
+  font-size: var(--text-md);
 }
 
 .companion-coach__send {
@@ -322,15 +322,15 @@
 .companion-coach__framing {
   margin: 6px 0 0;
   color: var(--color-text-muted);
-  font-size: 0.86rem;
+  font-size: var(--text-sm);
   line-height: 1.4;
 }
 
 .companion-coach__step-note {
   margin: 0 0 4px;
   color: var(--color-text-muted);
-  font-size: 0.78rem;
-  font-weight: 700;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
 }
 
 .companion-coach__failure {
@@ -343,7 +343,7 @@
   border-radius: 14px;
   background: var(--color-danger-bg-soft);
   color: var(--color-danger-text-failure);
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
   line-height: 1.4;
 }
 
@@ -375,15 +375,15 @@
   color: var(--color-text-chip);
   cursor: pointer;
   font: inherit;
-  font-size: 0.88rem;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
   white-space: nowrap;
 }
 /* --- end coach sheet additions --- */
 
 .companion__step-label {
   margin: 0;
-  font-size: 1.35rem;
+  font-size: var(--title-3);
 }
 
 .companion__step-detail {
@@ -403,14 +403,14 @@
 
 .companion__timer-label {
   color: var(--color-success);
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .companion__timer-value {
-  font-size: 1.75rem;
+  font-size: var(--title-1);
   line-height: 1.1;
 }
 
@@ -436,8 +436,8 @@
 
 .companion__timer-done {
   color: var(--color-danger-text-bright);
-  font-size: 0.92rem;
-  font-weight: 700;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
 }
 
 .companion__overview {
@@ -447,7 +447,7 @@
 
 .companion__overview-title {
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--text-md);
 }
 
 .companion__overview-list {
@@ -462,6 +462,6 @@
   justify-self: center;
   width: auto;
   padding: 10px 18px;
-  font-size: 0.92rem;
+  font-size: var(--text-sm);
 }
 
