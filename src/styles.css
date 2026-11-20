@@ -4126,6 +4126,22 @@ body {
   padding-top: var(--app-top-inset);
 }
 
+/* A fixed strip in the page colour over the status bar area. Screens with a sticky header already paint
+   this band themselves; Home, Saved and History have no header, so without the strip their cards scroll
+   through the clock and the island. Height is 0 where there is no safe-area inset (desktop, no notch).
+   Above the sticky headers (20 to 30), below dialogs, toasts and the coach sheet (100 and up). */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top, 0px);
+  background: var(--color-bg);
+  pointer-events: none;
+  z-index: 40;
+}
+
 .wizard-shell__header,
 .screen-chrome,
 .app-header {

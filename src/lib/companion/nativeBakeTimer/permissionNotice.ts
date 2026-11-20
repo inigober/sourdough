@@ -20,6 +20,11 @@ export function getBakeTimerPermissionNotice(
     return null;
   }
 
+  // Not asked yet: the system prompts appear when the first timer starts, so there is nothing to warn about.
+  if (state.status === 'prompt') {
+    return null;
+  }
+
   if (state.status === 'granted' && state.alertMode === 'alarm') {
     return null;
   }

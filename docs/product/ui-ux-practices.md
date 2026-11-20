@@ -203,3 +203,4 @@ Add a line here when a practice is added or changed after a product discussion.
 - 2026-11-20: Sticky footer fix (wrap is the sticky element); wizard footer has one primary action and equal buttons; flour step title is a question; assessment collapsed to a one-line verdict with a disclosure.
 - 2026-11-20: UI review quick wins: pressed states and `(hover: hover)` for hover, select chevrons, native web view CSS, calmer font weights (no 650/750/800/900), dialog and sheet motion, one Save recipe / Update recipe pair, History search from six bakes, flat template list on Home, two browns merged into `--color-primary-text`.
 - 2026-11-20: Accessibility audit and fixes (dialog and sheet focus, bake timer announcements, headings, page titles, Increase Contrast); new rows in Accessibility Basics.
+- 2026-11-20: Status bar strip for screens without a sticky header (Home, Saved, History); the "Timer alerts are off" notice waits until the baker has been asked.

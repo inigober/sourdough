@@ -131,6 +131,15 @@ Other top-area checks:
 
 ---
 
+## Fix status (updated 2026-11-20)
+
+| Problem | State |
+| --- | --- |
+| 1. Home, Saved and History scroll through the status bar | Fixed in code: a fixed `body::before` strip in the page colour, as tall as the top safe-area inset (`styles.css`, "Top safe area"). Checked in a browser with a simulated 62 px inset; not yet seen on a device or in the simulator |
+| 5. "Timer alerts are off" before the baker was asked | Fixed in code: no notice while the status is `prompt` (`permissionNotice.ts`, with a test). Not yet seen on a device |
+| 8 and 10. Select chevron, long-press selection, callout, pressed states | Fixed by the UI quick wins; needs a new `build:ios` to see |
+| 2, 3, 4, 6, 7, 9, 11, 12, 13, 14 | Open |
+
 ## 3. Device sizes
 
 | Device | Observed |
