@@ -20,6 +20,11 @@ export type ScheduleInput = {
   stretchAndFoldRestMinutes: number;
   coilFoldSets: number;
   coilFoldRestMinutes: number;
+  /**
+   * Rest minutes for one individual fold, by step id ("stretch-fold-2"), when the baker changed that fold.
+   * Folds without an entry use `stretchAndFoldRestMinutes` / `coilFoldRestMinutes`. Missing on older saves.
+   */
+  foldRestMinutesByStep?: Record<string, number>;
   preShapeMinutesBeforeBulkEnd: number;
   proofingStyle: ProofingStyle;
   desiredBakeTime: string;

@@ -153,6 +153,12 @@ export function buildTimeline(schedule: ScheduleInput, recipeInput: RecipeInput)
     appendStep('rest-after-levain', 'Rest after mixing in levain', schedule.restAfterLevainMinutes);
   }
 
+  // The step that is still running when Pre-shape starts. It is stretched to end there, so the
+  // timeline has no gap between the last fold and Pre-shape (see "Rest until pre-shape" below).
+  let lastBulkStep: MutableStep | undefined = [...steps]
+    .reverse()
+    .find((step) => step.id === 'rest-after-levain' || step.id === 'rest-after-salt');
+
   const bulkTotalMinutes = Math.round(recipeInput.targetBulkHours * 60);
   const bulkEndOffset = bulkStartOffset + bulkTotalMinutes;
   const preShapeStartOffset = bulkEndOffset - schedule.preShapeMinutesBeforeBulkEnd;
@@ -166,43 +172,65 @@ export function buildTimeline(schedule: ScheduleInput, recipeInput: RecipeInput)
       totalSlapMinutes,
       `${schedule.slapAndFolds} slaps · ${schedule.restAfterSlapAndFoldMinutes} min rest after`,
     );
+    lastBulkStep = steps[steps.length - 1];
     foldCursor += totalSlapMinutes;
   }
 
   for (let index = 0; index < schedule.stretchAndFoldSets; index += 1) {
+    const stepId = `stretch-fold-${index + 1}`;
+    const restMinutes = schedule.foldRestMinutesByStep?.[stepId] ?? schedule.stretchAndFoldRestMinutes;
     const restStart = foldCursor;
-    foldCursor += schedule.stretchAndFoldRestMinutes;
+    foldCursor += restMinutes;
 
     if (foldCursor > preShapeStartOffset) {
       break;
     }
 
-    const restDetail = `${schedule.stretchAndFoldRestMinutes} min rest · Set ${index + 1} of ${schedule.stretchAndFoldSets}`;
+    const restDetail = `${restMinutes} min rest · Set ${index + 1} of ${schedule.stretchAndFoldSets}`;
     appendAtOffset(
       restStart,
-      `stretch-fold-${index + 1}`,
+      stepId,
       `Stretch and fold ${index + 1}`,
-      schedule.stretchAndFoldRestMinutes,
+      restMinutes,
       restDetail,
     );
+    lastBulkStep = steps[steps.length - 1];
   }
 
   for (let index = 0; index < schedule.coilFoldSets; index += 1) {
+    const stepId = `coil-fold-${index + 1}`;
+    const restMinutes = schedule.foldRestMinutesByStep?.[stepId] ?? schedule.coilFoldRestMinutes;
     const restStart = foldCursor;
-    foldCursor += schedule.coilFoldRestMinutes;
+    foldCursor += restMinutes;
 
     if (foldCursor > preShapeStartOffset) {
       break;
     }
 
-    const restDetail = `${schedule.coilFoldRestMinutes} min rest · Set ${index + 1} of ${schedule.coilFoldSets}`;
+    const restDetail = `${restMinutes} min rest · Set ${index + 1} of ${schedule.coilFoldSets}`;
     appendAtOffset(
       restStart,
-      `coil-fold-${index + 1}`,
+      stepId,
       `Coil fold ${index + 1}`,
-      schedule.coilFoldRestMinutes,
+      restMinutes,
       restDetail,
     );
+    lastBulkStep = steps[steps.length - 1];
+  }
+
+  // Rest until pre-shape: whatever time is left between the last fold and Pre-shape belongs to the last
+  // step, so it ends exactly when the next one starts and its end time can be read and edited.
+  if (lastBulkStep) {
+    const stepEndOffset = lastBulkStep.startOffsetMinutes + lastBulkStep.durationMinutes;
+
+    if (stepEndOffset < preShapeStartOffset) {
+      lastBulkStep.durationMinutes = preShapeStartOffset - lastBulkStep.startOffsetMinutes;
+      // "30 min rest" would no longer match the step's length, so it is replaced, not added to.
+      const staleRest = /\d+ min rest( after)?/;
+      lastBulkStep.detail = lastBulkStep.detail && staleRest.test(lastBulkStep.detail)
+        ? lastBulkStep.detail.replace(staleRest, 'rest until pre-shape')
+        : [lastBulkStep.detail, 'rest until pre-shape'].filter(Boolean).join(' · ');
+    }
   }
 
   appendAtOffset(

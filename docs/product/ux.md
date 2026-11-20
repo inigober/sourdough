@@ -119,7 +119,15 @@ Defaults when a schedule is first created (`lib/schedule/defaults.ts`): start ti
 
 The timeline contains only the steps the plan defines: starter refresh and levain build when starter prep is on, autolyse, mixing, rests, slap and folds, stretch and folds, coil folds, pre-shape, shape, cold retard or room-temperature proof, and the bake phases. It is deliberately not exhaustive; not every moment needs its own step.
 
-Not built yet: tapping a timeline step to edit it.
+**Steps have no gaps.** Each step ends exactly when the next one starts. The last step of the bulk (normally the last fold) runs until Pre-shape and says "rest until pre-shape", so a long bulk no longer shows an unexplained hole after the folds.
+
+**Editing a step (model; the screen is built in the schedule builder, see below).** The timeline is built from the schedule settings, so an edit changes the setting a step comes from and the whole timeline is laid out again:
+
+- Change a step's **duration**: every later step moves by the difference. The end of the bulk and the bake time of a cold schedule are anchored, so on a cold schedule the cold retard absorbs the shift, and in the bulk the last fold's rest absorbs it.
+- Change a step's **start time**: the step before it takes the difference (so there is never a gap). Moving the first step changes the start time of the whole plan.
+- Editing the last step of the bulk moves Pre-shape. Pre-shape's own duration is how long it runs before the bulk ends.
+- One fold can be changed on its own (a per-fold override); other single steps change their own setting (autolyse, the two rests, slap and folds rest, room proof, each bake phase).
+- Not editable here: the levain prep steps (use the levain settings), the Shape moment, and the cold retard (use the bake time). An edit that cannot be honoured is refused with a message; nothing is guessed.
 
 ### 8. Recipe View
 
@@ -207,7 +215,6 @@ Network and storage failures (saving a recipe or a bake, loading history, the co
 
 ## Ideas Not Built Yet
 
-- Tap a timeline step in the schedule builder to edit it.
 - Choose the oven time instead of the mix time when starting a bake (working backward).
 - "Tweak recipe from notes" after a bake.
 - Streaming coach replies.
