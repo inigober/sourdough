@@ -158,6 +158,7 @@ Light and dark ratios were checked with a throwaway script over the main text/su
 | A sticky footer must be the sticky element itself, not a child of a wrapper that is only as tall as the footer. | A sticky child cannot leave its parent's box, so it scrolled away with the page. |
 | Type: use only the scale tokens in `src/styles/tokens.css` (`--text-xs` to `--title-1`, `--display` for the bake timer) and the three weights (`--weight-regular` 400, `--weight-semibold` 600, `--weight-bold` 700). No raw `font-size` or `font-weight`; `typeScale.test.ts` fails if one appears. | Eight sizes instead of 27 give a clear hierarchy, and one place to change when Dynamic Type arrives. |
 | Radius and spacing: `border-radius` uses `--radius-sm/md/lg/xl/pill` (8/12/16/24/pill); `gap`, `padding` and `margin` use `--space-1` to `--space-12` (4px grid, no 10/14/18px). Tests check both. A few raw values stay on purpose (1px hairlines, 38/40px icon offsets, `calc()` tied to the sticky footer). | One rhythm across screens; nested shapes stay concentric. |
+| Elevation has three levels: containers (cards) are a border with no shadow; popovers use `--shadow-raised`; dialogs, sheets and toasts use `--shadow-overlay`. No other `box-shadow` blur values (a test checks). | Few, clear depth cues; dark mode relies on borders and surface colour, not heavy shadows. |
 | Wizard step titles are questions, not derived values; live summaries sit in a labelled line inside the step. | Consistent steps; derived data in a heading reads as noise. |
 
 ---
@@ -209,3 +210,4 @@ Add a line here when a practice is added or changed after a product discussion.
 - 2026-11-20: iPhone portrait only; the page goes back to its scroll position when the keyboard closes (touch devices); search fields have no auto-capitalise or autocorrect; date and time pickers use the brand colour; bake mode copy has no signed durations and says "next day" for an end time past midnight.
 - 2026-11-20: UI review phase 1 and 2.1: `styles.css` split into `src/styles/`; type scale (8 sizes) and weights (400/600/700) as tokens, enforced by a test. Values snapped to the nearest token, so some text moved by 1 to 2px; metadata text went from 500 to 400.
 - 2026-11-20: UI review phase 2.2: radius scale (5 tokens) and spacing scale (8 tokens) applied everywhere; values snapped to the nearest token, so spacing moved by 1 to 2px in places.
+- 2026-11-20: UI review phase 2.3: three elevation levels; seven shadows replaced; cards lose their large drop shadow and rely on the border.

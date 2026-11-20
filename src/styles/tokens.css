@@ -85,10 +85,8 @@
   --color-tint-primary: rgb(161 91 42 / 12%);
   --color-scrim: rgb(47 36 28 / 42%);
   --color-nav-bg: rgb(255 250 244 / 96%);
-  --shadow-color-popover: rgb(91 54 26 / 14%);
+  --shadow-color-raised: rgb(91 54 26 / 12%);
   --shadow-color-overlay: rgb(47 36 28 / 16%);
-  --shadow-color-card: rgb(91 54 26 / 8%);
-  --shadow-color-card-soft: rgb(91 54 26 / 6%);
   --shadow-color-knob: rgb(47 36 28 / 18%);
 
   --space-section: 20px;
@@ -189,10 +187,8 @@
     --color-tint-primary: rgb(232 166 114 / 16%);
     --color-scrim: rgb(0 0 0 / 62%);
     --color-nav-bg: rgb(36 29 23 / 96%);
-    --shadow-color-popover: rgb(0 0 0 / 45%);
+    --shadow-color-raised: rgb(0 0 0 / 40%);
     --shadow-color-overlay: rgb(0 0 0 / 50%);
-    --shadow-color-card: rgb(0 0 0 / 30%);
-    --shadow-color-card-soft: rgb(0 0 0 / 25%);
     --shadow-color-knob: rgb(0 0 0 / 40%);
   }
 }
@@ -243,4 +239,15 @@
   --space-6: 24px; /* large card padding */
   --space-8: 32px; /* between major blocks */
   --space-12: 48px; /* bottom page padding */
+}
+
+/*
+  Elevation (UI review 6.3). Level 1, containers (cards, grouped lists): a border and no shadow.
+  Level 2, raised (popovers, menus): --shadow-raised. Level 3, overlay (dialogs, sheets, toasts): --shadow-overlay.
+  --shadow-knob is the tiny shadow on a switch knob. src/lib/ui/elevationScale.test.ts keeps box-shadow on these.
+*/
+:root {
+  --shadow-raised: 0 4px 16px var(--shadow-color-raised);
+  --shadow-overlay: 0 16px 48px var(--shadow-color-overlay);
+  --shadow-knob: 0 1px 3px var(--shadow-color-knob);
 }

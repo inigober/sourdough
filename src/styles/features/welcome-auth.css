@@ -78,7 +78,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
-  box-shadow: 0 12px 32px var(--shadow-color-popover);
+  box-shadow: var(--shadow-raised);
 }
 
 .welcome-top-bar__menu-email {

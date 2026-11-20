@@ -62,7 +62,7 @@
   .summary-group.card {
     padding: var(--space-4);
     border-radius: var(--radius-lg);
-    box-shadow: 0 8px 24px var(--shadow-color-card-soft);
+    box-shadow: none;
   }
 
   .welcome-screen {

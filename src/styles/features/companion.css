@@ -157,7 +157,7 @@
   border-bottom: 0;
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   background: var(--color-surface);
-  box-shadow: 0 -12px 40px var(--shadow-color-overlay);
+  box-shadow: var(--shadow-overlay);
 }
 
 .companion-coach__header {
