@@ -5,7 +5,13 @@
    - Web view tells: grey tap flash, long-press callout, text selection on buttons and chrome,
      and rubber-banding of the whole page. Text content and inputs stay selectable.
    ========================================================================== */
+/* Dynamic Type: in iOS WebKit, -apple-system-body is the user's Text Size setting (17px at the default),
+   and every size in this app is in rem, so the whole UI scales with it. Other browsers ignore the
+   unknown font keyword and keep 16px. The family still comes from the :root rule in tokens.css.
+   Inputs stay at 1rem (16px or more), which also stops iOS zooming into a focused field. */
 html {
+  font: -apple-system-body;
+  -webkit-text-size-adjust: 100%;
   overscroll-behavior-y: none;
   -webkit-tap-highlight-color: transparent;
 }

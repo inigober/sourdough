@@ -122,7 +122,9 @@ Visible text was not changed, except: the hidden label of the coach's text field
 - **Observed:** font sizes are all in `rem`: 153 declarations in `rem`, 4 `clamp(...)` with `vw`/`rem`, zero `px` font sizes. `:root` sets no `font-size` and no `-apple-system-body`, so 1rem is the browser default of 16px, always.
 - **Inferred (not tested on a device):** WKWebView does not scale the default 16px with the iOS Text Size setting unless the page asks for a system text style. So today the app does not follow Dynamic Type. The UI review said the same ("Dynamic Type: rem follows the root size, not the iOS setting").
 
-**Known approach (recommendation, not applied, as instructed):**
+**Status (2026-11-20, UI review phase 2):** steps 1 and 2 below are applied in `src/styles/overrides/native-web-view.css` (`html { font: -apple-system-body; -webkit-text-size-adjust: 100% }`), after the type scale landed. `dynamicType.test.ts` checks the two declarations and that every size is in `rem`. **Not verified on a device:** whether iOS WebKit really resolves the keyword, whether a running app re-lays out after a Text Size change without a relaunch, and how the sticky bars behave at the accessibility sizes. No cap on the top end is set yet (step 5). Test with [accessibility-testing.md](./accessibility-testing.md) at the default size, then Larger Text at a few steps, before deciding on a cap. Dialogs now scroll at any width (`max-height: 90dvh`), which removes one of the risks in the table below.
+
+**Known approach (the recommendation this status is based on):**
 
 1. In the type-scale task, set the root font from the system body style, then re-state the family:
    `html { font: -apple-system-body; font-family: <existing stack>; }` and keep every size in `rem` or `em`. In WebKit, `-apple-system-body` resolves to the user's preferred body size (17px at the default setting) and grows with Larger Text; `rem` sizes then follow it. This also changes today's 16px base to about 17px at the default, so it is a visible (small) change; do it together with the type scale so the new `--text-md` is defined as "1rem".
