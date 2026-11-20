@@ -180,3 +180,13 @@ These are manual checks on a real iPhone; the Simulator is not reliable for the 
 1. **Permission timing:** ask on first **Start timer** tap in bake mode.
 2. **Step jumps:** cancel the previous native timer id; a new step gets a fresh id (`session.id:step.id`).
 3. **Open app on dismiss:** AlarmKit secondary action opens `sourdough://bake`; web layer routes to `/bake` and resumes the stashed session when needed.
+
+## Keeping the native timer in sync
+
+`useBakeNativeTimer` works out which native timer the bake session wants (`deriveDesiredNativeBakeTimer`) and hands it to `createNativeTimerSync` (`nativeTimerSync.ts`), which does three things so no alarm is left that nothing can cancel:
+
+- **One call at a time.** Native calls run in order. A slow "cancel all" can no longer finish after, and wipe the bookkeeping of, a timer started right after it, and the same timer arriving twice while the first schedule is still in flight is scheduled once.
+- **Restart replaces.** A new end time on the same timer id (restarting a step timer) cancels the old alarm first. The native side keeps one alarm reference per timer id.
+- **Native belt and braces.** `BakeTimerPlugin.schedule` cancels any existing alarm for the same id before scheduling, `cancelAll` also cancels every alarm reference it still holds (not only the tracked ids), and failures of `stop`/`cancel` are logged (Xcode console or Console.app, subsystem `com.inigo.sourdough`, category `BakeTimer`) instead of being swallowed.
+
+Reported bug this addresses: after starting the autolyse timer and jumping to the next step before it finished, the old timer still rang. The session side was already correct (jumping clears the timer); the defects above are the ones found in the sync and plugin code. Not yet confirmed on a device. If it still happens, read the `BakeTimer` log lines around the jump.

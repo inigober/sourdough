@@ -6,11 +6,9 @@ import type { BakeSession } from '../types.ts';
 import type { TimelineStep } from '../../schedule/types.ts';
 import { getTimerRemainingSeconds } from '../bakeTimer.ts';
 import { NATIVE_BAKE_TIMER_PERMISSION_STORAGE_KEY } from './constants.ts';
-import {
-  deriveDesiredNativeBakeTimer,
-  getNativeBakeTimerSyncKey,
-} from './deriveDesiredNativeBakeTimer.ts';
+import { deriveDesiredNativeBakeTimer } from './deriveDesiredNativeBakeTimer.ts';
 import { nativeBakeTimer } from './nativeBakeTimer.ts';
+import { createNativeTimerSync } from './nativeTimerSync.ts';
 import {
   canScheduleNativeBakeTimer,
   defaultPermissionState,
@@ -67,8 +65,16 @@ export function useBakeNativeTimer(
 ): UseBakeNativeTimerResult {
   const [permissionState, setPermissionState] =
     useState<NativeBakeTimerPermissionState>(defaultPermissionState);
-  const lastSyncKeyRef = useRef<string | null>(null);
-  const lastTimerIdRef = useRef<string | null>(null);
+  // The permission can change between two syncs, so the sync reads the latest value when it runs.
+  const canScheduleRef = useRef(canScheduleNativeBakeTimer(permissionState));
+  canScheduleRef.current = canScheduleNativeBakeTimer(permissionState);
+  const nativeTimerSyncRef = useRef<ReturnType<typeof createNativeTimerSync> | null>(null);
+  if (!nativeTimerSyncRef.current) {
+    nativeTimerSyncRef.current = createNativeTimerSync({
+      client: nativeBakeTimer,
+      canSchedule: () => canScheduleRef.current,
+    });
+  }
 
   const refreshPermissionState = useCallback(async () => {
     const nextState = await nativeBakeTimer.getPermissionStatus();
@@ -76,34 +82,16 @@ export function useBakeNativeTimer(
     return nextState;
   }, []);
 
+  // All native timer changes go through one queue (see nativeTimerSync.ts); failures are logged, not thrown.
   const syncNativeTimer = useCallback(
     async (desired: ReturnType<typeof deriveDesiredNativeBakeTimer>) => {
-      if (!desired) {
-        // Desired state is "no native timer" — including expired in-app timers.
-        // cancelAll covers cold start / remount where lastTimerIdRef was lost but
-        // AlarmKit is still alerting from a finished step.
-        await nativeBakeTimer.cancelAll();
-        lastTimerIdRef.current = null;
-        lastSyncKeyRef.current = null;
-        return;
-      }
-
-      const syncKey = getNativeBakeTimerSyncKey(desired);
-      if (lastSyncKeyRef.current === syncKey) {
-        return;
-      }
-
-      if (lastTimerIdRef.current && lastTimerIdRef.current !== desired.timerId) {
-        await nativeBakeTimer.cancel(lastTimerIdRef.current);
-      }
-
-      if (canScheduleNativeBakeTimer(permissionState)) {
-        await nativeBakeTimer.schedule(desired);
-        lastSyncKeyRef.current = syncKey;
-        lastTimerIdRef.current = desired.timerId;
+      try {
+        await nativeTimerSyncRef.current?.sync(desired);
+      } catch (error) {
+        console.warn('[bake timer] native timer sync failed:', error);
       }
     },
-    [permissionState],
+    [],
   );
 
   useEffect(() => {
@@ -136,10 +124,13 @@ export function useBakeNativeTimer(
     };
   }, [currentStep, refreshPermissionState, session, syncNativeTimer]);
 
+  const canScheduleNow = canScheduleNativeBakeTimer(permissionState);
+
   useEffect(() => {
     const desired = deriveDesiredNativeBakeTimer(session, currentStep);
     void syncNativeTimer(desired);
-  }, [session, currentStep, syncNativeTimer]);
+    // canScheduleNow: granting the permission while a timer is running must schedule it (an equal key is a no-op).
+  }, [session, currentStep, syncNativeTimer, canScheduleNow]);
 
   // When the in-app end time passes, session.activeTimerEndsAt is unchanged, so the
   // sync effect above does not re-run. Explicitly clear native alarms at expiry so
@@ -172,11 +163,10 @@ export function useBakeNativeTimer(
 
   useEffect(() => {
     return () => {
-      void nativeBakeTimer.cancelAll();
-      lastSyncKeyRef.current = null;
-      lastTimerIdRef.current = null;
+      // Leaving bake mode: queue behind any call still in flight so the cancel is the last word.
+      void syncNativeTimer(null);
     };
-  }, []);
+  }, [syncNativeTimer]);
 
   const ensurePermissionForStartTimer = useCallback(async () => {
     const currentState = await refreshPermissionState();

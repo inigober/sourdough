@@ -4,6 +4,7 @@ import Capacitor
 import Foundation
 import UIKit
 import UserNotifications
+import os
 
 #if canImport(AlarmKit)
 import AlarmKit
@@ -25,6 +26,8 @@ public class BakeTimerPlugin: CAPPlugin, CAPBridgedPlugin {
 
     private let storageKey = "sourdough.activeBakeTimerIds"
     private let alarmIdStorageKey = "sourdough.activeBakeAlarmIds"
+    // Visible in Xcode's console and the Console app (subsystem com.inigo.sourdough) when a timer misbehaves.
+    private let log = Logger(subsystem: "com.inigo.sourdough", category: "BakeTimer")
 
     @objc func getPermissionStatus(_ call: CAPPluginCall) {
         Task {
@@ -96,6 +99,11 @@ public class BakeTimerPlugin: CAPPlugin, CAPBridgedPlugin {
 
         Task {
             do {
+                // Scheduling the same timer id again (a restarted step timer) must replace the old alarm.
+                // Each schedule makes a new alarm and only one alarm reference is kept per id, so without
+                // this the earlier alarm would be orphaned and still ring.
+                await self.cancelTimer(timerId: timerId)
+
                 if #available(iOS 26.0, *) {
                     #if canImport(AlarmKit)
                     if await self.isAlarmKitAuthorized() {
@@ -139,13 +147,24 @@ public class BakeTimerPlugin: CAPPlugin, CAPBridgedPlugin {
 
     @objc func cancelAll(_ call: CAPPluginCall) {
         Task {
-            let timerIds = self.loadTimerIds()
-            for timerId in timerIds {
+            // Tracked ids plus every alarm reference we still hold, so an alarm whose id was lost from the
+            // tracked set (for example by an overlapping call) is still cancelled.
+            for timerId in self.allKnownTimerIds() {
                 await self.cancelTimer(timerId: timerId)
             }
             self.saveTimerIds([])
+            self.log.info("cancelAll finished")
             call.resolve()
         }
+    }
+
+    private func allKnownTimerIds() -> Set<String> {
+        var timerIds = self.loadTimerIds()
+        #if canImport(AlarmKit)
+        let storedAlarmIds = UserDefaults.standard.dictionary(forKey: alarmIdStorageKey) as? [String: String] ?? [:]
+        timerIds.formUnion(storedAlarmIds.keys)
+        #endif
+        return timerIds
     }
 
     private func currentPermissionStatus() async -> String {
@@ -299,8 +318,17 @@ public class BakeTimerPlugin: CAPPlugin, CAPBridgedPlugin {
 
         // stop dismisses an alerting (ringing) alarm; cancel removes a still-scheduled one.
         // Try both so bake-mode sync can silence a fired timer after unlock / remount.
-        try? AlarmManager.shared.stop(id: alarmUUID)
-        try? AlarmManager.shared.cancel(id: alarmUUID)
+        // One of the two is expected to fail depending on the alarm's state, so failures are logged, not thrown.
+        do {
+            try AlarmManager.shared.stop(id: alarmUUID)
+        } catch {
+            self.log.info("stop(\(timerId, privacy: .public)) failed: \(String(describing: error), privacy: .public)")
+        }
+        do {
+            try AlarmManager.shared.cancel(id: alarmUUID)
+        } catch {
+            self.log.info("cancel(\(timerId, privacy: .public)) failed: \(String(describing: error), privacy: .public)")
+        }
         self.removeAlarmId(timerId: timerId)
     }
     #endif
