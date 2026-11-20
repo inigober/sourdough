@@ -33,13 +33,21 @@ function render(overrides: Partial<SavedRecipeSummary> = {}, bakeStats?: RecipeB
 }
 
 describe('SavedRecipeCard', () => {
-  it('is a flat row with Start baking as the one primary button and Duplicate secondary', () => {
+  it('is a flat row with no primary button: Start baking and Duplicate are both secondary', () => {
     const html = render();
 
     expect(html).toContain('saved-recipe-row');
-    expect(html).toMatch(/class="button button--primary[^"]*"[^>]*aria-label="Start baking Dark wheat moderate hydration"/);
+    expect(html).toMatch(/class="button button--secondary[^"]*"[^>]*aria-label="Start baking Dark wheat moderate hydration"/);
     expect(html).toMatch(/class="button button--secondary[^"]*"[^>]*aria-label="Duplicate Dark wheat moderate hydration"/);
-    expect(html.match(/button--primary/g)).toHaveLength(1);
+    expect(html).not.toContain('button--primary');
+  });
+
+  it('leads the meta line with hydration, dough size and flour from the recipe', () => {
+    const html = render({ recipeFacts: { hydrationPercent: 78, finalDoughWeightGrams: 900, numberOfLoaves: 1 } });
+
+    expect(html).toContain('78% · 900 g');
+    expect(html).toContain('Updated ');
+    expect(html.match(/saved-recipe-row__meta/g)).toHaveLength(1);
   });
 
   it('shows one muted meta line: bake stats when there are bakes, otherwise the updated date', () => {

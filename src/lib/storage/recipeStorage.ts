@@ -1,3 +1,4 @@
+import { pickBakeRecipeFacts } from '../history/bakeSummaryLine.ts';
 import { describeBreadStyle } from '../recipe/describeBreadStyle.ts';
 import type { RecipeInput } from '../recipe/types.ts';
 import { buildTimeline, formatTimelineForDisplay } from '../schedule/buildTimeline.ts';
@@ -153,6 +154,7 @@ export function toSavedRecipeSummary(recipe: SavedRecipe): SavedRecipeSummary {
     breadStyle: describeBreadStyle(recipe.recipeInput),
     scheduleLabel: describeSavedSchedule(recipe),
     hasSchedule: Boolean(recipe.scheduleInput),
+    recipeFacts: pickBakeRecipeFacts(recipe.recipeInput),
     savedAt: recipe.savedAt,
     updatedAt: recipe.updatedAt,
   };

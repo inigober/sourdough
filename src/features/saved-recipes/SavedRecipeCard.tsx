@@ -25,7 +25,7 @@ export function SavedRecipeCard({ recipe, bakeStats, onOpen, onStartBake, onDupl
         {recipe.hasSchedule ? (
           <button
             type="button"
-            className="button button--primary saved-recipe-row__bake"
+            className="button button--secondary saved-recipe-row__bake"
             aria-label={`Start baking ${recipe.name}`}
             onClick={() => onStartBake(recipe.id)}
           >

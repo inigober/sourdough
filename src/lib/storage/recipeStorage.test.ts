@@ -148,3 +148,30 @@ test('recipes without a schedule say so in their summary', () => {
   assert.equal(listSavedRecipeSummaries(storage)[0].hasSchedule, false);
   assert.equal(listSavedRecipeSummaries(storage)[0].scheduleLabel, 'No schedule yet');
 });
+
+test('a saved recipe summary carries the recipe facts the Saved list shows', () => {
+  const summary = toSavedRecipeSummary({
+    id: 'r1',
+    name: 'Loaf',
+    recipeInput: { ...defaultRecipeInput, hydrationPercent: 78, finalDoughWeightGrams: 900, numberOfLoaves: 1 },
+    scheduleInput: undefined,
+    savedAt: '2026-11-10T10:00:00.000Z',
+    updatedAt: '2026-11-10T10:00:00.000Z',
+  });
+
+  assert.equal(summary.recipeFacts?.hydrationPercent, 78);
+  assert.equal(summary.recipeFacts?.finalDoughWeightGrams, 900);
+});
+
+test('a saved recipe from an older shape without usable numbers still summarises', () => {
+  const summary = toSavedRecipeSummary({
+    id: 'r2',
+    name: 'Old loaf',
+    recipeInput: { ...defaultRecipeInput, hydrationPercent: Number.NaN },
+    scheduleInput: undefined,
+    savedAt: '2026-11-10T10:00:00.000Z',
+    updatedAt: '2026-11-10T10:00:00.000Z',
+  });
+
+  assert.equal(summary.recipeFacts?.hydrationPercent, undefined);
+});
