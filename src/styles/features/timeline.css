@@ -15,11 +15,6 @@
   background: var(--color-surface-muted);
 }
 
-/* The two --dated rules below no longer match any markup: src/lib/ui/mobileLayout.test.ts still pins them. */
-.timeline-row__layout--dated .timeline-row__content-col {
-  grid-row: 2;
-}
-
 .timeline-row__date {
   grid-column: 1;
   grid-row: 1;
@@ -27,10 +22,6 @@
   font-size: var(--text-sm);
   font-weight: var(--weight-bold);
   letter-spacing: 0.02em;
-}
-
-.timeline-row__layout--dated .timeline-row__time {
-  grid-row: 2;
 }
 
 .timeline-row--interactive {

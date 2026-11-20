@@ -33,10 +33,9 @@ test('the sticky footer wrap is the sticky element, so it can stick', () => {
   assert.match(stylesCss, /\.page-shell__footer-wrap > \.page-shell__footer\s*\{[^}]*position:\s*static/s);
 });
 
-test('timeline rows use a fixed-width time column so step names align across days', () => {
+test('bake mode timeline rows use a fixed-width time column so step names align across days', () => {
   assert.match(stylesCss, /--timeline-time-width:\s*7\.75rem/s);
-  assert.match(stylesCss, /\.timeline-row__layout--dated \.timeline-row__time\s*\{[^}]*grid-row:\s*2/s);
-  assert.match(stylesCss, /\.timeline-row__layout--dated \.timeline-row__content-col\s*\{[^}]*grid-row:\s*2/s);
+  assert.match(stylesCss, /\.timeline-row--interactive\s*\{[^}]*grid-template-columns:\s*var\(--timeline-time-width\)/s);
 });
 
 test('summary groups stay in a two-column grid on desktop', () => {
