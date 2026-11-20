@@ -150,9 +150,7 @@ export function NumberField({
               type="button"
               className="number-field__stepper number-field__stepper--decrease"
               aria-label={`Decrease ${label}`}
-              aria-hidden="true"
               disabled={decrementDisabled}
-              tabIndex={-1}
               onClick={() => adjustValue(-stepSize)}
             >
               <MinusIcon />
@@ -176,9 +174,7 @@ export function NumberField({
               type="button"
               className="number-field__stepper number-field__stepper--increase"
               aria-label={`Increase ${label}`}
-              aria-hidden="true"
               disabled={incrementDisabled}
-              tabIndex={-1}
               onClick={() => adjustValue(stepSize)}
             >
               <PlusIcon />

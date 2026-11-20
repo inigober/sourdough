@@ -33,6 +33,10 @@ export function useSavedRecipes({ user, isConfigured }: UseSavedRecipesOptions) 
   const [activeSavedRecipe, setActiveSavedRecipe] = useState<SavedRecipe | null>(null);
   const [savedRecipesError, setSavedRecipesError] = useState<string | null>(null);
   const [recipeImportMessage, setRecipeImportMessage] = useState<string | null>(null);
+  // Which source (a user id, or 'local') the list was last loaded for. Lets the Saved tab say
+  // "Loading" for a signed-in baker instead of flashing "No saved recipes yet".
+  const [loadedSourceKey, setLoadedSourceKey] = useState<string | null>(null);
+  const sourceKey = useCloudRecipes && user ? user.id : 'local';
 
   const loadSavedRecipes = useCallback(async (): Promise<void> => {
     if (useCloudRecipes && user) {
@@ -51,12 +55,15 @@ export function useSavedRecipes({ user, isConfigured }: UseSavedRecipesOptions) 
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Failed to load saved recipes.';
         setSavedRecipesError(message);
+      } finally {
+        setLoadedSourceKey(user.id);
       }
       return;
     }
 
     setSavedRecipesError(null);
     setSavedRecipes(listSavedRecipeSummaries());
+    setLoadedSourceKey('local');
   }, [useCloudRecipes, user]);
 
   const refreshSavedRecipes = useCallback(async (): Promise<void> => {
@@ -155,6 +162,7 @@ export function useSavedRecipes({ user, isConfigured }: UseSavedRecipesOptions) 
     useCloudRecipes,
     savedRecipes,
     savedRecipesError,
+    isSavedRecipesLoading: useCloudRecipes && loadedSourceKey !== sourceKey,
     recipeImportMessage,
     activeSavedRecipeId,
     activeSavedRecipe,

@@ -30,6 +30,8 @@ export function StepLayout({
   onContinue,
   onSaveToSummary,
 }: StepLayoutProps) {
+  const hasSave = showSaveToSummary && Boolean(onSaveToSummary);
+
   return (
     <PageShell
       className="wizard-shell"
@@ -42,35 +44,36 @@ export function StepLayout({
         </header>
       }
       footer={
-        <nav className="page-shell__footer wizard-nav wizard-nav--steps" aria-label="Recipe builder navigation">
+        <nav className={getNavClassName(canGoBack, hasSave)} aria-label="Recipe builder navigation">
           {canGoBack ? (
             <button
               type="button"
-              className="wizard-button wizard-button--secondary wizard-button--with-icon"
+              className="wizard-button wizard-button--secondary wizard-button--with-icon wizard-nav__back"
               onClick={onBack}
             >
               <ArrowLeftIcon />
               Back
             </button>
-          ) : (
-            <span className="wizard-nav__spacer" />
-          )}
-          {showSaveToSummary && onSaveToSummary ? (
+          ) : null}
+          {hasSave ? (
             <button
               type="button"
-              className="wizard-button wizard-button--primary wizard-nav__save"
+              className="wizard-button wizard-button--primary wizard-button--with-icon wizard-nav__save"
               aria-label="Save and return to summary"
               onClick={onSaveToSummary}
             >
-              <SaveIcon className="wizard-nav__save-icon" />
+              <SaveIcon />
               Save
             </button>
-          ) : (
-            <span className="wizard-nav__spacer" />
-          )}
+          ) : null}
+          {/* One primary action per bar: when Save is there, Continue is the secondary one. */}
           <button
             type="button"
-            className="wizard-button wizard-button--primary wizard-button--with-icon"
+            className={
+              hasSave
+                ? 'wizard-button wizard-button--secondary wizard-button--with-icon wizard-nav__continue'
+                : 'wizard-button wizard-button--primary wizard-button--with-icon wizard-nav__continue'
+            }
             disabled={!canContinue}
             onClick={onContinue}
           >
@@ -83,4 +86,16 @@ export function StepLayout({
       {children}
     </PageShell>
   );
+}
+
+function getNavClassName(hasBack: boolean, hasSave: boolean): string {
+  return [
+    'page-shell__footer',
+    'wizard-nav',
+    'wizard-nav--steps',
+    hasBack ? 'wizard-nav--has-back' : 'wizard-nav--no-back',
+    hasSave ? 'wizard-nav--has-save' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 }

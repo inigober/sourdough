@@ -69,4 +69,46 @@ describe('StepLayout', () => {
 
     expect(html).toMatch(/<button[^>]*>View summary<svg/);
   });
+
+  it('in edit mode shows Back, Save and Continue in one row group with Save as the only primary', () => {
+    const html = renderToStaticMarkup(
+      createElement(StepLayout, {
+        currentStep: 'flour',
+        canGoBack: true,
+        canContinue: true,
+        showSaveToSummary: true,
+        onBack: () => {},
+        onContinue: () => {},
+        onSaveToSummary: () => {},
+        children: 'Step content',
+      }),
+    );
+    const nav = html.match(/<nav[^>]*>.*<\/nav>/)?.[0] ?? '';
+    const buttons = [...nav.matchAll(/<button[^>]*class="([^"]*)"/g)].map((match) => match[1]);
+
+    expect(nav).toContain('wizard-nav--has-save');
+    expect(buttons).toHaveLength(3);
+    expect(buttons.filter((className) => className.includes('wizard-button--primary'))).toHaveLength(1);
+    expect(buttons[1]).toContain('wizard-nav__save');
+    expect(buttons[1]).toContain('wizard-button--primary');
+    expect(buttons[0]).toContain('wizard-button--secondary');
+    expect(buttons[2]).toContain('wizard-button--secondary');
+  });
+
+  it('on the first step there is no Back button and no empty spacer', () => {
+    const html = renderToStaticMarkup(
+      createElement(StepLayout, {
+        currentStep: 'doughSize',
+        canGoBack: false,
+        canContinue: true,
+        onBack: () => {},
+        onContinue: () => {},
+        children: 'Step content',
+      }),
+    );
+
+    expect(html).toContain('wizard-nav--no-back');
+    expect(html).not.toMatch(/>Back</);
+    expect(html).not.toContain('wizard-nav__spacer');
+  });
 });

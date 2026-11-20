@@ -16,6 +16,7 @@ const SLUG_TO_WIZARD_STEP = Object.fromEntries(
 
 export const APP_ROUTES = {
   home: '/',
+  saved: '/saved',
   history: '/history',
   historyDetail: (id: string) => `/history/${encodeURIComponent(id)}`,
   recipe: (id: string) => `/recipe/${encodeURIComponent(id)}`,
@@ -82,6 +83,7 @@ export function isKnownAppPath(pathname: string): boolean {
 
   if (
     path === APP_ROUTES.home ||
+    path === APP_ROUTES.saved ||
     path === APP_ROUTES.history ||
     path === APP_ROUTES.buildSummary ||
     path === APP_ROUTES.buildSchedule ||
@@ -108,6 +110,15 @@ export function parseAppRoute(pathname: string): ParsedAppRoute {
   if (path === APP_ROUTES.home) {
     return {
       location: { tab: 'home', phase: 'wizard' },
+      wizardStep: 'welcome',
+      historyDetailId: null,
+      recipeViewId: null,
+    };
+  }
+
+  if (path === APP_ROUTES.saved) {
+    return {
+      location: { tab: 'saved', phase: 'wizard' },
       wizardStep: 'welcome',
       historyDetailId: null,
       recipeViewId: null,
@@ -220,6 +231,7 @@ export function buildAppPathFromDraft(draft: {
 
 export type AppRouteNavigate = {
   toHome: () => void;
+  toSaved: () => void;
   toHistory: () => void;
   toHistoryDetail: (id: string) => void;
   toRecipe: (id: string) => void;
@@ -233,6 +245,7 @@ export type AppRouteNavigate = {
 export function createAppRouteNavigate(navigate: (path: string) => void): AppRouteNavigate {
   return {
     toHome: () => navigate(APP_ROUTES.home),
+    toSaved: () => navigate(APP_ROUTES.saved),
     toHistory: () => navigate(APP_ROUTES.history),
     toHistoryDetail: (id) => navigate(APP_ROUTES.historyDetail(id)),
     toRecipe: (id) => navigate(APP_ROUTES.recipe(id)),

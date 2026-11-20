@@ -11,12 +11,13 @@ import {
   WaterIcon,
   WheatIcon,
 } from '../../components/icons.tsx';
+import { IngredientBreakdownCard } from '../../components/IngredientBreakdownCard.tsx';
 import { RecipeAssessment } from '../../components/RecipeAssessment.tsx';
 import { RecipeCard } from '../../components/RecipeCard.tsx';
 import { assessmentInfo } from './fieldInfo.ts';
 import { formatGrams, formatGramsToNearest } from '../../app/format.ts';
 import { getFlourGrams } from '../../lib/recipe/flourBlend.ts';
-import { buildIngredientRows } from '../../lib/recipe/formatIngredients.ts';
+import { buildIngredientBreakdown } from '../../lib/recipe/buildIngredientBreakdown.ts';
 import { flourProfiles } from '../../lib/recipe/flourProfiles.ts';
 import type { AssessmentSection, FlourBlendEntry, RecipeFormula, RecipeInput } from '../../lib/recipe/types.ts';
 import { levainActivityOptions } from './recipeOptions.ts';
@@ -44,7 +45,8 @@ export function RecipeResultsView({
   const levainActivityLabel =
     levainActivityOptions.find((option) => option.value === recipeInput.levainActivity)?.label ??
     recipeInput.levainActivity;
-  const ingredientRows = formula ? buildIngredientRows(recipeInput, formula) : [];
+  // No schedule exists yet on the builder summary, so the levain build uses the schedule defaults.
+  const ingredientBreakdown = formula ? buildIngredientBreakdown(recipeInput, formula) : null;
 
   const formulaRows = formula
     ? ([
@@ -99,24 +101,28 @@ export function RecipeResultsView({
       <section className="summary-groups" aria-label="Recipe inputs summary">
         <SummaryGroup
           icon={<ScaleIcon />}
+          tone="size"
           title="Dough size"
           value={`${recipeInput.finalDoughWeightGrams}g · ${recipeInput.numberOfLoaves} loaf${recipeInput.numberOfLoaves === 1 ? '' : 'es'}`}
           onEdit={() => onEditStep('doughSize')}
         />
         <SummaryGroup
           icon={<WheatIcon />}
+          tone="flour"
           title="Flour blend"
           onEdit={() => onEditStep('flour')}
           stackedLines={getFlourSummaryLines(recipeInput.doughFlours, formula?.totalFlourGrams ?? null)}
         />
         <SummaryGroup
           icon={<WaterIcon />}
+          tone="water"
           title="Hydration & salt"
           value={`${recipeInput.hydrationPercent}% hydration · ${recipeInput.saltPercent}% salt`}
           onEdit={() => onEditStep('recipeTargets')}
         />
         <SummaryGroup
           icon={<ClockIcon />}
+          tone="time"
           title="Fermentation & levain"
           value={`${recipeInput.targetBulkHours}h bulk · ${recipeInput.roomTemperatureCelsius}°C · ${levainActivityLabel}`}
           onEdit={() => onEditStep('fermentation')}
@@ -125,9 +131,9 @@ export function RecipeResultsView({
 
       <div className="recipe-results__calculated">
         <section className="summary-grid" aria-label="Calculated recipe summary">
-          {formula ? (
+          {formula && ingredientBreakdown ? (
             <>
-              <RecipeCard title="Ingredient list" rows={ingredientRows} />
+              <IngredientBreakdownCard breakdown={ingredientBreakdown} />
               <RecipeCard title="Formula breakdown" rows={formulaRows} />
             </>
           ) : (
@@ -166,6 +172,7 @@ function getFlourSummaryLines(
 
 type SummaryGroupProps = {
   icon: ReactNode;
+  tone: 'size' | 'flour' | 'water' | 'time';
   title: string;
   info?: string;
   value?: string;
@@ -173,12 +180,12 @@ type SummaryGroupProps = {
   onEdit: () => void;
 };
 
-function SummaryGroup({ icon, title, info, value, stackedLines, onEdit }: SummaryGroupProps) {
+function SummaryGroup({ icon, tone, title, info, value, stackedLines, onEdit }: SummaryGroupProps) {
   return (
     <div className="summary-group card">
       <div className="summary-group__header">
         <span className="summary-group__label">
-          <span className="summary-group__icon" aria-hidden="true">
+          <span className={`summary-group__icon summary-group__icon--${tone}`} aria-hidden="true">
             {icon}
           </span>
           {title}

@@ -13,8 +13,9 @@ import type {
 import type { BuilderDraftSummary } from '../../lib/storage/draftStorage.ts';
 import type { SavedRecipeSummary } from '../../lib/storage/types.ts';
 import type { RecipeBakeStats } from '../../lib/history/recipeBakeStats.ts';
-import { BakeHistoryDetailView } from '../history/BakeHistoryDetailView.tsx';
+import { BakeHistoryDetailView, type BakeHistoryPhotoActions } from '../history/BakeHistoryDetailView.tsx';
 import { BakeHistoryView } from '../history/BakeHistoryView.tsx';
+import { SavedRecipesView } from '../saved-recipes/SavedRecipesView.tsx';
 import { WelcomeStep } from './steps/WelcomeStep.tsx';
 
 type WelcomeScreenProps = {
@@ -32,7 +33,8 @@ type WelcomeScreenProps = {
   onLoadTemplate: (templateId: string) => void;
   onLoadRecipe: (id: string) => void;
   onDuplicateRecipe: (id: string) => void;
-  onDeleteRecipe: (id: string) => void;
+  onOpenSaved: () => void;
+  isSavedRecipesLoading: boolean;
   onOpenAuth: () => void;
   onStartBake: (id: string) => void;
   onRetrySavedRecipes: () => void;
@@ -53,6 +55,7 @@ type WelcomeScreenProps = {
   onBakeAgainFromHistory: (session: BakeHistorySession) => void;
   recipeBakeStats: Record<string, RecipeBakeStats>;
   onDeleteHistoryDetail: () => Promise<void>;
+  historyPhotoActions: BakeHistoryPhotoActions;
   onDevPanelUnlock: () => void;
   children?: ReactNode;
 };
@@ -72,7 +75,8 @@ export function WelcomeScreen({
   onLoadTemplate,
   onLoadRecipe,
   onDuplicateRecipe,
-  onDeleteRecipe,
+  onOpenSaved,
+  isSavedRecipesLoading,
   onOpenAuth,
   onStartBake,
   onRetrySavedRecipes,
@@ -91,6 +95,7 @@ export function WelcomeScreen({
   onCloseHistoryDetail,
   onUpdateHistoryDetail,
   onDeleteHistoryDetail,
+  historyPhotoActions,
   onBakeAgainFromHistory,
   recipeBakeStats,
   onDevPanelUnlock,
@@ -112,12 +117,24 @@ export function WelcomeScreen({
           onResumeBake={onResumeBake}
           onLoadTemplate={onLoadTemplate}
           onLoadRecipe={onLoadRecipe}
-          onDuplicateRecipe={onDuplicateRecipe}
-          onDeleteRecipe={onDeleteRecipe}
+          onOpenSaved={onOpenSaved}
           onOpenAuth={onOpenAuth}
           onStartBake={onStartBake}
           recipeBakeStats={recipeBakeStats}
           onRetrySavedRecipes={onRetrySavedRecipes}
+        />
+      ) : null}
+      {mainTab === 'saved' ? (
+        <SavedRecipesView
+          savedRecipes={savedRecipes}
+          savedRecipesError={savedRecipesError}
+          isLoading={isSavedRecipesLoading}
+          recipeBakeStats={recipeBakeStats}
+          onNewRecipe={onStart}
+          onOpenRecipe={onLoadRecipe}
+          onStartBake={onStartBake}
+          onDuplicateRecipe={onDuplicateRecipe}
+          onRetry={onRetrySavedRecipes}
         />
       ) : null}
       {mainTab === 'history' && !historyDetailId ? (
@@ -150,6 +167,7 @@ export function WelcomeScreen({
             onBack={onCloseHistoryDetail}
             onUpdate={onUpdateHistoryDetail}
             onDelete={onDeleteHistoryDetail}
+            photoActions={historyPhotoActions}
             onBakeAgain={() => onBakeAgainFromHistory(activeHistorySession)}
           />
         ) : historyDetailLoadError ? (

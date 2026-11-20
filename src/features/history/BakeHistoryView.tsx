@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
 
 import { ScreenChrome } from '../../components/ScreenChrome.tsx';
-import { FilterIcon, SearchIcon } from '../../components/icons.tsx';
+import { FilterIcon, LoafIcon, SearchIcon } from '../../components/icons.tsx';
 import { LoafAssessmentPicker } from '../../components/LoafAssessmentPicker.tsx';
 import { getLoafAssessmentLabel } from '../../lib/history/assessment.ts';
+import { buildBakeSummaryLine } from '../../lib/history/bakeSummaryLine.ts';
 import {
   filterBakeHistoryEntries,
   type BakeHistoryAssessmentFilter,
@@ -43,7 +44,7 @@ export function BakeHistoryView({
   );
   const showBackupNudge = !isSignedIn && canSignIn && entries.length > 0 && !isBackupNudgeDismissed;
 
-  const photoUrls = useBakePhotoUrls(entries);
+  const photoUrls = useBakePhotoUrls(entries, { size: 'thumbnail' });
 
   const filteredEntries = useMemo(
     () => filterBakeHistoryEntries(entries, searchQuery, assessmentFilter),
@@ -133,6 +134,7 @@ export function BakeHistoryView({
             {filteredEntries.map((entry) => {
               const assessmentLabel = getLoafAssessmentLabel(entry.overallAssessment);
               const photoUrl = photoUrls.get(entry.id);
+              const summaryLine = buildBakeSummaryLine(entry.recipeFacts);
 
               return (
                 <li key={entry.id} className="saved-recipe-card">
@@ -141,15 +143,19 @@ export function BakeHistoryView({
                     className="saved-recipe-card__open bake-history__entry-open"
                     onClick={() => onOpenEntry(entry.id)}
                   >
-                    {photoUrl ? (
-                      <img
-                        src={photoUrl}
-                        alt=""
-                        className="bake-history__thumb"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    ) : null}
+                    <span className="bake-history__thumb" aria-hidden="true">
+                      {photoUrl ? (
+                        <img
+                          src={photoUrl}
+                          alt=""
+                          className="bake-history__thumb-image"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      ) : (
+                        <LoafIcon className="bake-history__thumb-placeholder" />
+                      )}
+                    </span>
                     <span className="bake-history__entry-text">
                       <strong>{entry.recipeName}</strong>
                       <span className="saved-recipe-card__meta">
@@ -165,6 +171,12 @@ export function BakeHistoryView({
                           </>
                         ) : null}
                       </span>
+                      {summaryLine ? (
+                        <span className="bake-history__recipe-line">
+                          <span className="visually-hidden">Recipe: </span>
+                          {summaryLine}
+                        </span>
+                      ) : null}
                       {entry.overallNotePreview ? (
                         <span className="bake-history__note-preview">{entry.overallNotePreview}</span>
                       ) : null}

@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { AppHeader } from '../../components/AppHeader.tsx';
-import { LoafIcon, PenIcon } from '../../components/icons.tsx';
+import { BinIcon, LoafIcon, PenIcon } from '../../components/icons.tsx';
 import { PageShell } from '../../components/PageShell.tsx';
-import { RecipeCard } from '../../components/RecipeCard.tsx';
+import { IngredientBreakdownCard } from '../../components/IngredientBreakdownCard.tsx';
 import { StickyFooter } from '../../components/StickyFooter.tsx';
+import { buildIngredientBreakdown } from '../../lib/recipe/buildIngredientBreakdown.ts';
 import { buildRecipeOverview } from '../../lib/recipe/buildRecipeOverview.ts';
+import { calculateRecipe } from '../../lib/recipe/calculateRecipe.ts';
 import type { ScheduleInput } from '../../lib/schedule/types.ts';
 import type { SavedRecipe } from '../../lib/storage/types.ts';
 
@@ -21,10 +23,11 @@ type RecipeViewProps = {
   onHome: () => void;
   onEdit: (recipe: SavedRecipe) => void;
   onStartBake: (recipe: SavedRecipe & { scheduleInput: ScheduleInput }) => void;
+  onDelete: (recipe: SavedRecipe) => void;
 };
 
 /** Read-only look at a saved recipe: ingredients, starter and levain amounts, and the schedule. */
-export function RecipeView({ recipeId, fetchSavedRecipe, onHome, onEdit, onStartBake }: RecipeViewProps) {
+export function RecipeView({ recipeId, fetchSavedRecipe, onHome, onEdit, onStartBake, onDelete }: RecipeViewProps) {
   const [loadState, setLoadState] = useState<LoadState>({ status: 'loading' });
 
   useEffect(() => {
@@ -74,6 +77,7 @@ export function RecipeView({ recipeId, fetchSavedRecipe, onHome, onEdit, onStart
       onHome={onHome}
       onEdit={onEdit}
       onStartBake={onStartBake}
+      onDelete={onDelete}
     />
   );
 }
@@ -83,13 +87,23 @@ type RecipeViewContentProps = {
   onHome: () => void;
   onEdit: (recipe: SavedRecipe) => void;
   onStartBake: (recipe: SavedRecipe & { scheduleInput: ScheduleInput }) => void;
+  onDelete: (recipe: SavedRecipe) => void;
 };
 
-function RecipeViewContent({ recipe, onHome, onEdit, onStartBake }: RecipeViewContentProps) {
+function RecipeViewContent({ recipe, onHome, onEdit, onStartBake, onDelete }: RecipeViewContentProps) {
   const overview = useMemo(
     () => buildRecipeOverview(recipe.recipeInput, recipe.scheduleInput),
     [recipe.recipeInput, recipe.scheduleInput],
   );
+  // Saved inputs can fail to produce a formula (older or edited data), so the card is optional.
+  const ingredientBreakdown = useMemo(() => {
+    try {
+      const formula = calculateRecipe(recipe.recipeInput);
+      return buildIngredientBreakdown(recipe.recipeInput, formula, recipe.scheduleInput ?? undefined);
+    } catch {
+      return null;
+    }
+  }, [recipe.recipeInput, recipe.scheduleInput]);
   const bakeableRecipe = recipe.scheduleInput ? { ...recipe, scheduleInput: recipe.scheduleInput } : null;
 
   return (
@@ -124,14 +138,8 @@ function RecipeViewContent({ recipe, onHome, onEdit, onStartBake }: RecipeViewCo
           <p className="hero-copy">{overview.doughSummary}</p>
         </section>
 
-        {overview.ingredientRows.length > 0 ? (
-          <>
-            <div className="summary-grid recipe-view__amounts">
-              <RecipeCard title="Ingredients" rows={overview.ingredientRows} />
-              <RecipeCard title="Starter and levain" rows={overview.levainRows} />
-            </div>
-            {overview.totalsSummary ? <p className="section-copy recipe-view__totals">{overview.totalsSummary}</p> : null}
-          </>
+        {ingredientBreakdown ? (
+          <IngredientBreakdownCard breakdown={ingredientBreakdown} />
         ) : (
           <section className="card card--notice">
             <h2>Ingredients unavailable</h2>
@@ -166,6 +174,14 @@ function RecipeViewContent({ recipe, onHome, onEdit, onStartBake }: RecipeViewCo
             <p className="section-copy">No schedule saved yet. Edit the recipe and build one to start baking.</p>
           )}
         </section>
+
+        {/* Deliberately last and quiet: the only destructive action on the page, away from Start baking. */}
+        <div className="recipe-view__danger-zone">
+          <button type="button" className="recipe-view__delete" onClick={() => onDelete(recipe)}>
+            <BinIcon />
+            Delete recipe
+          </button>
+        </div>
       </PageShell>
     </>
   );

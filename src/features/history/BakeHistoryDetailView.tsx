@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react';
 
+import { BakePhotoPicker } from '../companion/BakePhotoPicker.tsx';
 import { ConfirmDialog } from '../../components/ConfirmDialog.tsx';
 import { DialogCard } from '../../components/DialogCard.tsx';
 import { ChromeBackButton } from '../../components/ChromeBackButton.tsx';
 import { LoafAssessmentPicker } from '../../components/LoafAssessmentPicker.tsx';
+import { BinIcon, CameraIcon } from '../../components/icons.tsx';
 import { PageShell } from '../../components/PageShell.tsx';
 import { PenEditButton } from '../../components/PenEditButton.tsx';
 import { RecipeCard } from '../../components/RecipeCard.tsx';
@@ -23,6 +25,14 @@ import { buildIngredientRows, type IngredientRow } from '../../lib/recipe/format
 import { buildTimeline, formatTimelineForDisplay } from '../../lib/schedule/buildTimeline.ts';
 import { formatBakeDateLong, getBakeDateIso, getMixDateIso } from '../../lib/schedule/dates.ts';
 
+/** Adding, replacing and removing the loaf photo of a saved bake. Each resolves with a message, or null. */
+export type BakeHistoryPhotoActions = {
+  /** Changes when the photo was changed, so the photo link is looked up again. */
+  version: number;
+  onChange: (photo: Blob) => Promise<string | null>;
+  onRemove: () => Promise<string | null>;
+};
+
 type BakeHistoryDetailViewProps = {
   session: BakeHistorySession;
   isSaving: boolean;
@@ -31,6 +41,7 @@ type BakeHistoryDetailViewProps = {
   onUpdate: (input: UpdateBakeHistorySessionInput) => Promise<void>;
   onDelete: () => Promise<void>;
   onBakeAgain: () => void;
+  photoActions: BakeHistoryPhotoActions;
 };
 
 export function BakeHistoryDetailView({
@@ -41,11 +52,23 @@ export function BakeHistoryDetailView({
   onUpdate,
   onDelete,
   onBakeAgain,
+  photoActions,
 }: BakeHistoryDetailViewProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isPhotoOpen, setIsPhotoOpen] = useState(false);
-  const photoUrl = useBakePhotoUrls([{ id: session.id, photoPath: session.photoPath }]).get(session.id);
+  const photoUrl = useBakePhotoUrls([{ id: session.id, photoPath: session.photoPath }], {
+    version: photoActions.version,
+  }).get(session.id);
+  // Photo editing: choosing a new photo (add or replace), saving it, removing it.
+  const [isChoosingPhoto, setIsChoosingPhoto] = useState(false);
+  const [chosenPhoto, setChosenPhoto] = useState<Blob | null>(null);
+  const [isPreparingPhoto, setIsPreparingPhoto] = useState(false);
+  const [isSavingPhoto, setIsSavingPhoto] = useState(false);
+  const [isRemovePhotoDialogOpen, setIsRemovePhotoDialogOpen] = useState(false);
+  const [photoMessage, setPhotoMessage] = useState<string | null>(null);
+  // Changing the key gives the picker a fresh, empty state after each save or cancel.
+  const [photoPickerKey, setPhotoPickerKey] = useState(0);
   const [draftNote, setDraftNote] = useState(session.overallNote ?? '');
   const [draftAssessment, setDraftAssessment] = useState<BakeSessionAssessment | undefined>(
     session.overallAssessment,
@@ -86,6 +109,37 @@ export function BakeHistoryDetailView({
       overallAssessment: draftAssessment ?? null,
     });
     setIsEditing(false);
+  }
+
+  function closePhotoPicker(): void {
+    setIsChoosingPhoto(false);
+    setChosenPhoto(null);
+    setPhotoPickerKey((key) => key + 1);
+  }
+
+  async function handleSavePhoto(): Promise<void> {
+    if (!chosenPhoto) {
+      return;
+    }
+
+    setIsSavingPhoto(true);
+    setPhotoMessage(null);
+    try {
+      setPhotoMessage(await photoActions.onChange(chosenPhoto));
+    } finally {
+      setIsSavingPhoto(false);
+      closePhotoPicker();
+    }
+  }
+
+  async function handleRemovePhoto(): Promise<void> {
+    setIsSavingPhoto(true);
+    setPhotoMessage(null);
+    try {
+      setPhotoMessage(await photoActions.onRemove());
+    } finally {
+      setIsSavingPhoto(false);
+    }
   }
 
   function startEditing(): void {
@@ -129,8 +183,9 @@ export function BakeHistoryDetailView({
         </button>
       </section>
 
-      {photoUrl ? (
-        <section className="card bake-history-detail__photo" aria-label="Loaf photo">
+      <section className="card bake-history-detail__photo" aria-label="Loaf photo">
+        <h2 className="bake-history-detail__section-title">Loaf photo</h2>
+        {photoUrl ? (
           <button
             type="button"
             className="bake-photo-button"
@@ -139,8 +194,69 @@ export function BakeHistoryDetailView({
           >
             <img src={photoUrl} alt={`Your ${session.recipeName} loaf`} className="bake-photo-button__image" />
           </button>
-        </section>
-      ) : null}
+        ) : null}
+
+        {!photoUrl || isChoosingPhoto ? (
+          <>
+            <BakePhotoPicker
+              key={photoPickerKey}
+              label={photoUrl ? 'New photo' : 'Add a photo of this loaf'}
+              onChange={setChosenPhoto}
+              onBusyChange={setIsPreparingPhoto}
+              disabled={isSavingPhoto}
+            />
+            <div className="bake-history-detail__photo-actions">
+              {chosenPhoto ? (
+                <button
+                  type="button"
+                  className="wizard-button wizard-button--primary"
+                  onClick={() => void handleSavePhoto()}
+                  disabled={isSavingPhoto || isPreparingPhoto}
+                >
+                  {isSavingPhoto ? 'Saving photo…' : 'Save photo'}
+                </button>
+              ) : null}
+              {photoUrl ? (
+                <button
+                  type="button"
+                  className="wizard-button wizard-button--secondary"
+                  onClick={closePhotoPicker}
+                  disabled={isSavingPhoto}
+                >
+                  Cancel
+                </button>
+              ) : null}
+            </div>
+          </>
+        ) : (
+          <div className="bake-history-detail__photo-actions">
+            <button
+              type="button"
+              className="wizard-button wizard-button--secondary bake-history-detail__photo-action"
+              onClick={() => setIsChoosingPhoto(true)}
+              disabled={isSavingPhoto}
+            >
+              <CameraIcon />
+              <span>Replace photo</span>
+            </button>
+            <button
+              type="button"
+              className="wizard-button wizard-button--secondary bake-history-detail__photo-action"
+              onClick={() => setIsRemovePhotoDialogOpen(true)}
+              disabled={isSavingPhoto}
+            >
+              <BinIcon />
+              <span>Remove photo</span>
+            </button>
+          </div>
+        )}
+
+        {photoMessage ? (
+          <p className="bake-history-detail__photo-message" role="status">
+            {photoMessage}
+          </p>
+        ) : null}
+      </section>
 
       <section className="card bake-history-detail__note" aria-label="Bake notes">
         <h2 className="bake-history-detail__section-title">Notes & assessment</h2>
@@ -278,6 +394,19 @@ export function BakeHistoryDetailView({
         >
           <img src={photoUrl} alt={`Your ${session.recipeName} loaf`} className="bake-photo-large" />
         </DialogCard>
+      ) : null}
+
+      {isRemovePhotoDialogOpen ? (
+        <ConfirmDialog
+          title="Remove this photo?"
+          message="The photo of this loaf will be deleted. The rest of the bake stays in your history."
+          confirmLabel="Remove photo"
+          onCancel={() => setIsRemovePhotoDialogOpen(false)}
+          onConfirm={() => {
+            setIsRemovePhotoDialogOpen(false);
+            void handleRemovePhoto();
+          }}
+        />
       ) : null}
 
       {isDeleteDialogOpen ? (

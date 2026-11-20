@@ -4,7 +4,14 @@ import type { User } from '@supabase/supabase-js';
 import type { AppMainTab } from '../../components/AppBottomNav.tsx';
 import { importLocalRecipesIfNeeded } from '../storage/importLocalRecipes.ts';
 import { listRemoteRecipeSummaries } from '../storage/remoteRecipeStorage.ts';
-import { retryPendingPhotoUploads } from './bakePhotos.ts';
+import {
+  describePhotoOutcome,
+  describePhotoRemoval,
+  removePhotoFromBake,
+  retryPendingPhotoUploads,
+  savePhotoForBake,
+} from './bakePhotos.ts';
+import { createBakePhotoThumbnail } from './compressBakePhoto.ts';
 import { importLocalBakeHistoryIfNeeded } from './importLocalBakeHistory.ts';
 import { getDefaultBakePhotoStore } from './localBakePhotoStorage.ts';
 import {
@@ -21,7 +28,7 @@ import {
   listRemoteBakeHistorySummaries,
   updateRemoteBakeHistorySession,
 } from './remoteBakeHistoryStorage.ts';
-import { uploadRemoteBakePhoto } from './remoteBakePhotoStorage.ts';
+import { removeRemoteBakePhoto, uploadRemoteBakePhoto } from './remoteBakePhotoStorage.ts';
 import type {
   BakeHistorySession,
   BakeHistorySessionSummary,
@@ -50,6 +57,8 @@ export function useBakeHistory({
   const [isSavingHistoryDetail, setIsSavingHistoryDetail] = useState(false);
   const [historyDetailError, setHistoryDetailError] = useState<string | null>(null);
   const [historyDetailLoadError, setHistoryDetailLoadError] = useState<string | null>(null);
+  // Bumped after a photo is added, replaced or removed so the photo links are looked up again.
+  const [photoVersion, setPhotoVersion] = useState(0);
 
   const loadBakeHistory = useCallback(async (): Promise<void> => {
     if (!useCloudHistory || !user) {
@@ -69,6 +78,7 @@ export function useBakeHistory({
         remoteBakes: summaries,
         store: getDefaultBakePhotoStore(),
         uploadRemote: uploadRemoteBakePhoto,
+        makeThumbnail: createBakePhotoThumbnail,
       });
       if (retried > 0) {
         summaries = await listRemoteBakeHistorySummaries(user.id);
@@ -144,6 +154,71 @@ export function useBakeHistory({
     [historyDetailId, loadBakeHistory, useCloudHistory, user],
   );
 
+  /** Re-reads the open bake and the list after a photo change. The change itself already worked. */
+  const refreshAfterPhotoChange = useCallback(
+    async (id: string): Promise<void> => {
+      try {
+        // The list load also retries waiting uploads, so read the bake after it.
+        await loadBakeHistory();
+        const session =
+          useCloudHistory && user
+            ? await getRemoteBakeHistorySession(user.id, id)
+            : getLocalBakeHistorySession(id);
+        if (session) {
+          setActiveHistorySession(session);
+        }
+      } catch {
+        // The photo links below are still refreshed; the next load shows the rest.
+      }
+      setPhotoVersion((version) => version + 1);
+    },
+    [loadBakeHistory, useCloudHistory, user],
+  );
+
+  /**
+   * Adds or replaces the photo of the open bake. Returns a short non-blocking message when the
+   * photo needs attention (see `describePhotoOutcome`), otherwise null.
+   */
+  const changeHistoryPhoto = useCallback(
+    async (photo: Blob): Promise<string | null> => {
+      if (!historyDetailId) {
+        return null;
+      }
+
+      const signedInUserId = useCloudHistory && user ? user.id : null;
+      const outcome = await savePhotoForBake({
+        photo,
+        bakeId: historyDetailId,
+        userId: signedInUserId,
+        hadRemotePhoto: Boolean(activeHistorySession?.photoPath),
+        store: getDefaultBakePhotoStore(),
+        uploadRemote: uploadRemoteBakePhoto,
+        makeThumbnail: createBakePhotoThumbnail,
+      });
+
+      await refreshAfterPhotoChange(historyDetailId);
+      return describePhotoOutcome(outcome, signedInUserId !== null, 'existing-bake');
+    },
+    [activeHistorySession?.photoPath, historyDetailId, refreshAfterPhotoChange, useCloudHistory, user],
+  );
+
+  /** Removes the photo of the open bake. Returns a message when it failed, otherwise null. */
+  const removeHistoryPhoto = useCallback(async (): Promise<string | null> => {
+    if (!historyDetailId) {
+      return null;
+    }
+
+    const result = await removePhotoFromBake({
+      bakeId: historyDetailId,
+      userId: useCloudHistory && user ? user.id : null,
+      store: getDefaultBakePhotoStore(),
+      removeRemote: removeRemoteBakePhoto,
+    });
+
+    await refreshAfterPhotoChange(historyDetailId);
+    return describePhotoRemoval(result);
+  }, [historyDetailId, refreshAfterPhotoChange, useCloudHistory, user]);
+
   const deleteHistoryDetail = useCallback(async (): Promise<void> => {
     if (!historyDetailId) {
       return;
@@ -202,6 +277,9 @@ export function useBakeHistory({
     loadBakeHistory,
     updateHistoryDetail,
     deleteHistoryDetail,
+    photoVersion,
+    changeHistoryPhoto,
+    removeHistoryPhoto,
   };
 }
 
@@ -221,7 +299,11 @@ async function importLocalBakesAfterSignIn(userId: string): Promise<string | nul
       listRemoteSummaries: listRemoteBakeHistorySummaries,
       listRemoteRecipeIds: async (id) => (await listRemoteRecipeSummaries(id)).map((recipe) => recipe.id),
       createRemote: createRemoteBakeHistorySession,
-      photos: { store: getDefaultBakePhotoStore(), uploadRemote: uploadRemoteBakePhoto },
+      photos: {
+        store: getDefaultBakePhotoStore(),
+        uploadRemote: uploadRemoteBakePhoto,
+        makeThumbnail: createBakePhotoThumbnail,
+      },
     });
     return null;
   } catch (error) {

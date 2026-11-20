@@ -33,7 +33,7 @@ When a signed-in user opens the app, bakes saved on this device are uploaded (`i
 
 ## History screen
 
-- A list of completed bakes with the recipe name, the baked date, and the loaf assessment. Search matches the recipe name and notes; the filter narrows by assessment (Great loaf, OK, Needs work, No assessment).
+- A list of completed bakes. Each row has a square thumbnail (a loaf icon when there is no photo), the recipe name, the baked date and assessment, and one muted line from the bake's recipe snapshot: hydration, loaf size and flour, for example `78% · 900 g · Wheat Type 1050` or `75% · 2 × 450 g · 70% Wheat Type 1050 + 30% Whole wheat`. Loaf size is the weight per loaf when there are several loaves, otherwise the dough weight. The line is built by `buildBakeSummaryLine` (`lib/history/bakeSummaryLine.ts`); the summary carries `recipeFacts` for both signed-in and signed-out lists, and older rows simply skip the parts they lack. Search matches the recipe name and notes; the filter narrows by assessment (Great loaf, OK, Needs work, No assessment).
 - The detail view shows notes and assessment (editable with the pen), the recipe snapshot and ingredient list, the planned schedule, step timings with start drift, **Bake again**, and Delete (with confirmation).
 - The bake snapshot is what was baked, not the saved recipe as it is today, so later edits to the recipe never rewrite history.
 
@@ -51,9 +51,10 @@ An optional photo of the finished loaf, added in the Bake complete dialog ("Add 
 - **Signed in:** the photo is uploaded to the private Supabase Storage bucket `bake-photos` at `<user_id>/<bake_id>.jpg`, and the path is stored in `bake_sessions.photo_path`. It is shown through short-lived signed links.
 - **The bake is saved first.** If the photo upload fails, the bake is still saved, a short message appears, and the photo is kept on this device and retried each time History loads (`retryPendingPhotoUploads`).
 - **Import after sign-in** moves each local photo to the account. The on-device copy is deleted only after its upload succeeded; if the upload fails, the photo stays on this device under the account bake's id and is retried later.
-- **Deleting a bake** deletes its photo (on this device, and in the bucket).
 - Old bakes and bakes without a photo have no `photoPath` and show no photo.
-- Photos show as a small thumbnail in the History list and full width on the bake detail screen (tap to enlarge). Adding or replacing a photo on an existing bake is not built yet.
+- **Thumbnails.** When a photo is saved, a small thumbnail (about 320 px, JPEG, under about 20 KB; `createBakePhotoThumbnail`) is saved next to it: in the bucket at `<user_id>/<bake_id>_thumb.jpg` (same private bucket and folder, so the existing storage policies cover it and no migration is needed), and in IndexedDB under `<bake_id>:thumb` for signed-out bakes. The History list loads only thumbnails, so it does not download full photos; the detail screen loads the full photo (tap to enlarge). A bake without a thumbnail (photos from before thumbnails, or a thumbnail that failed to save) falls back to the full photo in the list. Import after sign-in and the upload retry carry the thumbnail along, and make one for older on-device photos that lack it.
+- **Add, replace or remove from the detail screen.** The "Loaf photo" card on a bake's detail screen offers "Add a photo of this loaf" (no photo yet), or "Replace photo" and "Remove photo" (with confirmation). It reuses the same picker as the Bake complete dialog (compressed on the device, then **Save photo**). Replacing uploads the new photo and thumbnail over the same paths, so the old objects are overwritten only once the new ones are in. Messages are non-blocking and worded like the save flow: if adding while signed in fails to upload, the photo is kept on this device and retried when History loads; if replacing fails, the previous photo stays and the message says so (nothing is queued, since a retry could not tell the new photo from the old one). Removing clears `photo_path` first, then deletes the photo and thumbnail objects.
+- **Deleting a bake** deletes both objects (and both on-device copies when signed out).
 
 Needs the `bake_photos` migration on the Supabase project before the app update ships; see [Supabase operations](../engineering/supabase-ops.md#bake-photos-supabase-storage).
 
@@ -61,4 +62,4 @@ Needs the `bake_photos` migration on the Supabase project before the app update 
 
 - "Tweak recipe from notes": prefill recipe changes from a bake's notes.
 - Photo comparison between bakes.
-- Adding, replacing or removing a photo from the history detail screen.
+- Creating thumbnails for photos saved before thumbnails existed (they use the full photo in the list until the bake gets a new photo).

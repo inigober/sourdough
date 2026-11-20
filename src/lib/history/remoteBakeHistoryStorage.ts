@@ -1,4 +1,5 @@
 import { getSupabaseClient } from '../auth/supabaseClient.ts';
+import { pickBakeRecipeFacts } from './bakeSummaryLine.ts';
 import { deleteRemoteBakePhoto } from './remoteBakePhotoStorage.ts';
 import type {
   BakeHistorySession,
@@ -205,6 +206,8 @@ function rowToSummary(row: {
   saved_at: string;
   overall_assessment: BakeHistorySession['overallAssessment'] | null;
   overall_note: string | null;
+  /** Only the few numbers shown in the list are read from it (see `pickBakeRecipeFacts`). */
+  recipe_input?: unknown;
   photo_path?: string | null;
 }): BakeHistorySessionSummary {
   const note = row.overall_note?.trim() ?? '';
@@ -217,6 +220,7 @@ function rowToSummary(row: {
     savedAt: row.saved_at,
     overallAssessment: row.overall_assessment ?? undefined,
     overallNotePreview: note ? truncateNotePreview(note) : undefined,
+    recipeFacts: pickBakeRecipeFacts(row.recipe_input),
     photoPath: row.photo_path ?? undefined,
   };
 }
@@ -236,7 +240,7 @@ export async function listRemoteBakeHistorySummaries(
   const { data, error } = await supabase
     .from('bake_sessions')
     .select(
-      'id, saved_recipe_id, recipe_name, completed_at, saved_at, overall_assessment, overall_note, photo_path',
+      'id, saved_recipe_id, recipe_name, completed_at, saved_at, overall_assessment, overall_note, recipe_input, photo_path',
     )
     .eq('user_id', userId)
     .order('completed_at', { ascending: false });
@@ -253,6 +257,7 @@ export async function listRemoteBakeHistorySummaries(
     saved_at: string;
     overall_assessment: BakeHistorySession['overallAssessment'] | null;
     overall_note: string | null;
+    recipe_input: unknown;
     photo_path: string | null;
   }> | null) ?? []).map(rowToSummary);
 }

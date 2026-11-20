@@ -4,6 +4,7 @@ import { RecipeBuilder } from '../features/recipe-builder/RecipeBuilder.tsx';
 
 const router = createBrowserRouter([
   { path: '/', element: <RecipeBuilder /> },
+  { path: '/saved', element: <RecipeBuilder /> },
   { path: '/history', element: <RecipeBuilder /> },
   { path: '/history/:bakeId', element: <RecipeBuilder /> },
   { path: '/recipe/:recipeId', element: <RecipeBuilder /> },

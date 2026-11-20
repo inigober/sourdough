@@ -79,8 +79,20 @@ describe('WizardInputSteps integration', () => {
     };
     const html = renderWizard({ currentStep: 'flour', recipeInput: unevenBlend });
 
+    // The step title is a question; the blend itself is a labelled line inside the step.
+    expect(html).toContain('Which flours are you blending?');
+    expect(html).toContain('Your blend');
     expect(html).toContain('60% Wheat Type 1050 + 30% Wheat Type 1050');
     expect(getContinueButtonMarkup(html)).toMatch(/disabled/);
+  });
+
+  it('asks which flour with a single flour and keeps the summary line inside the step', () => {
+    const html = renderWizard({ currentStep: 'flour' });
+
+    expect(html).toContain('Which flour are you using?');
+    expect(html).not.toContain('Which flours are you blending?');
+    expect(html).toContain('Your blend');
+    expect(html).toContain('100% Wheat Type 1050');
   });
 
   it('renders recipe targets and blocks Continue only on that step for invalid hydration', () => {

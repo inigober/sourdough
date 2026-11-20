@@ -1,11 +1,14 @@
-import { BinIcon, PlusIcon } from '../../../components/icons.tsx';
+import { PlusIcon } from '../../../components/icons.tsx';
 import { WelcomeTopBar } from '../../auth/WelcomeTopBar.tsx';
 import { getTemplateImageSrc } from '../../../lib/recipe/templateImages.ts';
 import { recipeTemplates } from '../../../lib/recipe/templates.ts';
 import type { BuilderDraftSummary } from '../../../lib/storage/draftStorage.ts';
-import { formatRecipeBakeStats, type RecipeBakeStats } from '../../../lib/history/recipeBakeStats.ts';
+import type { RecipeBakeStats } from '../../../lib/history/recipeBakeStats.ts';
 import type { BakeSession } from '../../../lib/companion/types.ts';
 import type { SavedRecipeSummary } from '../../../lib/storage/types.ts';
+import { formatSavedDate } from '../../saved-recipes/formatSavedDate.ts';
+import { SavedRecipesShortcut } from '../../saved-recipes/SavedRecipesShortcut.tsx';
+
 type WelcomeStepProps = {
   savedRecipes: SavedRecipeSummary[];
   savedRecipesError: string | null;
@@ -17,8 +20,7 @@ type WelcomeStepProps = {
   onResumeBake: () => void;
   onLoadTemplate: (templateId: string) => void;
   onLoadRecipe: (id: string) => void;
-  onDuplicateRecipe: (id: string) => void;
-  onDeleteRecipe: (id: string) => void;
+  onOpenSaved: () => void;
   onOpenAuth: () => void;
   onStartBake: (id: string) => void;
   recipeBakeStats: Record<string, RecipeBakeStats>;
@@ -36,8 +38,7 @@ export function WelcomeStep({
   onResumeBake,
   onLoadTemplate,
   onLoadRecipe,
-  onDuplicateRecipe,
-  onDeleteRecipe,
+  onOpenSaved,
   onOpenAuth,
   onStartBake,
   recipeBakeStats,
@@ -48,78 +49,19 @@ export function WelcomeStep({
   const createButtonClass = hasResumeCard
     ? 'wizard-button wizard-button--secondary welcome-screen__create'
     : 'wizard-button wizard-button--primary welcome-screen__create';
-  const showSavedRecipes = savedRecipes.length > 0 || Boolean(savedRecipesError);
+  // No saved recipes: no shortcut at all. The Saved tab explains the empty state.
+  const showSavedShortcut = savedRecipes.length > 0 || Boolean(savedRecipesError);
 
-  const savedRecipesSection = showSavedRecipes ? (
-    <section className="card saved-recipes" aria-label="Saved recipes">
-      <div className="welcome-section__header saved-recipes__header">
-        <h2>Saved recipes</h2>
-        <p className="section-copy">View a saved recipe, start a bake, or duplicate it as a starting point.</p>
-      </div>
-      {savedRecipesError ? (
-        <div className="saved-recipes__error" role="alert">
-          <p className="auth-modal__error">{savedRecipesError}</p>
-          <button type="button" className="wizard-button wizard-button--secondary" onClick={onRetrySavedRecipes}>
-            Try again
-          </button>
-        </div>
-      ) : null}
-      {savedRecipes.length > 0 ? (
-        <ul className="saved-recipes__list">
-          {savedRecipes.map((recipe) => (
-            <li key={recipe.id} className="saved-recipe-card">
-              <button
-                type="button"
-                className="saved-recipe-card__open"
-                onClick={() => onLoadRecipe(recipe.id)}
-              >
-                <strong>{recipe.name}</strong>
-                <span className="saved-recipe-card__meta">
-                  {recipe.scheduleLabel}
-                  <span className="saved-recipe-card__meta-sep" aria-hidden="true">
-                    ·
-                  </span>
-                  Updated {formatSavedDate(recipe.updatedAt)}
-                </span>
-                {recipeBakeStats[recipe.id] ? (
-                  <span className="saved-recipe-card__meta saved-recipe-card__bake-stats">
-                    {formatRecipeBakeStats(recipeBakeStats[recipe.id])}
-                  </span>
-                ) : null}
-              </button>
-              <div className="saved-recipe-card__actions">
-                <div className="saved-recipe-card__buttons">
-                  {recipe.hasSchedule ? (
-                    <button
-                      type="button"
-                      className="wizard-button wizard-button--primary saved-recipe-card__bake"
-                      onClick={() => onStartBake(recipe.id)}
-                    >
-                      Start baking
-                    </button>
-                  ) : null}
-                  <button
-                    type="button"
-                    className="wizard-button wizard-button--secondary saved-recipe-card__duplicate"
-                    onClick={() => onDuplicateRecipe(recipe.id)}
-                  >
-                    Duplicate
-                  </button>
-                  <button
-                    type="button"
-                    className="icon-button icon-button--delete saved-recipe-card__delete"
-                    aria-label={`Delete ${recipe.name}`}
-                    onClick={() => onDeleteRecipe(recipe.id)}
-                  >
-                    <BinIcon />
-                  </button>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-    </section>
+  const savedRecipesShortcut = showSavedShortcut ? (
+    <SavedRecipesShortcut
+      savedRecipes={savedRecipes}
+      savedRecipesError={savedRecipesError}
+      recipeBakeStats={recipeBakeStats}
+      onSeeAll={onOpenSaved}
+      onOpenRecipe={onLoadRecipe}
+      onStartBake={onStartBake}
+      onRetry={onRetrySavedRecipes}
+    />
   ) : null;
 
   const templatesSection = (
@@ -154,9 +96,6 @@ export function WelcomeStep({
       </ul>
     </section>
   );
-
-  // First-time bakers see templates before an empty-looking recipe list; returning bakers see their recipes first.
-  const savedRecipesFirst = showSavedRecipes;
 
   return (
     <div className="welcome-screen">
@@ -213,21 +152,8 @@ export function WelcomeStep({
         </section>
       ) : null}
 
-      {savedRecipesFirst ? savedRecipesSection : null}
+      {savedRecipesShortcut}
       {templatesSection}
-      {savedRecipesFirst ? null : savedRecipesSection}
     </div>
   );
-}
-
-function formatSavedDate(isoDate: string): string {
-  const date = new Date(isoDate);
-  if (Number.isNaN(date.getTime())) {
-    return 'recently';
-  }
-
-  return date.toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-  });
 }

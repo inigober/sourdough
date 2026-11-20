@@ -14,6 +14,14 @@ export const BAKE_PHOTO_MAX_DIMENSION = 1280;
 export const BAKE_PHOTO_START_QUALITY = 0.85;
 export const BAKE_PHOTO_MAX_BYTES = 250_000;
 
+/**
+ * The small picture shown in the History list, so the list does not download full photos.
+ * About 320 px on the longest side and under about 20 KB.
+ */
+export const BAKE_PHOTO_THUMBNAIL_MAX_DIMENSION = 320;
+export const BAKE_PHOTO_THUMBNAIL_START_QUALITY = 0.75;
+export const BAKE_PHOTO_THUMBNAIL_MAX_BYTES = 20_000;
+
 /** After the quality ladder fails at full size, retry at these fractions of the target size. */
 const SHRINK_FACTORS = [0.75, 0.56];
 
@@ -76,6 +84,23 @@ export async function encodeWithinBudget<T extends EncodedPhoto>(
   throw new Error('That photo is still too large after compression. Try a different photo.');
 }
 
+/** Draws the image at the given size on a canvas and encodes it as a JPEG. */
+function encodeImageAsJpeg(image: HTMLImageElement): PhotoEncoder<Blob> {
+  return async (width, height, quality) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext('2d');
+    if (!context) {
+      throw new Error('Could not compress image.');
+    }
+
+    context.drawImage(image, 0, 0, width, height);
+    return canvasToJpegBlob(canvas, quality);
+  };
+}
+
 /** Compresses a chosen image file to a small JPEG (longest side ~1280px, under ~250 KB). */
 export async function compressBakePhoto(file: Blob): Promise<Blob> {
   if (!file.type.startsWith('image/')) {
@@ -98,17 +123,28 @@ export async function compressBakePhoto(file: Blob): Promise<Blob> {
     return file;
   }
 
-  return encodeWithinBudget(target, async (width, height, quality) => {
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
+  return encodeWithinBudget(target, encodeImageAsJpeg(image));
+}
 
-    const context = canvas.getContext('2d');
-    if (!context) {
-      throw new Error('Could not compress image.');
-    }
+/**
+ * Makes the small list thumbnail from an already compressed photo. A thumbnail is a nice-to-have,
+ * so this never throws: it returns null when the thumbnail cannot be made, and the app then
+ * shows the full photo instead.
+ */
+export async function createBakePhotoThumbnail(photo: Blob): Promise<Blob | null> {
+  try {
+    const image = await loadImageFromFile(photo);
+    const target = computeScaledDimensions(
+      image.naturalWidth,
+      image.naturalHeight,
+      BAKE_PHOTO_THUMBNAIL_MAX_DIMENSION,
+    );
 
-    context.drawImage(image, 0, 0, width, height);
-    return canvasToJpegBlob(canvas, quality);
-  });
+    return await encodeWithinBudget(target, encodeImageAsJpeg(image), {
+      maxBytes: BAKE_PHOTO_THUMBNAIL_MAX_BYTES,
+      startQuality: BAKE_PHOTO_THUMBNAIL_START_QUALITY,
+    });
+  } catch {
+    return null;
+  }
 }

@@ -46,6 +46,7 @@ export function RecipeBuilder() {
     useCloudRecipes,
     savedRecipes,
     savedRecipesError,
+    isSavedRecipesLoading,
     recipeImportMessage,
     activeSavedRecipeId,
     activeSavedRecipe,
@@ -88,6 +89,9 @@ export function RecipeBuilder() {
     loadBakeHistory,
     updateHistoryDetail,
     deleteHistoryDetail,
+    photoVersion: historyPhotoVersion,
+    changeHistoryPhoto,
+    removeHistoryPhoto,
   } = useBakeHistory({
     user,
     isConfigured,
@@ -275,6 +279,11 @@ export function RecipeBuilder() {
 
     await deleteRecipe(navigation.pendingDeleteRecipeId);
     navigation.clearPendingDeleteRecipe();
+    // Deleting from the recipe view leaves a page that no longer exists; the list is the next stop.
+    if (screen.kind === 'recipe') {
+      routes.toSaved();
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
   }
 
   async function confirmSaveRecipe(name: string, recipeId: string | null): Promise<void> {
@@ -352,6 +361,7 @@ export function RecipeBuilder() {
           onHome={routes.toHome}
           onEdit={wizard.loadSavedRecipe}
           onStartBake={bakeFlow.requestBakeStartForSavedRecipe}
+          onDelete={(recipe) => navigation.requestDeleteRecipe(recipe.id)}
         />
         {dialogs}
         {devPanel}
@@ -420,7 +430,8 @@ export function RecipeBuilder() {
           onLoadTemplate={wizard.loadTemplate}
           onLoadRecipe={routes.toRecipe}
           onDuplicateRecipe={(id) => void duplicateRecipe(id)}
-          onDeleteRecipe={navigation.requestDeleteRecipe}
+          onOpenSaved={routes.toSaved}
+          isSavedRecipesLoading={isSavedRecipesLoading}
           onOpenAuth={openAuthModal}
           onStartBake={(id) => void bakeFlow.startBakeFromSavedRecipe(id)}
           onRetrySavedRecipes={() => void loadSavedRecipes()}
@@ -439,6 +450,11 @@ export function RecipeBuilder() {
           onCloseHistoryDetail={() => routes.toHistory()}
           onUpdateHistoryDetail={updateHistoryDetail}
           onDeleteHistoryDetail={handleDeleteHistoryDetail}
+          historyPhotoActions={{
+            version: historyPhotoVersion,
+            onChange: changeHistoryPhoto,
+            onRemove: removeHistoryPhoto,
+          }}
           onBakeAgainFromHistory={(session) => void bakeFlow.startBakeAgainFromHistory(session)}
           recipeBakeStats={recipeBakeStats}
           onDevPanelUnlock={() => setIsDevPanelOpen(true)}

@@ -1308,26 +1308,6 @@ p {
   line-height: 1.35;
 }
 
-.schedule-export__actions {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-@media (max-width: 640px) {
-  .schedule-export__actions {
-    grid-template-columns: 1fr;
-  }
-}
-
-.schedule-export__actions .wizard-button {
-  width: 100%;
-}
-
-.schedule-export__copy {
-  margin: 0 0 12px;
-}
-
 .toast {
   position: fixed;
   left: 50%;
@@ -1439,13 +1419,6 @@ div.dialog-backdrop {
   margin-top: 0;
 }
 
-.wizard-nav--steps {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 12px;
-}
-
 .wizard-nav--split {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1470,30 +1443,6 @@ div.dialog-backdrop {
   .wizard-nav--triple {
     grid-template-columns: 1fr;
   }
-}
-
-.wizard-nav__spacer {
-  min-width: 2.75rem;
-}
-
-.wizard-nav__save {
-  justify-self: center;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: auto;
-  min-width: 0;
-  min-height: var(--touch-target-min);
-  padding: 10px 14px;
-  font-size: 0.88rem;
-  white-space: nowrap;
-}
-
-.wizard-nav__save-icon {
-  flex-shrink: 0;
-  width: 1rem;
-  height: 1rem;
 }
 
 .icon {
@@ -2726,10 +2675,6 @@ div.dialog-backdrop {
   gap: 16px;
 }
 
-.schedule-bake-minutes input {
-  min-width: 5.5rem;
-}
-
 .companion__time-separator {
   display: inline-flex;
   align-items: center;
@@ -3689,7 +3634,7 @@ dd {
     padding: 13px 18px;
   }
 
-  .schedule-export__actions .wizard-button,
+
   .flour-add-button,
   .saved-recipes__create,
   .auth-modal__choice,
@@ -3697,23 +3642,6 @@ dd {
   .companion__start-step {
     width: 100%;
     padding: 13px 18px;
-  }
-
-  .wizard-nav--steps {
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    gap: 8px;
-  }
-
-  .wizard-nav--steps .wizard-button {
-    width: auto;
-  }
-
-  .wizard-nav--steps .wizard-nav__save {
-    grid-column: auto;
-    width: auto;
-    min-width: 0;
-    padding: 10px 12px;
-    font-size: 0.84rem;
   }
 
   .wizard-nav--triple {
@@ -4100,7 +4028,7 @@ dd {
 }
 
 /* Customise groups: the sections inside "Customise" are flat rows, not cards inside a card. */
-.schedule-customise .collapsible-section .collapsible-section {
+.schedule-customise .collapsible-section {
   border: 0;
   border-top: 1px solid var(--color-border-faint);
   border-radius: 0;
@@ -4109,18 +4037,18 @@ dd {
   box-shadow: none;
 }
 
-.schedule-customise .collapsible-section .collapsible-section .collapsible-section__trigger {
+.schedule-customise .collapsible-section .collapsible-section__trigger {
   padding: 16px 0;
   font-size: 1.05rem;
 }
 
-.schedule-customise .collapsible-section .collapsible-section .collapsible-section__panel {
+.schedule-customise .collapsible-section .collapsible-section__panel {
   display: grid;
   gap: 16px;
   padding: 0 0 20px;
 }
 
-.schedule-customise .collapsible-section .collapsible-section .collapsible-section__panel .section-copy {
+.schedule-customise .collapsible-section .collapsible-section__panel .section-copy {
   margin: 0;
 }
 
@@ -4139,33 +4067,6 @@ dd {
   color: var(--color-text-muted);
   font-size: 0.86rem;
   line-height: 1.4;
-}
-
-/* Very narrow phones: Back + Save + the last step's "View summary" do not fit on one row,
-   so Save moves to its own row above them. */
-@media (max-width: 380px) {
-  .wizard-nav--steps {
-    grid-template-columns: auto 1fr;
-  }
-
-  .wizard-nav--steps .wizard-nav__spacer {
-    display: none;
-  }
-
-  .wizard-nav--steps .wizard-nav__save {
-    grid-column: 1 / -1;
-    order: -1;
-    justify-self: stretch;
-  }
-
-  .wizard-nav--steps > .wizard-button:first-child:not(:last-child) {
-    grid-column: 1;
-  }
-
-  .wizard-nav--steps > .wizard-button:last-child {
-    grid-column: 2;
-    justify-self: end;
-  }
 }
 
 /* ==========================================================================
@@ -4251,29 +4152,6 @@ dd {
   outline-offset: 2px;
 }
 
-.bake-history__entry-open {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: 44px;
-}
-
-.bake-history__entry-text {
-  display: grid;
-  gap: 4px;
-  min-width: 0;
-}
-
-.bake-history__thumb {
-  width: 56px;
-  height: 56px;
-  flex-shrink: 0;
-  border: 1px solid var(--color-border-soft);
-  border-radius: 10px;
-  background: var(--color-surface-muted);
-  object-fit: cover;
-}
-
 .bake-photo-button {
   display: block;
   width: 100%;
@@ -4322,4 +4200,987 @@ dd {
   color: var(--color-text-muted);
   font-size: 0.95rem;
   line-height: 1.45;
+}
+
+/* --- Top safe area (Dynamic Island / notch) ---
+   Before: every top edge was (shell padding + full safe-area inset), which left 16-24px of dead space
+   under the island. Now one token owns it: the shell padding on screens without a notch (unchanged),
+   or just under the safe-area edge (+4px) on a notched iPhone. The sticky header cancels the same
+   amount with a negative margin, so the inset is counted once.
+   The header fade also gets a fully opaque band behind the status bar, so scrolled content never
+   shows through under the clock and battery. Colours come from the tokens, so light and dark follow. */
+:root {
+  --app-top-inset: max(var(--app-shell-pad-top), calc(env(safe-area-inset-top, 0px) + 4px));
+  --app-chrome-header-bg: linear-gradient(
+    var(--color-bg) 0,
+    var(--color-bg) env(safe-area-inset-top, 0px),
+    var(--app-chrome-bg) calc(env(safe-area-inset-top, 0px) + 1px),
+    var(--app-chrome-bg) 68%,
+    rgb(var(--color-bg-rgb) / 0)
+  );
+}
+
+html,
+body {
+  background: var(--color-bg);
+}
+
+.app-shell {
+  padding-top: var(--app-top-inset);
+}
+
+.wizard-shell__header,
+.screen-chrome,
+.app-header {
+  margin-top: calc(-1 * var(--app-top-inset));
+  padding-top: var(--app-top-inset);
+}
+
+/* --- Bake mode: "Amounts" disclosure on the current step, and padding for the Full schedule rows --- */
+.companion-amounts {
+  display: grid;
+  gap: 8px;
+}
+
+.companion-amounts__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 4px;
+  min-height: var(--touch-target-min);
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.companion-amounts__toggle:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.companion-amounts__chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-90deg);
+  transition: transform 0.15s ease;
+}
+
+.companion-amounts__chevron--open {
+  transform: rotate(0deg);
+}
+
+.companion-amounts__panel {
+  display: grid;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 14px;
+  background: var(--color-surface-muted);
+}
+
+.companion-amounts__list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.companion-amounts__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.companion-amounts__row dt {
+  color: var(--color-text-muted);
+}
+
+.companion-amounts__row dd {
+  margin: 0;
+  color: var(--color-text);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.companion-amounts__row--total {
+  padding-top: 6px;
+  border-top: 1px solid var(--color-border-soft);
+}
+
+.companion-amounts__note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/*
+ * Full schedule rows: every row gets the same inner padding and a rounded corner, so the
+ * highlight (current step, or the row picked for "Jump to this step") has room around the text
+ * and the text stays in the same place whether a row is highlighted or not. The negative list
+ * margin cancels the padding, so the text still lines up with the card title.
+ */
+.companion__overview-list {
+  margin-inline: -12px;
+}
+
+.companion__overview-list .timeline-row--interactive {
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+.companion__overview-list .timeline-row--current.timeline-row--interactive {
+  background: var(--color-tint-primary);
+}
+
+/* The row picked for "Jump to this step": outlined, so it cannot be mistaken for the current (filled) step. */
+.companion__overview-list .timeline-row--interactive[aria-expanded='true'] {
+  background: var(--color-row-active-bg);
+  box-shadow: inset 0 0 0 1.5px var(--color-primary-text);
+}
+
+.companion__overview-list .timeline-row--current .timeline-row__time-compact,
+.companion__overview-list .timeline-row--current .timeline-row__label-compact {
+  color: var(--color-primary-text);
+}
+
+/* The Jump button sits under its row, indented to the same inner edge as the row text. */
+.companion__overview-list .companion__row-actions {
+  padding: 6px 12px 10px;
+}
+/* --- end bake mode amounts and Full schedule --- */
+
+/* ==========================================================================
+   Schedule builder + number steppers (owner feedback 7, 8, 9)
+   - Custom is the fourth plan option; its field groups sit under the picker.
+   - NumberField never clips its + button: the control has a floor width and the input may shrink.
+   - Export is a quiet text button that reveals three small text actions.
+   Colours are tokens only, so the dark theme follows.
+   ========================================================================== */
+
+/* Stepper: root cause of the clipped "+" was a 5.5rem min-width on the bake inputs
+   (44 + 88 + 44 > the 164px control, whose overflow is hidden). The input may now shrink, and the
+   control cannot go narrower than two 44px buttons plus room for a 3-digit value. */
+.input-row--stepper .number-field__control {
+  min-width: calc(var(--touch-target-min) * 2 + 3.25rem + 2px);
+}
+
+.number-field__control input {
+  min-width: 0;
+}
+
+.number-field__stepper {
+  min-width: var(--touch-target-min);
+}
+
+/* A unit label that does not fit drops under the stepper instead of squeezing it. */
+.input-row--stepper {
+  flex-wrap: wrap;
+}
+
+/* The control clips its children (rounded corners), so rings are drawn inside the buttons and as a
+   box-shadow on the control rather than as outlines that would be cut off. */
+.number-field__stepper:focus-visible {
+  outline: 3px solid var(--color-primary-text);
+  outline-offset: -4px;
+}
+
+.number-field__control:has(input:focus) {
+  border-color: var(--color-primary-text);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.number-field__control input:focus {
+  outline: none;
+}
+
+/* Export: small, quiet, text only. Three actions appear under it on demand. */
+.schedule-export {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+}
+
+.schedule-export__toggle,
+.schedule-export__action {
+  min-height: var(--touch-target-min);
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.schedule-export__toggle:focus-visible,
+.schedule-export__action:focus-visible {
+  outline: 3px solid var(--color-primary-text);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.schedule-export__action:disabled {
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.schedule-export__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+
+
+/* ==========================================================================
+   Summary and wizard chrome pass: sticky footer fix, wizard footer layout,
+   ingredient breakdown card, compact recipe assessment, flour blend line.
+   Colour tokens only; nothing here animates.
+   ========================================================================== */
+
+/* Sticky footer. The footer used to be sticky inside `.page-shell__footer-wrap`, a grid exactly as
+   tall as the footer, so it had no room to stick and scrolled away with the page. The wrap is now
+   the sticky element and the inner bar just sits in it. The wrap stays in the flow, so the last
+   content is never hidden behind it. Margins mirror the old rule: bleed into the shell padding. */
+.page-shell__footer-wrap {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  flex-shrink: 0;
+  margin: 0 calc(-1 * var(--app-shell-pad-inline)) -48px;
+  padding: 20px var(--app-shell-pad-inline) calc(16px + env(safe-area-inset-bottom, 0px));
+  /* Short fade, then solid, so the "Save recipe" link never sits over scrolling text. */
+  background: linear-gradient(rgb(var(--color-bg-rgb) / 0), var(--color-bg) 16px);
+}
+
+.page-shell__footer-wrap > .page-shell__footer {
+  position: static;
+  margin: 0;
+  padding: 0;
+  background: none;
+}
+
+@media (max-width: 640px) {
+  .page-shell__footer-wrap {
+    margin-bottom: calc(-40px - env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Wizard footer. Buttons share one height and equal columns. There is one primary action:
+   Continue normally, Save when editing from the summary (Continue is then secondary).
+   Narrow screens: Save gets its own row on top, Back and Continue share the row below. */
+.wizard-nav--steps {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 10px;
+}
+
+.wizard-nav--steps .wizard-button {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.wizard-nav--no-back .wizard-nav__continue,
+.wizard-nav--has-save .wizard-nav__save {
+  grid-column: 1 / -1;
+}
+
+.wizard-nav--has-save .wizard-nav__save {
+  order: -1;
+}
+
+@media (min-width: 480px) {
+  .wizard-nav--has-save.wizard-nav--has-back {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .wizard-nav--has-save .wizard-nav__save {
+    grid-column: auto;
+    order: 0;
+  }
+
+  .wizard-nav--has-save.wizard-nav--no-back .wizard-nav__continue {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 360px) {
+  .wizard-nav--steps .wizard-button {
+    gap: 6px;
+    padding-inline: 8px;
+    font-size: 0.9rem;
+  }
+}
+
+/* 320px phones: "View summary" next to an arrow does not fit in half a row, so the arrows go
+   (the labels carry the meaning) and every button stays one line at the same height. */
+@media (max-width: 340px) {
+  .wizard-nav--steps .wizard-button .icon {
+    display: none;
+  }
+}
+
+/* Flour step: the live blend summary is a labelled line below the inputs. */
+.flour-blend-summary {
+  display: grid;
+  gap: 2px;
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 14px;
+  background: var(--color-surface-muted);
+}
+
+.flour-blend-summary__label {
+  color: var(--color-text-subtle);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.flour-blend-summary strong {
+  color: var(--color-text);
+  font-size: 1rem;
+}
+
+/* Summary input cards: tinted icon chips. */
+.recipe-results .summary-group__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-right: 8px;
+  border-radius: 9px;
+  background: var(--color-tint-primary);
+  color: var(--color-primary-text);
+}
+
+.recipe-results .summary-group__icon .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.recipe-results .summary-group__icon--water {
+  background: var(--color-help-bg);
+  color: var(--color-help);
+}
+
+.recipe-results .summary-group__icon--time {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+/* Ingredient breakdown: levain panel, then the dough list. Every row is icon | name | amount. */
+.ingredient-breakdown {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.ingredient-group {
+  display: grid;
+  gap: 4px;
+}
+
+.ingredient-group--levain {
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--color-border-soft);
+  border-left: 3px solid var(--color-success-border);
+  border-radius: 16px;
+  background: var(--color-surface-muted);
+}
+
+.ingredient-group__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ingredient-group__icon,
+.ingredient-row__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: var(--color-success-bg-soft);
+  color: var(--color-success);
+}
+
+.ingredient-group__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+}
+
+.ingredient-group__icon--dough {
+  background: var(--color-tint-primary);
+  color: var(--color-primary-text);
+}
+
+.ingredient-group__icon .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.ingredient-row__icon .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.ingredient-group__heading {
+  display: grid;
+  flex: 1;
+  gap: 1px;
+  min-width: 0;
+}
+
+.ingredient-group__heading h3,
+.ingredient-feeding__header h4 {
+  margin: 0;
+}
+
+.ingredient-group__heading h3 {
+  color: var(--color-text);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.ingredient-group__heading p {
+  color: var(--color-text-muted);
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.ingredient-group__total {
+  display: grid;
+  flex-shrink: 0;
+  justify-items: end;
+  margin: 0;
+  text-align: right;
+}
+
+.ingredient-group__total strong {
+  color: var(--color-text);
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ingredient-group__total span {
+  color: var(--color-text-subtle);
+  font-size: 0.78rem;
+}
+
+.ingredient-feeding {
+  display: grid;
+  gap: 2px;
+}
+
+.ingredient-feeding__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ingredient-feeding__header h4 {
+  color: var(--color-text-subtle);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ingredient-feeding__ratio {
+  padding: 2px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-primary-text);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.ingredient-rows {
+  display: grid;
+  margin: 0;
+}
+
+.ingredient-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  border-top: 1px solid var(--color-border-faint);
+}
+
+.ingredient-row:first-child {
+  border-top: 0;
+}
+
+.ingredient-row dt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: var(--color-text-body);
+  font-weight: 700;
+}
+
+.ingredient-row dd {
+  flex-shrink: 0;
+  margin: 0;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  text-align: right;
+}
+
+.ingredient-row__label {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.ingredient-row__label small {
+  color: var(--color-text-subtle);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.ingredient-row--total dt,
+.ingredient-row--total dd {
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+}
+
+.ingredient-row--total dt {
+  padding-left: 38px;
+}
+
+.ingredient-row__icon--flour {
+  background: var(--color-tint-primary);
+  color: var(--color-primary-text);
+}
+
+.ingredient-row__icon--water {
+  background: var(--color-help-bg);
+  color: var(--color-help);
+}
+
+.ingredient-row__icon--salt {
+  background: var(--color-surface-neutral);
+  color: var(--color-text-neutral);
+}
+
+.ingredient-group__meta {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.ingredient-group__meta .icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  color: var(--color-success);
+}
+
+.ingredient-breakdown__totals {
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border-faint);
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+/* Recipe assessment: one-line verdict, details behind a disclosure. */
+.recipe-assessment .assessment-verdict {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+.assessment-verdict__icon,
+.assessment-section__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.assessment-verdict__icon .icon,
+.assessment-section__icon .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.assessment-verdict__icon {
+  margin-top: 1px;
+}
+
+.assessment-verdict__text {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.assessment-verdict__level {
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.recipe-assessment .assessment-verdict--risk {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.recipe-assessment .assessment-verdict--warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.recipe-assessment .assessment-verdict--positive {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.recipe-assessment .assessment-verdict--info {
+  background: var(--color-surface-neutral);
+  color: var(--color-text-neutral);
+}
+
+.assessment-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: var(--touch-target-min);
+  margin-top: 4px;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: var(--color-primary-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 800;
+  text-align: left;
+}
+
+.assessment-toggle:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.assessment-toggle__chevron {
+  display: inline-flex;
+}
+
+.assessment-toggle__chevron--open {
+  transform: rotate(180deg);
+}
+
+.assessment-details {
+  display: grid;
+  gap: 4px;
+}
+
+.recipe-assessment .assessment-details__intro {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.recipe-assessment .assessment-details ul {
+  margin-top: 10px;
+}
+
+.assessment-section strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ==========================================================================
+   Home / Saved split (owner feedback 10). Everything for the Saved tab, the
+   compact Home shortcut, the three-tab bottom nav and the recipe-view delete
+   lives in this one block. Colours are tokens only.
+   ========================================================================== */
+
+/* Bottom nav: Home | Saved | History. */
+.app-bottom-nav {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* Saved tab. */
+.saved-recipes__search {
+  margin: 16px 0 0;
+}
+
+.saved-recipes__empty-state {
+  display: grid;
+  gap: 16px;
+  justify-items: start;
+}
+
+.saved-recipes__empty-state .saved-recipes__empty {
+  margin: 0;
+}
+
+/* Home shortcut: a short card, not the full list. */
+.saved-shortcut__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.saved-shortcut__header .page-shell__secondary-link {
+  flex-shrink: 0;
+  align-self: center;
+  white-space: nowrap;
+}
+
+.saved-shortcut__list {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.saved-shortcut-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--touch-target-min);
+  padding: 8px 8px 8px 12px;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 14px;
+  background: var(--color-surface-muted);
+}
+
+.saved-shortcut-row__open {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+  min-height: var(--touch-target-min);
+  align-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.saved-shortcut-row__open:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.saved-shortcut-row__open strong,
+.saved-shortcut-row__meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saved-shortcut-row__open strong {
+  color: var(--color-text);
+}
+
+.saved-shortcut-row__open:hover strong,
+.saved-shortcut-row__open:focus-visible strong {
+  color: var(--color-primary-text);
+}
+
+.saved-shortcut-row__meta {
+  color: var(--color-text-subtle);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.saved-shortcut-row__bake {
+  /* The mobile .wizard-button rule makes buttons full width; this one sits beside the name. */
+  flex: 0 0 auto;
+  width: auto;
+  min-height: var(--touch-target-min);
+  padding: 8px 12px;
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+/* Recipe view: delete is the last thing on the page, quiet and clearly apart from Start baking. */
+.recipe-view__danger-zone {
+  display: flex;
+  justify-content: center;
+  margin: 28px 0 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border-soft);
+}
+
+.recipe-view__delete .icon {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.recipe-view__delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--touch-target-min);
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--color-danger);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.recipe-view__delete:hover {
+  background: var(--color-danger-bg);
+}
+
+.recipe-view__delete:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Saved cards no longer have a bin beside Duplicate, so the mobile button grid is a single column. */
+.saved-recipe-card__buttons {
+  grid-template-columns: 1fr;
+}
+
+/* ==========================================================================
+   Bake history list rows and photo editing on the bake detail screen.
+   Row: square thumbnail (or loaf placeholder) on the left, then name, date and
+   assessment, then one muted recipe line (hydration, loaf size, flour).
+   Colour tokens only, so the dark theme picks it up. Rows stay at least 44px tall.
+   ========================================================================== */
+.bake-history__entry-open {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  width: 100%;
+}
+
+.bake-history__entry-text {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.bake-history__thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 12px;
+  background: var(--color-surface-muted);
+  color: var(--color-text-subtle);
+}
+
+.bake-history__thumb-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bake-history__thumb-placeholder {
+  width: 28px;
+  height: 28px;
+}
+
+/* Muted line under the date: at most two lines, so a long flour blend cannot stretch the row. */
+.bake-history__recipe-line {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--color-text-subtle);
+  font-size: 0.8rem;
+  line-height: 1.35;
+  text-align: left;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.bake-history-detail__photo {
+  display: grid;
+  gap: 12px;
+}
+
+.bake-history-detail__photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bake-history-detail__photo-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+}
+
+.bake-history-detail__photo-message {
+  margin: 0;
+  color: var(--color-text-subtle);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.bake-history-detail__photo .bake-history-detail__section-title {
+  margin: 0;
 }

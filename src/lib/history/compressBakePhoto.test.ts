@@ -7,6 +7,9 @@ import {
   BAKE_PHOTO_MAX_BYTES,
   BAKE_PHOTO_MAX_DIMENSION,
   BAKE_PHOTO_START_QUALITY,
+  BAKE_PHOTO_THUMBNAIL_MAX_BYTES,
+  BAKE_PHOTO_THUMBNAIL_MAX_DIMENSION,
+  BAKE_PHOTO_THUMBNAIL_START_QUALITY,
   buildQualityLadder,
   encodeWithinBudget,
 } from './compressBakePhoto.ts';
@@ -87,4 +90,26 @@ test('throws when no attempt fits the budget', async () => {
     encodeWithinBudget({ width: 1280, height: 960 }, fakeEncoder(10_000_000, 1280 * 960, [])),
     /still too large/,
   );
+});
+
+test('the thumbnail is about 320px on the longest side and under about 20 KB', () => {
+  assert.equal(BAKE_PHOTO_THUMBNAIL_MAX_DIMENSION, 320);
+  assert.ok(BAKE_PHOTO_THUMBNAIL_MAX_BYTES <= 20_000);
+  assert.ok(BAKE_PHOTO_THUMBNAIL_MAX_BYTES < BAKE_PHOTO_MAX_BYTES / 10);
+  assert.deepEqual(computeScaledDimensions(1280, 960, BAKE_PHOTO_THUMBNAIL_MAX_DIMENSION), {
+    width: 320,
+    height: 240,
+  });
+});
+
+test('the thumbnail budget lowers quality, then shrinks, to get under 20 KB', async () => {
+  const attempts: Attempt[] = [];
+  const result = await encodeWithinBudget(
+    { width: 320, height: 240 },
+    fakeEncoder(60_000, 320 * 240, attempts),
+    { maxBytes: BAKE_PHOTO_THUMBNAIL_MAX_BYTES, startQuality: BAKE_PHOTO_THUMBNAIL_START_QUALITY },
+  );
+
+  assert.ok(result.size <= BAKE_PHOTO_THUMBNAIL_MAX_BYTES);
+  assert.ok(attempts.length > 1);
 });

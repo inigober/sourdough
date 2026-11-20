@@ -42,7 +42,8 @@ src/
   features/       One folder per screen area
     recipe-builder/  Wizard, summary, routing glue, bake-start flow
     schedule-builder/  Presets, timeline, customise sections
-    recipe-view/     Read-only recipe page
+    recipe-view/     Read-only recipe page (also hosts Delete recipe)
+    saved-recipes/   Saved tab list, its cards, and the compact shortcut on Home
     companion/       Bake mode, coach sheet, bake-complete dialog
     history/         History list and detail
     auth/            Sign-in modal and top bar
@@ -112,7 +113,7 @@ State is local to features. `RecipeBuilder.tsx` composes the screens and these h
 | `useAppNavigation` (in `useAppLocation.ts`) | Unsaved-navigation blocking and the leave dialog (see [Leave dialog](./leave-dialog-and-unsaved-navigation.md)) |
 | `useBakeFlow` | Start, resume, save and exit a bake, and the "When are you mixing?" request |
 | `useBakeSession` | The one active bake session and its persistence |
-| `useSavedRecipes` | Saved recipes, locally or in Supabase, and import after sign-in |
+| `useSavedRecipes` | Saved recipes, locally or in Supabase, and import after sign-in; `isSavedRecipesLoading` while a signed-in list loads. Feeds both Home and the Saved tab |
 | `useBakeHistory` | History list and detail, locally or in Supabase, and import after sign-in |
 | `useScheduleBuilder` | Timeline, advice, presets, and export for the schedule screen |
 | `useAuthPrompt` | When the "Sync your recipes" offer may appear |
@@ -128,7 +129,7 @@ Routes are defined in two places that must stay in sync:
 - `features/recipe-builder/appRoutes.ts`: path helpers, `parseAppRoute`, `isKnownAppPath`, and the unsaved-navigation rule.
 - The `createBrowserRouter` list in `src/app/App.tsx`.
 
-The paths are `/`, `/history`, `/history/:bakeId`, `/recipe/:recipeId`, `/build/:step` (wizard steps, `summary`, `schedule`), and `/bake`. Unknown paths redirect home. All of them render `RecipeBuilder`, which picks the screen from the parsed route.
+The paths are `/`, `/saved`, `/history`, `/history/:bakeId`, `/recipe/:recipeId`, `/build/:step` (wizard steps, `summary`, `schedule`), and `/bake`. Unknown paths redirect home. All of them render `RecipeBuilder`, which picks the screen from the parsed route.
 
 ## Storage
 

@@ -12,6 +12,12 @@ import { APP_ROUTES, isBuilderPath, shouldBlockUnsavedNavigation, type AppRouteN
 import type { RecipeBuilderStep } from './recipeBuilderSteps.ts';
 import type { SaveDialogSource } from './types.ts';
 
+const MAIN_TAB_PATHS: Record<AppMainTab, string> = {
+  home: APP_ROUTES.home,
+  saved: APP_ROUTES.saved,
+  history: APP_ROUTES.history,
+};
+
 type WizardSnapshot = {
   currentStep: RecipeBuilderStep;
   recipeInput: RecipeInput;
@@ -221,12 +227,14 @@ export function useAppNavigation({
 
   const handleMainTabChange = useCallback(
     (tab: AppMainTab): void => {
-      const targetPath = tab === 'history' ? APP_ROUTES.history : APP_ROUTES.home;
+      const targetPath = MAIN_TAB_PATHS[tab];
       const navigationAllowed =
         !isDirty || location.phase === 'companion' || pathname === targetPath;
 
       if (tab === 'history') {
         routes.toHistory();
+      } else if (tab === 'saved') {
+        routes.toSaved();
       } else {
         routes.toHome();
       }

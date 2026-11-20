@@ -7,7 +7,9 @@ import type { RecipeInput } from '../recipe/types.ts';
 import { buildTimeline } from './buildTimeline.ts';
 import { createDefaultScheduleInput } from './defaults.ts';
 import {
+  CUSTOM_PLAN_OPTION,
   findMatchingSchedulePresetId,
+  getSelectedPlanOptionId,
   getSchedulePresetChanges,
   getSchedulePresetPatch,
   hasEditedScheduleValues,
@@ -240,4 +242,19 @@ test('changes list exactly the fields a preset would overwrite', () => {
 test('legacy schedules with a saved calendar date still match by process fields', () => {
   const legacy = { ...applyPreset('weekendDeepFerment', defaultRecipeInput), mixDate: '2025-08-18' };
   assert.equal(findMatchingSchedulePresetId(legacy, defaultRecipeInput), 'weekendDeepFerment');
+});
+
+test('the selected plan option is the matching preset, or Custom', () => {
+  assert.equal(getSelectedPlanOptionId('sameDay', false), 'sameDay');
+  // No preset matches: Custom.
+  assert.equal(getSelectedPlanOptionId(null, false), 'custom');
+  // Chosen on purpose (or editing) stays Custom even when the values equal a preset.
+  assert.equal(getSelectedPlanOptionId('sameDay', true), 'custom');
+  assert.equal(getSelectedPlanOptionId(null, true), 'custom');
+});
+
+test('Custom is not a preset and has copy for the picker', () => {
+  assert.equal(presetIds.includes('custom' as SchedulePresetId), false);
+  assert.ok(CUSTOM_PLAN_OPTION.label.length > 0);
+  assert.ok(CUSTOM_PLAN_OPTION.description.length > 0);
 });

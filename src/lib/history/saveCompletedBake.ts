@@ -1,6 +1,12 @@
 import type { BakeCompleteSaveInput, BakeSession } from '../companion/types.ts';
-import { savePhotoForNewBake, type BakePhotoOutcome, type UploadRemoteBakePhoto } from './bakePhotos.ts';
+import {
+  savePhotoForBake,
+  type BakePhotoOutcome,
+  type MakeBakePhotoThumbnail,
+  type UploadRemoteBakePhoto,
+} from './bakePhotos.ts';
 import { buildBakeHistoryStepsFromSession } from './buildBakeHistorySteps.ts';
+import { createBakePhotoThumbnail } from './compressBakePhoto.ts';
 import { getDefaultBakePhotoStore, type BakePhotoStore } from './localBakePhotoStorage.ts';
 import { createLocalBakeHistorySession } from './localBakeHistoryStorage.ts';
 import { uploadRemoteBakePhoto } from './remoteBakePhotoStorage.ts';
@@ -28,6 +34,8 @@ export type SaveCompletedBakeOptions = {
   photo?: Blob;
   photoStore?: BakePhotoStore;
   uploadRemotePhoto?: UploadRemoteBakePhoto;
+  /** Makes the small list thumbnail; defaults to the canvas-based one. Tests pass a fake. */
+  makeThumbnail?: MakeBakePhotoThumbnail;
 };
 
 export function buildCompletedBakeHistoryInput(
@@ -66,12 +74,13 @@ export async function saveCompletedBake(
     : createLocalBakeHistorySession(historyInput, options.storage);
 
   const photo = options.photo
-    ? await savePhotoForNewBake({
+    ? await savePhotoForBake({
         photo: options.photo,
         bakeId: savedBake.id,
         userId,
         store: options.photoStore ?? getDefaultBakePhotoStore(),
         uploadRemote: options.uploadRemotePhoto ?? uploadRemoteBakePhoto,
+        makeThumbnail: options.makeThumbnail ?? createBakePhotoThumbnail,
       })
     : 'none';
 

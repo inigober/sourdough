@@ -43,7 +43,7 @@ export function FlourSection({
   return (
     <section className="card">
       <SectionHeading
-        title={formatFlourBlendSummary(recipeInput.doughFlours)}
+        title={isMultiFlour ? 'Which flours are you blending?' : 'Which flour are you using?'}
         copy={
           isMultiFlour
             ? 'These flours share 100% of the total flour in your dough. Use the steppers to adjust each share.'
@@ -97,6 +97,11 @@ export function FlourSection({
           Add another flour
         </button>
       </form>
+
+      <p className="flour-blend-summary">
+        <span className="flour-blend-summary__label">Your blend</span>
+        <strong>{formatFlourBlendSummary(recipeInput.doughFlours)}</strong>
+      </p>
     </section>
   );
 }

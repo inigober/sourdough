@@ -30,7 +30,8 @@ The product prioritises clarity, trust, and learning over speed. Interaction rul
 
 | Route | Screen |
 | --- | --- |
-| `/` | Home: templates, saved recipes, resume cards |
+| `/` | Home: start a bake or a recipe, resume cards, saved-recipes shortcut, templates |
+| `/saved` | Saved tab: the full list of saved recipes |
 | `/build/dough-size`, `/build/flour`, `/build/recipe-targets`, `/build/fermentation` | Recipe wizard steps |
 | `/build/summary` | Ingredient summary and assessment |
 | `/build/schedule` | Schedule builder |
@@ -38,7 +39,7 @@ The product prioritises clarity, trust, and learning over speed. Interaction rul
 | `/bake` | Bake mode |
 | `/history`, `/history/:id` | Bake history list and detail |
 
-Home and History are the two bottom-nav tabs. Routes live in `features/recipe-builder/appRoutes.ts`.
+Home, Saved and History are the three bottom-nav tabs. Routes live in `features/recipe-builder/appRoutes.ts`.
 
 ## Screen Flow
 
@@ -50,8 +51,10 @@ Content, top to bottom:
 
 - Title "Plan your sourdough bake" with the sign-in control, a one-line promise ("Hour by hour, with alerts when it is time to act"), and **New recipe**.
 - **Continue where you left off** (an unfinished builder draft) and **Resume baking** (an unfinished bake). When either card is showing it owns the filled primary button and New recipe becomes secondary.
-- **Saved recipes** (shown first when any exist): each card shows the name, the mix day ("Mix on bake day −1"), the updated date, and "Baked Nx · last: Great loaf" once the recipe has history. Tapping the card opens the recipe view. Start baking, Duplicate, and a bin icon (delete, with confirmation) sit on the card.
-- **Start from a template**: six templates with a photo. Shown before saved recipes for a first-time user, after them for a returning one.
+- **Saved recipes shortcut** (only when the baker has saved recipes): a compact card with the count, a **See all** link to the Saved tab, and the three most recently updated recipes as slim rows. A row shows the name and one meta line ("Updated 19 Nov", or "Baked 3x · last: Great loaf" once the recipe has history; a recipe without a schedule says "No schedule yet" first). Tapping the row opens the recipe view; **Start baking** on the row opens the same "When are you mixing?" dialog as everywhere else. With no saved recipes there is no card at all, so a first-time baker sees only New recipe and the templates.
+- **Start from a template**: six templates with a photo, below the shortcut.
+
+Home stays short on purpose: a long saved list lives on the Saved tab, never here.
 
 There is no sign-in modal on launch. After a recipe is saved and the baker is back on Home, the app offers "Sync your recipes" once; dismissing it is remembered. Explicit sign-in taps always open it. Without Supabase configured, nothing about accounts is offered.
 
@@ -65,7 +68,7 @@ Inputs: final dough weight (default 900 g, steppers of 50 g) and number of loave
 
 Purpose: define the flour context for calculation and assessment.
 
-The step shows the total dough weight and the estimated total flour, then one row per dough flour (flour type plus a percent and gram stepper). "Add another flour" adds a whole wheat entry; the shares always total 100% and rebalance as one changes. Each flour has an info toggle.
+The step title is a question ("Which flour are you using?", or "Which flours are you blending?" with more than one flour); the live blend summary (for example "70% Wheat Type 1050 + 30% Whole rye") is a labelled "Your blend" line below the inputs. The step shows the total dough weight and the estimated total flour, then one row per dough flour (flour type plus a percent and gram stepper). "Add another flour" adds a whole wheat entry; the shares always total 100% and rebalance as one changes. Each flour has an info toggle.
 
 ### 4. Hydration And Salt
 
@@ -82,8 +85,10 @@ Inputs: target bulk fermentation time, room temperature, levain activity, levain
 Purpose: give the user control, then show the result.
 
 - Four cards summarise the inputs; tapping one opens that wizard step, and a Save button in the wizard footer returns to the summary.
-- **Ingredient list**, **Formula breakdown**, and the **Assessment** update immediately. If the inputs have a blocking error the summary says "Formula unavailable".
-- Footer: **Save recipe** (or "Update recipe") and **Build schedule**.
+- The **Ingredients** card, **Formula breakdown**, and the **Assessment** update immediately. If the inputs have a blocking error the summary says "Formula unavailable".
+- The Ingredients card has two groups, each row icon | name | amount: **Levain** (amount that goes into the dough, then the build as starter, flour and water with its ratio, plus a refresh feeding for a fridge starter) and **Added to the dough** (flour or flours, water, salt, and the levain row). The levain build uses the schedule defaults until a schedule is built.
+- The **Assessment** is one line (a level word, a check or warning icon, and the overall-shape message) with a "Show details" disclosure, collapsed by default. The details hold every section, including the reminder to confirm readiness from dough signs.
+- Footer, always visible while scrolling (the Save recipe link sits above the main button): **Save recipe** (or "Update recipe") and **Build schedule**.
 
 The assessment sections are listed in [Calculation and assessment](./calculation-and-assessment.md).
 
@@ -94,21 +99,21 @@ Decision (owner, from the UX review in [ux-review-commercial-viability.md](./ux-
 Layout, top to bottom:
 
 1. A one-line summary of the plan ("Mix on bake day −1 and bake on bake day...") and a reminder that the real date is chosen when baking starts.
-2. **Choose a plan**: three presets, each with a one-sentence plain-language description.
+2. **Choose a plan**: three presets and a fourth option, **Custom**, each with a one-sentence plain-language description (one radio group, arrow keys move between the four).
    - *Simple overnight*: mix and fold during the day, about 14 hours in the fridge, bake at 08:00 the next morning. Stretch-and-folds only; autolyse 45 minutes when recommended.
    - *Same day*: start at 07:00, proof at room temperature, bake the same evening. Stretch-and-folds only; autolyse 30 minutes when recommended.
    - *Weekend deep ferment*: about 20 hours in the fridge, bake at 12:00 the next day. Full fold plan for the dough's hydration, always with a 60-minute autolyse.
-3. **Bake schedule**: the resulting timeline directly beneath the presets, updating as soon as a plan is chosen.
-4. **Customise** (collapsed): the individual fields, grouped into collapsed sections (Starter prep, Start time and mixing, Folding and shaping, Proofing, Baking). Jargon fields carry a visible one-line explanation (for example "Coil fold: a gentle fold done in the bowl"). The Proofing section shows the cold retard length and an assessment of it.
-5. **Export** (collapsed): copy ingredients, copy the schedule, or copy the full recipe as JSON.
-6. Footer: Back, **Save recipe**, and **Start baking**.
+   - *Custom*: shown only while Custom is selected, as the next block under the picker: the individual fields, grouped into collapsed sections (Starter prep, Start time and mixing, Folding and shaping, Proofing, Baking). Jargon fields carry a visible one-line explanation (for example "Coil fold: a gentle fold done in the bowl"). The Proofing section shows the cold retard length and an assessment of it. Custom is selected when the values match no preset, when the baker taps it, or as soon as they edit any value (so the fields never disappear mid-edit, even if the values happen to equal a preset). Picking a preset hides the groups again.
+3. **Bake schedule**: the resulting timeline, directly under the picker (or under the Custom groups, so a baker who has just edited sees the effect right below), updating as soon as a plan is chosen or a value changes.
+4. **Export**: a small, quiet text button. Tapping it reveals three text actions: copy ingredients, copy the schedule, or copy the full recipe as JSON.
+5. Footer: Back, **Save recipe**, and **Start baking**.
 
 How presets behave (`lib/schedule/presets.ts`):
 
 - A preset sets only the shape of the day: start time, autolyse, mixing rests, folds, pre-shape, and cold vs room-temperature proofing. Oven method and temperatures, starter prep and the (absent) calendar date are never touched.
 - Cold presets keep the bake time and fridge time fixed and work out the start time from the recipe's bulk length, so a 4-hour and a 10-hour bulk both get a sensible overnight.
-- Nothing about the chosen preset is stored. The builder compares the current values with each preset: a match shows that plan as selected ("Current plan: Simple overnight."), anything else shows **Custom**. Saved recipes and bake sessions keep exactly the shape they have.
-- Opening the builder never changes existing values. Choosing a preset over values the user has edited asks "Replace your settings?" and lists what will be reset (up to five changes, then "and N more").
+- Nothing about the chosen preset is stored. The builder compares the current values with each preset: a match shows that plan as selected ("Current plan: Simple overnight."), anything else shows **Custom**; a baker who chose Custom or edited a value stays on Custom. Saved recipes and bake sessions keep exactly the shape they have.
+- Opening the builder never changes existing values. Choosing a preset over values the user has edited asks "Replace your settings?" and lists what will be reset (up to five changes, then "and N more"); cancelling keeps Custom and every value. Choosing Custom itself never changes a value.
 
 Defaults when a schedule is first created (`lib/schedule/defaults.ts`): start time 09:00, cold proof with an 08:00 bake, Dutch oven, starter prep on (starter from the fridge), autolyse on from 72% hydration. Fold counts follow hydration, and bake times and temperatures scale with dough weight. These rescale when the dough weight or loaf count changes.
 
@@ -118,7 +123,7 @@ Not built yet: tapping a timeline step to edit it.
 
 ### 8. Recipe View
 
-Tapping a saved recipe opens a read-only page with the ingredients, starter and levain amounts, and the schedule by bake day, with Start baking and an Edit recipe action. See [Recipe view and relative days](./recipe-view-and-relative-days.md).
+Tapping a saved recipe opens a read-only page with the ingredients, starter and levain amounts, and the schedule by bake day, with Start baking and an Edit recipe action. **Delete recipe** (bin icon, danger colour, no filled button) is the last item on the page, apart from the main actions, and asks for confirmation before removing the recipe; afterwards the baker lands on the Saved tab. Delete is deliberately not on the list cards, where it used to sit one tap from Duplicate. See [Recipe view and relative days](./recipe-view-and-relative-days.md).
 
 ### 9. Starting A Bake
 
@@ -134,12 +139,18 @@ Layout, top to bottom:
 
 - "Step N of M", and a collapsed **About this bake** (mix day, bake day, coach hint).
 - Notices, only when relevant: the web-build banner, a schedule drift note ("Remaining schedule shifted by +20m based on actual timing"), the native timer permission notice, and a test-timer note when a test override is set.
-- **Previous** step card, then the **Current step** card: time range, step name (large), a coach button, "Starts in 2h 10m" for a future step, the step detail, **Start timer** and an edit pen for steps whose timing can be adjusted, the timer (large, tabular digits, "Time's up" at zero, restart button), and "Next up: X at 17:15 (in 2h 10m)".
-- **Full schedule**: every step with its time and, for future steps, "Starts in ...". Tapping a row reveals **Jump to this step**.
+- **Previous** step card, then the **Current step** card: time range, step name (large), a coach button, "Starts in 2h 10m" for a future step, the step detail, an **Amounts** disclosure (see below), **Start timer** and an edit pen for steps whose timing can be adjusted, the timer (large, tabular digits, "Time's up" at zero, restart button), and "Next up: X at 17:15 (in 2h 10m)".
+- **Full schedule**: every step with its time and, for future steps, "Starts in ...". The current row is filled, with padding all round and the same text position as every other row. Tapping another row outlines it and reveals **Jump to this step**.
 - Footer: **Previous** and **Next step** (**Finish baking** on the last step). **Exit bake mode** keeps the session.
 
 Behaviours:
 
+- **Amounts** (`getStepAmounts` in `lib/companion/stepAmounts.ts`): the steps where you weigh ingredients have a small "Amounts" button with a chevron (`aria-expanded`) on the Current step card. It is collapsed on every step and opens on tap; nothing is remembered between steps. Other steps show no button. What each step lists:
+  - **Refresh starter**: seed starter, flour, water, total (the 1:3:3 feeding).
+  - **Build levain**: seed starter, flour, water, total, plus "Includes N% extra for scrape and transfer". Uses the same feeding ratio and buffer as the recipe view.
+  - **Autolyse**: each flour of the blend by name, and the added water.
+  - **Mix in levain / Mix in salt**: the levain or the salt. With no autolyse, the first mix step also lists the flour and water, because nothing earlier combines them.
+  - If the recipe cannot be calculated, no amounts are shown. Because the grams now live in the disclosure, the step's one-line detail no longer repeats them in bake mode (the schedule screens still show them).
 - **Screen stays awake** while bake mode is open: the web Screen Wake Lock API where supported, and on native iOS the plugin's `setKeepAwake` turns off the idle timer. Auto-lock comes back when bake mode closes. The native path has not been tested on a physical device. See [Native iOS bake timers](../engineering/native-ios-bake-timers.md).
 - **Early start confirm**: starting a timer more than 30 minutes before the step's planned start asks "Start this step early?" and, if confirmed, shifts the whole remaining plan earlier so the Full schedule stays in order. Starting within 30 minutes of plan does not shift it. Starting late always shifts the plan later.
 - **Skip confirm**: jumping forward more than one step asks "Skip N steps?" (the running timer stops and the steps in between are logged as skipped). Jumping to the next step or backwards does not ask.
@@ -164,13 +175,17 @@ The sparkles button opens an AI baking coach for the current step (a Supabase ed
 
 Finishing the last step opens "Bake complete" with an optional loaf assessment (Great loaf, OK, Needs work) notes and an optional loaf photo (compressed on the device). **Save bake** saves it and only then clears the bake session. Closing the dialog (X, Escape, backdrop) keeps the bake so it shows as "Resume baking" on Home. **Don't save** asks for confirmation and is the only path that deletes an unsaved bake. See [Bake history](./bake-history.md).
 
+### 11b. Saved
+
+The full list of saved recipes, newest updated first. Each card shows the name, the mix day, the updated date, "Baked Nx · last: …" when there is history, **Start baking** (when the recipe has a schedule) and **Duplicate**. A search box (by name) appears only when there are more than eight recipes. While a signed-in baker's list loads it says "Loading your recipes…"; a load failure shows the message with **Try again**; with no recipes it explains how to save one and offers **New recipe**. The list data and the "baked Nx" stats come from the same hooks as Home, so both always agree.
+
 ### 12. History
 
 A searchable list of completed bakes (search by recipe name or notes, filter by assessment) with a detail view showing notes, the assessment, the recipe snapshot, the planned schedule, step timings with drift, **Bake again**, and Delete. History is local first, and signing in uploads it. See [Bake history](./bake-history.md).
 
 ## Navigation
 
-- The wizard has a sticky header with progress and a sticky footer with Back and Continue, so both stay reachable. The last wizard step's button reads "View summary". The app follows the system light or dark setting, respects reduced motion, and keeps tap targets at least 44px (see [UI/UX practices](./ui-ux-practices.md)).
+- The wizard has a sticky header with progress and a sticky footer with Back and Continue, so both stay reachable. Footer buttons share one height and equal columns. When editing from the summary there are three: Save is the only primary button and sits on its own row above Back and Continue on narrow screens (one row from 480px); on 320px phones the arrow icons are dropped so labels stay on one line. The last wizard step's button reads "View summary". The app follows the system light or dark setting, respects reduced motion, and keeps tap targets at least 44px (see [UI/UX practices](./ui-ux-practices.md)).
 - Entered values are preserved when moving between steps and across reloads (draft).
 - Leaving a dirty recipe asks to save or discard (see [Leave dialog and unsaved navigation](../engineering/leave-dialog-and-unsaved-navigation.md)). Bake mode is never blocked.
 - Bake timers can reopen the app on bake mode through the `sourdough://bake` link.

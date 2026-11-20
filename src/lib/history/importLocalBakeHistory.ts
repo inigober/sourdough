@@ -1,4 +1,8 @@
-import { moveLocalPhotoToAccount, type UploadRemoteBakePhoto } from './bakePhotos.ts';
+import {
+  moveLocalPhotoToAccount,
+  type MakeBakePhotoThumbnail,
+  type UploadRemoteBakePhoto,
+} from './bakePhotos.ts';
 import type { BakePhotoStore } from './localBakePhotoStorage.ts';
 import {
   deleteLocalBakeHistorySession,
@@ -16,7 +20,11 @@ export type ImportLocalBakeHistoryOptions = {
   /** Resolves with the created bake (its `id` is needed to attach a photo). */
   createRemote: (userId: string, input: CreateBakeHistorySessionInput) => Promise<{ id: string } | void>;
   /** When given, loaf photos kept on this device are moved to the account along with their bakes. */
-  photos?: { store: BakePhotoStore; uploadRemote: UploadRemoteBakePhoto };
+  photos?: {
+    store: BakePhotoStore;
+    uploadRemote: UploadRemoteBakePhoto;
+    makeThumbnail?: MakeBakePhotoThumbnail;
+  };
 };
 
 /**
@@ -81,6 +89,7 @@ export async function importLocalBakeHistoryIfNeeded(
         remoteHasPhoto: Boolean(existingRemote?.photoPath),
         store: options.photos.store,
         uploadRemote: options.photos.uploadRemote,
+        makeThumbnail: options.photos.makeThumbnail,
       });
     }
 

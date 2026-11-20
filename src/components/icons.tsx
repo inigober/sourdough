@@ -289,3 +289,45 @@ export function FilterIcon({ className }: IconProps) {
     </Icon>
   );
 }
+
+export function JarIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <path d="M7.25 4.5h5.5M7.75 4.5v1.25M12.25 4.5v1.25" {...stroke} strokeWidth={1.35} />
+      <path
+        d="M6.25 7.25a1 1 0 0 1 1-1h5.5a1 1 0 0 1 1 1v7.5a1.25 1.25 0 0 1-1.25 1.25h-5a1.25 1.25 0 0 1-1.25-1.25v-7.5Z"
+        {...stroke}
+        strokeWidth={1.35}
+      />
+      <path d="M8.25 11.25h.01M11 12.75h.01M10 9.5h.01" {...stroke} strokeWidth={2} />
+    </Icon>
+  );
+}
+
+export function SaltIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <path d="M7.5 4.5h5l1.25 2.25h-7.5L7.5 4.5Z" {...stroke} strokeWidth={1.35} />
+      <path d="M6.75 6.75h6.5l-.5 8.25a1 1 0 0 1-1 .9h-3.5a1 1 0 0 1-1-.9l-.5-8.25Z" {...stroke} strokeWidth={1.35} />
+      <path d="M9 9.25h.01M11 9.25h.01M10 11.5h.01" {...stroke} strokeWidth={2} />
+    </Icon>
+  );
+}
+
+export function AlertIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <path d="M10 4.75 16 15H4l6-10.25Z" {...stroke} strokeWidth={1.35} />
+      <path d="M10 8.75v2.75" {...stroke} strokeWidth={1.75} />
+      <path d="M10 13.25h.01" {...stroke} strokeWidth={2} />
+    </Icon>
+  );
+}
+
+export function BookmarkIcon({ className }: IconProps) {
+  return (
+    <Icon className={className}>
+      <path d="M5.5 3.5h9a.5.5 0 0 1 .5.5v12.5l-5-3.5-5 3.5V4a.5.5 0 0 1 .5-.5Z" {...stroke} />
+    </Icon>
+  );
+}

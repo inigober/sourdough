@@ -1,6 +1,7 @@
 import type { RecipeInput } from '../recipe/types.ts';
 import { normalizeScheduleInput } from '../schedule/normalizeScheduleInput.ts';
 import type { ScheduleInput } from '../schedule/types.ts';
+import { pickBakeRecipeFacts } from './bakeSummaryLine.ts';
 import type {
   BakeHistorySession,
   BakeHistorySessionSummary,
@@ -150,6 +151,7 @@ export function toBakeHistorySummary(session: BakeHistorySession): BakeHistorySe
     savedAt: session.savedAt,
     overallAssessment: session.overallAssessment,
     overallNotePreview: note ? truncateNotePreview(note) : undefined,
+    recipeFacts: pickBakeRecipeFacts(session.recipeInput),
   };
 }
 

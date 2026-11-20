@@ -9,6 +9,8 @@ type BakePhotoPickerProps = {
   /** True while a chosen photo is being compressed; the dialog uses it to hold back Save. */
   onBusyChange: (isBusy: boolean) => void;
   disabled?: boolean;
+  /** Heading above the picker. The bake detail screen passes its own wording. */
+  label?: string;
 };
 
 /**
@@ -16,7 +18,12 @@ type BakePhotoPickerProps = {
  * so the preview shows exactly what will be saved. The photo only lives in this component
  * until Save bake; it is not written to the bake session.
  */
-export function BakePhotoPicker({ onChange, onBusyChange, disabled = false }: BakePhotoPickerProps) {
+export function BakePhotoPicker({
+  onChange,
+  onBusyChange,
+  disabled = false,
+  label = 'Photo of your loaf (optional)',
+}: BakePhotoPickerProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isCompressing, setIsCompressing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -65,7 +72,7 @@ export function BakePhotoPicker({ onChange, onBusyChange, disabled = false }: Ba
 
   return (
     <div className="field-card bake-photo-picker">
-      <span className="field-label-row">Photo of your loaf (optional)</span>
+      <span className="field-label-row">{label}</span>
       {previewUrl ? (
         <div className="bake-photo-picker__preview">
           <img src={previewUrl} alt="Preview of your loaf photo" className="bake-photo-picker__image" />

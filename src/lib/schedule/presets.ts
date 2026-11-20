@@ -40,6 +40,27 @@ export const SCHEDULE_PRESET_INFO: readonly SchedulePresetInfo[] = [
   },
 ];
 
+/** The plan picker has the presets plus a fourth option, Custom, where every step is set by hand. */
+export type SchedulePlanOptionId = SchedulePresetId | 'custom';
+
+export const CUSTOM_PLAN_OPTION: { id: 'custom'; label: string; description: string } = {
+  id: 'custom',
+  label: 'Custom',
+  description: 'Set every step yourself: starter prep, mixing, folds, proofing and baking.',
+};
+
+/**
+ * Which plan option is selected. Custom wins when the values match no preset, and also when the
+ * baker chose Custom on purpose (or has started editing), even if the values happen to equal a
+ * preset: otherwise the fields they are typing into would disappear mid-edit.
+ */
+export function getSelectedPlanOptionId(
+  matchedPresetId: SchedulePresetId | null,
+  customChosen: boolean,
+): SchedulePlanOptionId {
+  return customChosen || matchedPresetId === null ? 'custom' : matchedPresetId;
+}
+
 type FoldPlan = 'stretchOnly' | 'full';
 
 type SchedulePresetSpec = {

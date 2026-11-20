@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useId, useState } from 'react';
 
 import { PageShell } from '../../components/PageShell.tsx';
 import { StickyFooter } from '../../components/StickyFooter.tsx';
@@ -48,12 +48,16 @@ export function ScheduleBuilderView({
 }: ScheduleBuilderViewProps) {
   const startTimeInputId = useId();
   const desiredBakeTimeInputId = useId();
+  const customPanelId = useId();
+  const exportPanelId = useId();
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   const {
     exportMessage,
-    matchedPresetId,
+    selectedOptionId,
     pendingPreset,
-    choosePreset,
+    selectPlanOption,
+    editSchedule,
     confirmPendingPreset,
     cancelPendingPreset,
     autolyseAdvice,
@@ -73,6 +77,7 @@ export function ScheduleBuilderView({
     copyIngredientList,
     copyRecipeJson,
   } = useScheduleBuilder({ recipeInput, scheduleInput, recipeName, onScheduleChange });
+  const isCustomSelected = selectedOptionId === 'custom';
 
   return (
     <PageShell
@@ -111,14 +116,16 @@ export function ScheduleBuilderView({
         </p>
       </section>
 
-      <SchedulePresetPicker selectedPresetId={matchedPresetId} onSelect={choosePreset} />
+      <SchedulePresetPicker
+        selectedOptionId={selectedOptionId}
+        onSelect={selectPlanOption}
+        customPanelId={isCustomSelected ? customPanelId : undefined}
+      />
 
-      <BakePlanTimeline steps={timeline} caption={`Times follow your start time. ${mixAndBakeSentence}`} />
-
-      <div className="schedule-customise">
-        <CollapsibleSection title="Customise" defaultOpen={false}>
+      {isCustomSelected ? (
+        <section id={customPanelId} className="card schedule-customise" aria-label="Custom plan settings">
           <p className="section-copy schedule-customise__copy">
-            Fine-tune any step. The timeline above updates as you change things, and the plan switches to Custom.
+            Fine-tune any step. The bake schedule below updates as you change things.
           </p>
 
           <CollapsibleSection title="Starter prep">
@@ -131,14 +138,14 @@ export function ScheduleBuilderView({
               <ToggleField
                 label="Include starter prep steps"
                 checked={scheduleInput.includeStarterPrep}
-                onChange={(includeStarterPrep) => onScheduleChange({ includeStarterPrep })}
+                onChange={(includeStarterPrep) => editSchedule({ includeStarterPrep })}
               />
               {scheduleInput.includeStarterPrep ? (
                 <>
                   <ToggleField
                     label="Starter was in the fridge"
                     checked={scheduleInput.starterFromFridge}
-                    onChange={(checked) => onScheduleChange({ starterFromFridge: checked })}
+                    onChange={(checked) => editSchedule({ starterFromFridge: checked })}
                   />
                   <NumberField
                     label="Levain build time"
@@ -147,7 +154,7 @@ export function ScheduleBuilderView({
                     min={3}
                     max={18}
                     step={0.5}
-                    onChange={(value) => onScheduleChange({ levainBuildHours: value })}
+                    onChange={(value) => editSchedule({ levainBuildHours: value })}
                   />
                   <p className="schedule-starter-prep__ratio" role="status">
                     Suggested feeding for a {scheduleInput.levainBuildHours}h build at{' '}
@@ -178,7 +185,7 @@ export function ScheduleBuilderView({
                   id={startTimeInputId}
                   type="time"
                   value={scheduleInput.startTime}
-                  onChange={(event) => onScheduleChange({ startTime: event.currentTarget.value })}
+                  onChange={(event) => editSchedule({ startTime: event.currentTarget.value })}
                 />
               </div>
             </form>
@@ -189,13 +196,13 @@ export function ScheduleBuilderView({
                     label="Autolyse"
                     checked={scheduleInput.autolyseEnabled}
                     info={autolyseAdvice.summary}
-                    onChange={(autolyseEnabled) => onScheduleChange({ autolyseEnabled })}
+                    onChange={(autolyseEnabled) => editSchedule({ autolyseEnabled })}
                   />
                   <ToggleField
                     label="Mix salt after levain"
                     checked={scheduleInput.saltAfterLevain}
                     info={scheduleFieldInfo.saltAfterLevain}
-                    onChange={(saltAfterLevain) => onScheduleChange({ saltAfterLevain })}
+                    onChange={(saltAfterLevain) => editSchedule({ saltAfterLevain })}
                   />
                 </div>
                 <FieldHint>{scheduleFieldHints.autolyse}</FieldHint>
@@ -207,7 +214,7 @@ export function ScheduleBuilderView({
                     min={0}
                     step={5}
                     info={autolyseTimeAdvice}
-                    onChange={(autolyseMinutes) => onScheduleChange({ autolyseMinutes })}
+                    onChange={(autolyseMinutes) => editSchedule({ autolyseMinutes })}
                   />
                 ) : null}
               </li>
@@ -221,7 +228,7 @@ export function ScheduleBuilderView({
                     min={0}
                     step={5}
                     info={scheduleFieldInfo.restAfterLevainMinutes}
-                    onChange={(restAfterLevainMinutes) => onScheduleChange({ restAfterLevainMinutes })}
+                    onChange={(restAfterLevainMinutes) => editSchedule({ restAfterLevainMinutes })}
                   />
                   <NumberField
                     label="Rest after mixing in salt"
@@ -230,7 +237,7 @@ export function ScheduleBuilderView({
                     min={0}
                     step={5}
                     info={scheduleFieldInfo.restAfterSaltMinutes}
-                    onChange={(restAfterSaltMinutes) => onScheduleChange({ restAfterSaltMinutes })}
+                    onChange={(restAfterSaltMinutes) => editSchedule({ restAfterSaltMinutes })}
                   />
                 </div>
               </li>
@@ -251,7 +258,7 @@ export function ScheduleBuilderView({
                     max={200}
                     step={5}
                     info={scheduleFieldInfo.slapAndFolds}
-                    onChange={(slapAndFolds) => onScheduleChange({ slapAndFolds })}
+                    onChange={(slapAndFolds) => editSchedule({ slapAndFolds })}
                   />
                   <NumberField
                     label="Rest after slap and folds"
@@ -260,7 +267,7 @@ export function ScheduleBuilderView({
                     min={0}
                     step={5}
                     info={scheduleFieldInfo.restAfterSlapAndFoldMinutes}
-                    onChange={(restAfterSlapAndFoldMinutes) => onScheduleChange({ restAfterSlapAndFoldMinutes })}
+                    onChange={(restAfterSlapAndFoldMinutes) => editSchedule({ restAfterSlapAndFoldMinutes })}
                   />
                 </div>
                 <FieldHint>{scheduleFieldHints.slapAndFold}</FieldHint>
@@ -274,7 +281,7 @@ export function ScheduleBuilderView({
                     max={8}
                     step={1}
                     info={scheduleFieldInfo.stretchAndFoldSets}
-                    onChange={(stretchAndFoldSets) => onScheduleChange({ stretchAndFoldSets })}
+                    onChange={(stretchAndFoldSets) => editSchedule({ stretchAndFoldSets })}
                   />
                   <NumberField
                     label="Rest between stretch and folds"
@@ -283,7 +290,7 @@ export function ScheduleBuilderView({
                     min={10}
                     step={5}
                     info={scheduleFieldInfo.stretchAndFoldRestMinutes}
-                    onChange={(stretchAndFoldRestMinutes) => onScheduleChange({ stretchAndFoldRestMinutes })}
+                    onChange={(stretchAndFoldRestMinutes) => editSchedule({ stretchAndFoldRestMinutes })}
                   />
                 </div>
                 <FieldHint>{scheduleFieldHints.stretchAndFold}</FieldHint>
@@ -297,7 +304,7 @@ export function ScheduleBuilderView({
                     max={8}
                     step={1}
                     info={scheduleFieldInfo.coilFoldSets}
-                    onChange={(coilFoldSets) => onScheduleChange({ coilFoldSets })}
+                    onChange={(coilFoldSets) => editSchedule({ coilFoldSets })}
                   />
                   <NumberField
                     label="Rest between coil folds"
@@ -306,7 +313,7 @@ export function ScheduleBuilderView({
                     min={10}
                     step={5}
                     info={scheduleFieldInfo.coilFoldRestMinutes}
-                    onChange={(coilFoldRestMinutes) => onScheduleChange({ coilFoldRestMinutes })}
+                    onChange={(coilFoldRestMinutes) => editSchedule({ coilFoldRestMinutes })}
                   />
                 </div>
                 <FieldHint>{scheduleFieldHints.coilFold}</FieldHint>
@@ -320,7 +327,7 @@ export function ScheduleBuilderView({
                     min={10}
                     step={5}
                     info={scheduleFieldInfo.preShapeMinutesBeforeBulkEnd}
-                    onChange={(preShapeMinutesBeforeBulkEnd) => onScheduleChange({ preShapeMinutesBeforeBulkEnd })}
+                    onChange={(preShapeMinutesBeforeBulkEnd) => editSchedule({ preShapeMinutesBeforeBulkEnd })}
                   />
                 </div>
                 <FieldHint>{scheduleFieldHints.preShape}</FieldHint>
@@ -344,7 +351,7 @@ export function ScheduleBuilderView({
                 value={scheduleInput.proofingStyle}
                 options={proofingStyleOptions}
                 info={proofingAdvice}
-                onChange={(proofingStyle) => onScheduleChange({ proofingStyle })}
+                onChange={(proofingStyle) => editSchedule({ proofingStyle })}
               />
               {scheduleInput.proofingStyle === 'cold' ? (
                 <>
@@ -358,7 +365,7 @@ export function ScheduleBuilderView({
                       id={desiredBakeTimeInputId}
                       type="time"
                       value={scheduleInput.desiredBakeTime}
-                      onChange={(event) => onScheduleChange({ desiredBakeTime: event.currentTarget.value })}
+                      onChange={(event) => editSchedule({ desiredBakeTime: event.currentTarget.value })}
                     />
                   </div>
                   <div
@@ -384,7 +391,7 @@ export function ScheduleBuilderView({
                   max={6}
                   step={0.25}
                   info={scheduleFieldInfo.roomProofHours}
-                  onChange={(roomProofHours) => onScheduleChange({ roomProofHours })}
+                  onChange={(roomProofHours) => editSchedule({ roomProofHours })}
                 />
               )}
             </form>
@@ -400,7 +407,7 @@ export function ScheduleBuilderView({
                 value={scheduleInput.bakeMethod}
                 options={bakeMethodOptions}
                 info={scheduleFieldInfo.bakeMethod}
-                onChange={(bakeMethod) => onScheduleChange({ bakeMethod })}
+                onChange={(bakeMethod) => editSchedule({ bakeMethod })}
               />
               <div className="field-grid field-grid--pair">
                 <NumberField
@@ -411,7 +418,7 @@ export function ScheduleBuilderView({
                   max={280}
                   step={5}
                   info={scheduleFieldInfo.openBakeTempCelsius}
-                  onChange={(openBakeTempCelsius) => onScheduleChange({ openBakeTempCelsius })}
+                  onChange={(openBakeTempCelsius) => editSchedule({ openBakeTempCelsius })}
                 />
                 <NumberField
                   label="Finish temperature"
@@ -421,7 +428,7 @@ export function ScheduleBuilderView({
                   max={250}
                   step={5}
                   info={scheduleFieldInfo.finishTempCelsius}
-                  onChange={(finishTempCelsius) => onScheduleChange({ finishTempCelsius })}
+                  onChange={(finishTempCelsius) => editSchedule({ finishTempCelsius })}
                 />
               </div>
               {scheduleInput.bakeMethod === 'dutchOven' ? (
@@ -433,7 +440,7 @@ export function ScheduleBuilderView({
                     min={10}
                     step={5}
                     info={scheduleFieldInfo.dutchOvenClosedMinutes}
-                    onChange={(dutchOvenClosedMinutes) => onScheduleChange({ dutchOvenClosedMinutes })}
+                    onChange={(dutchOvenClosedMinutes) => editSchedule({ dutchOvenClosedMinutes })}
                   />
                   <NumberField
                     label="Lid off"
@@ -442,7 +449,7 @@ export function ScheduleBuilderView({
                     min={5}
                     step={5}
                     info={scheduleFieldInfo.dutchOvenLidOffMinutes}
-                    onChange={(dutchOvenLidOffMinutes) => onScheduleChange({ dutchOvenLidOffMinutes })}
+                    onChange={(dutchOvenLidOffMinutes) => editSchedule({ dutchOvenLidOffMinutes })}
                   />
                   <NumberField
                     label="Bake out of Dutch oven"
@@ -451,7 +458,7 @@ export function ScheduleBuilderView({
                     min={3}
                     step={1}
                     info={scheduleFieldInfo.dutchOvenOutOfPotMinutes}
-                    onChange={(dutchOvenOutOfPotMinutes) => onScheduleChange({ dutchOvenOutOfPotMinutes })}
+                    onChange={(dutchOvenOutOfPotMinutes) => editSchedule({ dutchOvenOutOfPotMinutes })}
                   />
                 </div>
               ) : (
@@ -463,7 +470,7 @@ export function ScheduleBuilderView({
                     min={10}
                     step={5}
                     info={scheduleFieldInfo.openBakeMinutes}
-                    onChange={(openBakeMinutes) => onScheduleChange({ openBakeMinutes })}
+                    onChange={(openBakeMinutes) => editSchedule({ openBakeMinutes })}
                   />
                   <NumberField
                     label="Finish bake"
@@ -472,36 +479,41 @@ export function ScheduleBuilderView({
                     min={5}
                     step={5}
                     info={scheduleFieldInfo.finishMinutes}
-                    onChange={(finishMinutes) => onScheduleChange({ finishMinutes })}
+                    onChange={(finishMinutes) => editSchedule({ finishMinutes })}
                   />
                 </div>
               )}
             </form>
           </CollapsibleSection>
-        </CollapsibleSection>
-      </div>
+        </section>
+      ) : null}
 
-      <CollapsibleSection title="Export" defaultOpen={false}>
-        <p className="section-copy schedule-export__copy">
-          Copy your bake schedule or full recipe data to share or back up.
-        </p>
-        <div className="schedule-export__actions">
-          <button
-            type="button"
-            className="wizard-button wizard-button--secondary"
-            disabled={!formula}
-            onClick={() => void copyIngredientList()}
-          >
-            Copy ingredients
-          </button>
-          <button type="button" className="wizard-button wizard-button--secondary" onClick={() => void copyScheduleText()}>
-            Copy schedule
-          </button>
-          <button type="button" className="wizard-button wizard-button--secondary" onClick={() => void copyRecipeJson()}>
-            Copy recipe JSON
-          </button>
-        </div>
-      </CollapsibleSection>
+      <BakePlanTimeline steps={timeline} caption={`Times follow your start time. ${mixAndBakeSentence}`} />
+
+      <div className="schedule-export">
+        <button
+          type="button"
+          className="schedule-export__toggle"
+          aria-expanded={isExportOpen}
+          aria-controls={exportPanelId}
+          onClick={() => setIsExportOpen((current) => !current)}
+        >
+          Export
+        </button>
+        {isExportOpen ? (
+          <div id={exportPanelId} className="schedule-export__actions">
+            <button type="button" className="schedule-export__action" disabled={!formula} onClick={() => void copyIngredientList()}>
+              Copy ingredients
+            </button>
+            <button type="button" className="schedule-export__action" onClick={() => void copyScheduleText()}>
+              Copy schedule
+            </button>
+            <button type="button" className="schedule-export__action" onClick={() => void copyRecipeJson()}>
+              Copy recipe JSON
+            </button>
+          </div>
+        ) : null}
+      </div>
 
       {pendingPreset ? (
         <ConfirmDialog

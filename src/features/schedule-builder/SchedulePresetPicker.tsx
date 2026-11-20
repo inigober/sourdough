@@ -1,37 +1,42 @@
 import { SectionHeading } from '../../components/SectionHeading.tsx';
 import {
+  CUSTOM_PLAN_OPTION,
   SCHEDULE_PRESET_INFO,
-  type SchedulePresetId,
+  type SchedulePlanOptionId,
   type SchedulePresetInfo,
 } from '../../lib/schedule/presets.ts';
 
 type SchedulePresetPickerProps = {
-  /** The preset the current values match, or null when the plan is Custom. */
-  selectedPresetId: SchedulePresetId | null;
-  onSelect: (presetId: SchedulePresetId) => void;
+  /** The selected plan option: one of the presets, or 'custom' (own values, field groups shown). */
+  selectedOptionId: SchedulePlanOptionId;
+  onSelect: (optionId: SchedulePlanOptionId) => void;
   presets?: readonly SchedulePresetInfo[];
+  /** The id of the region the Custom option reveals, so assistive tech can link them. */
+  customPanelId?: string;
 };
 
 export function SchedulePresetPicker({
-  selectedPresetId,
+  selectedOptionId,
   onSelect,
   presets = SCHEDULE_PRESET_INFO,
+  customPanelId,
 }: SchedulePresetPickerProps) {
-  const selectedPreset = presets.find((preset) => preset.id === selectedPresetId);
+  const options = [...presets, CUSTOM_PLAN_OPTION];
+  const selectedOption = options.find((option) => option.id === selectedOptionId) ?? CUSTOM_PLAN_OPTION;
 
   return (
     <section className="card schedule-presets">
       <SectionHeading
         title="Choose a plan"
-        copy="Pick the kind of bake day you want and the timeline below fills itself in. You can fine-tune every step under Customise."
+        copy="Pick the kind of bake day you want and the timeline fills itself in. Choose Custom to fine-tune every step."
       />
       <fieldset className="schedule-presets__group">
         <legend className="visually-hidden">Bake plan</legend>
-        {presets.map((preset) => (
+        {options.map((option) => (
           <label
-            key={preset.id}
+            key={option.id}
             className={
-              preset.id === selectedPresetId
+              option.id === selectedOptionId
                 ? 'schedule-presets__option schedule-presets__option--selected'
                 : 'schedule-presets__option'
             }
@@ -40,18 +45,19 @@ export function SchedulePresetPicker({
               type="radio"
               name="schedule-preset"
               className="schedule-presets__input"
-              checked={preset.id === selectedPresetId}
-              onChange={() => onSelect(preset.id)}
+              checked={option.id === selectedOptionId}
+              aria-controls={option.id === 'custom' ? customPanelId : undefined}
+              onChange={() => onSelect(option.id)}
             />
-            <span className="schedule-presets__label">{preset.label}</span>
-            <span className="schedule-presets__description">{preset.description}</span>
+            <span className="schedule-presets__label">{option.label}</span>
+            <span className="schedule-presets__description">{option.description}</span>
           </label>
         ))}
       </fieldset>
       <p className="schedule-presets__status" role="status">
-        {selectedPreset
-          ? `Current plan: ${selectedPreset.label}.`
-          : 'Current plan: Custom. Your own settings are kept until you pick one of the plans above.'}
+        {selectedOption.id === 'custom'
+          ? 'Current plan: Custom. Your own settings are kept until you pick one of the other plans.'
+          : `Current plan: ${selectedOption.label}.`}
       </p>
     </section>
   );

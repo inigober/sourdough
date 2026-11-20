@@ -66,7 +66,23 @@ test('parseAppRoute maps /recipe/:id to the read-only recipe view', () => {
   assert.equal(parseAppRoute(APP_ROUTES.recipe('abc 123')).recipeViewId, 'abc 123');
 });
 
+test('parseAppRoute maps /saved to the Saved tab and tolerates a trailing slash', () => {
+  const expected = {
+    location: { tab: 'saved', phase: 'wizard' },
+    wizardStep: 'welcome',
+    historyDetailId: null,
+    recipeViewId: null,
+  };
+  assert.equal(APP_ROUTES.saved, '/saved');
+  assert.deepEqual(parseAppRoute('/saved'), expected);
+  assert.deepEqual(parseAppRoute('/saved/'), expected);
+  // /saved has no sub-routes: anything below it is unknown and falls back to Home.
+  assert.equal(isKnownAppPath('/saved/extra'), false);
+  assert.equal(parseAppRoute('/saved/extra').location.tab, 'home');
+});
+
 test('isKnownAppPath accepts canonical routes only', () => {
+  assert.equal(isKnownAppPath('/saved'), true);
   assert.equal(isKnownAppPath('/recipe/abc-123'), true);
   assert.equal(isKnownAppPath('/recipe'), false);
   assert.equal(isKnownAppPath('/'), true);
@@ -97,6 +113,28 @@ test('isBuilderPath recognizes recipe and schedule builder routes', () => {
   assert.equal(isBuilderPath('/'), false);
   assert.equal(isBuilderPath('/bake'), false);
   assert.equal(isBuilderPath('/history'), false);
+  assert.equal(isBuilderPath('/saved'), false);
+});
+
+test('shouldBlockUnsavedNavigation blocks leaving a dirty builder for the Saved tab', () => {
+  assert.equal(
+    shouldBlockUnsavedNavigation({
+      currentPathname: '/build/flour',
+      nextPathname: '/saved',
+      isDirty: true,
+      phase: 'wizard',
+    }),
+    true,
+  );
+  assert.equal(
+    shouldBlockUnsavedNavigation({
+      currentPathname: '/saved',
+      nextPathname: '/recipe/abc',
+      isDirty: false,
+      phase: 'wizard',
+    }),
+    false,
+  );
 });
 
 test('shouldBlockUnsavedNavigation allows in-builder moves but blocks exits', () => {

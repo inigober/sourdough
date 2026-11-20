@@ -126,7 +126,7 @@ The calculator produces (`RecipeFormula`):
 - Per-loaf dough weight
 - Estimated baked loaf weight range (85 to 90% of dough weight)
 
-The summary shows an **Ingredient list** and a **Formula breakdown**:
+The summary shows an **Ingredients** card and a **Formula breakdown**. The card groups the same rows as **Levain** (with the build amounts) and **Added to the dough** (`buildIngredientBreakdown`, which wraps `buildIngredientRows`, so the rules below still hold):
 
 - Ingredient list, single flour: Added flour, Added water, Salt, Levain.
 - Ingredient list, flour blend: one row per flour (its share of the flour added on top of the levain, so the levain's own flour is not counted twice), then Added water, Salt, Levain. The rows add up to the dough weight (within rounding).

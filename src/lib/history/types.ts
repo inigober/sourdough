@@ -31,6 +31,14 @@ export type BakeHistorySession = {
   steps: BakeHistoryStep[];
 };
 
+/**
+ * The few recipe numbers the History list shows to tell bakes apart, copied out of the bake's
+ * recipe snapshot. Every field is optional because older or odd rows may lack them.
+ */
+export type BakeRecipeFacts = Partial<
+  Pick<RecipeInput, 'hydrationPercent' | 'finalDoughWeightGrams' | 'numberOfLoaves' | 'doughFlours'>
+>;
+
 export type BakeHistorySessionSummary = {
   id: string;
   /** Recipe this bake came from; null or absent when it was deleted or never saved. */
@@ -40,6 +48,8 @@ export type BakeHistorySessionSummary = {
   savedAt: string;
   overallAssessment?: BakeSessionAssessment;
   overallNotePreview?: string;
+  /** Hydration, dough weight, loaves and flour blend from the recipe snapshot (see `buildBakeSummaryLine`). */
+  recipeFacts?: BakeRecipeFacts;
   /** Loaf photo in the private `bake-photos` bucket. Absent when the bake has no uploaded photo. */
   photoPath?: string;
 };

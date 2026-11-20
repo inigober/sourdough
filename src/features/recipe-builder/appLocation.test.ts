@@ -33,6 +33,19 @@ test('resolveAppScreen maps welcome tab and history detail', () => {
   );
 });
 
+test('resolveAppScreen maps the Saved tab and keeps the bottom nav on it', () => {
+  assert.deepEqual(
+    resolveAppScreen({ tab: 'saved', phase: 'wizard' }, 'welcome', null),
+    { kind: 'welcome', tab: 'saved' },
+  );
+  // A recipe id wins only on the home tab (recipe view routes parse to home).
+  assert.deepEqual(
+    resolveAppScreen({ tab: 'saved', phase: 'wizard' }, 'welcome', null, 'recipe-1'),
+    { kind: 'welcome', tab: 'saved' },
+  );
+  assert.equal(showWelcomeBottomNav({ kind: 'welcome', tab: 'saved' }), true);
+});
+
 test('resolveAppScreen shows the recipe view for a recipe id on the home tab', () => {
   assert.deepEqual(
     resolveAppScreen({ tab: 'home', phase: 'wizard' }, 'welcome', null, 'recipe-1'),

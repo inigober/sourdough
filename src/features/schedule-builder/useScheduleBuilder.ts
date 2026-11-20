@@ -15,8 +15,10 @@ import {
   findMatchingSchedulePresetId,
   getSchedulePresetChanges,
   getSchedulePresetPatch,
+  getSelectedPlanOptionId,
   hasEditedScheduleValues,
   SCHEDULE_PRESET_INFO,
+  type SchedulePlanOptionId,
   type SchedulePresetId,
 } from '../../lib/schedule/presets.ts';
 import { getColdRetardHours, roundColdRetardHoursUp } from '../../lib/schedule/scheduleTiming.ts';
@@ -53,6 +55,9 @@ export function useScheduleBuilder({
 }: UseScheduleBuilderOptions) {
   const [exportMessage, setExportMessage] = useState<string | null>(null);
   const [pendingPresetId, setPendingPresetId] = useState<SchedulePresetId | null>(null);
+  // True once the baker picked Custom or edited a value. It keeps the field groups on screen even if
+  // the values happen to equal a preset, so the groups never vanish while they are being edited.
+  const [customChosen, setCustomChosen] = useState(false);
 
   const autolyseAdvice = useMemo(() => getAutolyseRecommendation(recipeInput), [recipeInput]);
   const autolyseTimeAdvice = useMemo(() => getAutolyseTimeAdvice(recipeInput), [recipeInput]);
@@ -178,8 +183,20 @@ export function useScheduleBuilder({
     [scheduleInput, recipeInput],
   );
 
+  const selectedOptionId = getSelectedPlanOptionId(matchedPresetId, customChosen);
+
+  /** Every edit made through the Custom field groups goes through here. */
+  const editSchedule = useCallback(
+    (patch: Partial<ScheduleInput>): void => {
+      setCustomChosen(true);
+      onScheduleChange(patch);
+    },
+    [onScheduleChange],
+  );
+
   const applyPreset = useCallback(
     (presetId: SchedulePresetId): void => {
+      setCustomChosen(false);
       onScheduleChange(getSchedulePresetPatch(presetId, recipeInput));
     },
     [onScheduleChange, recipeInput],
@@ -196,6 +213,19 @@ export function useScheduleBuilder({
       setPendingPresetId(presetId);
     },
     [applyPreset, recipeInput, scheduleInput],
+  );
+
+  // Custom only reveals the field groups; it never changes a value.
+  const selectPlanOption = useCallback(
+    (optionId: SchedulePlanOptionId): void => {
+      if (optionId === 'custom') {
+        setCustomChosen(true);
+        return;
+      }
+
+      choosePreset(optionId);
+    },
+    [choosePreset],
   );
 
   const pendingPreset = useMemo(() => {
@@ -221,9 +251,10 @@ export function useScheduleBuilder({
 
   return {
     exportMessage,
-    matchedPresetId,
+    selectedOptionId,
     pendingPreset,
-    choosePreset,
+    selectPlanOption,
+    editSchedule,
     confirmPendingPreset,
     cancelPendingPreset,
     autolyseAdvice,

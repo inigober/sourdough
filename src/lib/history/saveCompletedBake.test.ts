@@ -229,6 +229,27 @@ test('signed in: a failed photo upload still saves the bake and keeps the photo 
   assert.deepEqual(await photoStore.keys(), ['remote-bake']);
 });
 
+test('saving a bake with a photo also uploads a thumbnail of it', async () => {
+  const thumbnail = new Blob(['tiny'], { type: 'image/jpeg' });
+  const uploads: Array<Blob | null> = [];
+
+  await saveCompletedBake({
+    session: buildSession(),
+    input: { note: '' },
+    userId: 'user-1',
+    storage: new MemoryStorage(),
+    photo,
+    photoStore: createMemoryBakePhotoStore(),
+    createRemote: async () => ({ id: 'remote-bake' }) as BakeHistorySession,
+    uploadRemotePhoto: async (_userId, _bakeId, _photo, uploadedThumbnail) => {
+      uploads.push(uploadedThumbnail);
+    },
+    makeThumbnail: async () => thumbnail,
+  });
+
+  assert.deepEqual(uploads, [thumbnail]);
+});
+
 test('a photo that cannot be stored anywhere is reported as lost, not thrown', async () => {
   const photoStore = createMemoryBakePhotoStore();
   photoStore.put = async () => {

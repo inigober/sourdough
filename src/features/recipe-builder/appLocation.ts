@@ -10,6 +10,7 @@ export type AppLocation = {
 
 export type AppScreen =
   | { kind: 'welcome'; tab: 'home' }
+  | { kind: 'welcome'; tab: 'saved' }
   | { kind: 'welcome'; tab: 'history'; historyId: string | null }
   | { kind: 'recipe'; recipeId: string }
   | { kind: 'wizard'; step: InputWizardStep }
@@ -44,6 +45,10 @@ export function resolveAppScreen(
       return { kind: 'welcome', tab: 'history', historyId: historyDetailId };
     }
 
+    if (location.tab === 'saved') {
+      return { kind: 'welcome', tab: 'saved' };
+    }
+
     return { kind: 'welcome', tab: 'home' };
   }
 
@@ -55,7 +60,7 @@ export function resolveAppScreen(
 }
 
 export function showWelcomeBottomNav(screen: AppScreen): boolean {
-  return screen.kind === 'welcome' && (screen.tab === 'home' || screen.historyId === null);
+  return screen.kind === 'welcome' && (screen.tab !== 'history' || screen.historyId === null);
 }
 
 export function showHomeButton(location: AppLocation, currentStep: RecipeBuilderStep): boolean {

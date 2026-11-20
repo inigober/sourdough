@@ -34,6 +34,7 @@ import {
   isTimedStepRunning,
   shouldConfirmEarlyStart,
 } from '../../lib/companion/liveSchedule.ts';
+import { getStepAmounts, getStepDetailWithoutAmounts } from '../../lib/companion/stepAmounts.ts';
 import { getStepScheduleEdit } from '../../lib/companion/stepScheduleEdits.ts';
 import { finalizeBakeSessionForHistory } from '../../lib/history/buildBakeHistorySteps.ts';
 import type { BakeSession } from '../../lib/companion/types.ts';
@@ -44,6 +45,7 @@ import { getCoachTopicForStepId } from '../../lib/companion/coachTopics.ts';
 import type { ScheduleInput } from '../../lib/schedule/types.ts';
 import { BakeCompleteDialog, type BakeCompleteSaveInput } from './BakeCompleteDialog.tsx';
 import { CompanionCoachPanel } from './CompanionCoachPanel.tsx';
+import { CompanionStepAmounts } from './CompanionStepAmounts.tsx';
 import { CompanionStepEditDialog } from './CompanionStepEditDialog.tsx';
 import { CompanionBakeTimerPermissionNotice } from './CompanionBakeTimerPermissionNotice.tsx';
 import {
@@ -123,6 +125,12 @@ export function CompanionView({
   const stepIsRunning = isTimedStepRunning(session);
   const stepCanStart = currentStep ? canStartTimedStep(session, currentStep) : false;
   const coachTopic = currentStep ? getCoachTopicForStepId(currentStep.id) : null;
+  const currentStepAmounts = currentStep
+    ? getStepAmounts(currentStep.id, session.recipeInput, session.scheduleInput)
+    : null;
+  const currentStepDetail = currentStep
+    ? getStepDetailWithoutAmounts(currentStep, currentStepAmounts !== null)
+    : undefined;
   const currentStepTimes = currentStep ? getDisplayStepTimes(session, currentStep) : null;
   const currentStepStartsInMinutes =
     currentStep && !stepIsRunning ? getMinutesUntilStep(session, currentStep, clockNow) : 0;
@@ -381,7 +389,11 @@ export function CompanionView({
         {currentStepStartsInMinutes > 0 ? (
           <p className="companion__starts-in">Starts in {formatDurationMinutes(currentStepStartsInMinutes)}</p>
         ) : null}
-        {currentStep.detail ? <p className="companion__step-detail">{currentStep.detail}</p> : null}
+        {currentStepDetail ? <p className="companion__step-detail">{currentStepDetail}</p> : null}
+        {currentStepAmounts ? (
+          // key: collapsed again on every new step
+          <CompanionStepAmounts key={currentStep.id} amounts={currentStepAmounts} />
+        ) : null}
 
         {stepCanStart || (canEditStep && !stepIsRunning) ? (
           <div className="companion__step-controls">

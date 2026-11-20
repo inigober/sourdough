@@ -148,6 +148,9 @@ Light and dark ratios were checked with a throwaway script over the main text/su
 | Secondary actions visually lighter (e.g. Back). | Reduces competition with Continue. |
 | Cards group related content; avoid nested cards without purpose. | Scannable layout on small screens. |
 | Collapse advanced or secondary detail on results (e.g. formula breakdown) when it supports scanning. | Summary first, detail on demand. |
+| Wizard footer: buttons share one height and equal columns; the primary action is Continue, or Save when editing from the summary (Continue becomes secondary). | Three equally loud buttons made the bar clunky. |
+| A sticky footer must be the sticky element itself, not a child of a wrapper that is only as tall as the footer. | A sticky child cannot leave its parent's box, so it scrolled away with the page. |
+| Wizard step titles are questions, not derived values; live summaries sit in a labelled line inside the step. | Consistent steps; derived data in a heading reads as noise. |
 
 ---
 
@@ -174,3 +177,4 @@ Add a line here when a practice is added or changed after a product discussion.
 - 2026-05-20: Removed header preview chips; live previews belong in step content with labels.
 - 2026-11-19: Forms never silently clamp or revert typed numbers; messages show on blur.
 - 2026-11-19: Accessibility pass: full dark theme following the system setting; text contrast at least 4.5:1; 44px hit areas; labelled Back/Continue; steppers are − value + in one row; reduced motion honoured.
+- 2026-11-20: Sticky footer fix (wrap is the sticky element); wizard footer has one primary action and equal buttons; flour step title is a question; assessment collapsed to a one-line verdict with a disclosure.

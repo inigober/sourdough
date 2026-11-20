@@ -14,3 +14,16 @@ export const BAKE_PHOTO_SIGNED_URL_SECONDS = 3600;
 export function buildBakePhotoPath(userId: string, bakeId: string): string {
   return `${userId}/${bakeId}.jpg`;
 }
+
+/**
+ * Where a bake's small list thumbnail lives: `<user_id>/<bake_id>_thumb.jpg`, in the same folder
+ * as the photo, so the same folder-based storage policies cover it (no extra migration).
+ */
+export function buildBakePhotoThumbnailPath(userId: string, bakeId: string): string {
+  return `${userId}/${bakeId}_thumb.jpg`;
+}
+
+/** The thumbnail path that goes with a stored photo path (`<id>.jpg` -> `<id>_thumb.jpg`). */
+export function getBakePhotoThumbnailPath(photoPath: string): string {
+  return `${photoPath.replace(/\.jpg$/i, '')}_thumb.jpg`;
+}

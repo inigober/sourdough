@@ -27,10 +27,15 @@ test('flour percent control keeps digits separate from the external suffix', () 
   assert.match(stylesCss, /\.flour-percent-stepper\s*\{[^}]*display:\s*flex/s);
 });
 
-test('wizard save control stays compact with icon and label', () => {
-  assert.match(stylesCss, /\.wizard-nav__save\s*\{[^}]*display:\s*inline-flex/s);
-  assert.match(stylesCss, /\.wizard-nav__save\s*\{[^}]*width:\s*auto/s);
-  assert.match(stylesCss, /\.wizard-nav__save\s*\{[^}]*padding:\s*10px 14px/s);
+test('wizard footer buttons share equal columns and one height; Save takes its own row on narrow screens', () => {
+  assert.match(stylesCss, /\.wizard-nav--steps\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s);
+  assert.match(stylesCss, /\.wizard-nav--steps \.wizard-button\s*\{[^}]*min-height:\s*48px/s);
+  assert.match(stylesCss, /\.wizard-nav--has-save \.wizard-nav__save\s*\{[^}]*grid-column:\s*1 \/ -1/s);
+});
+
+test('the sticky footer wrap is the sticky element, so it can stick', () => {
+  assert.match(stylesCss, /\.page-shell__footer-wrap\s*\{[^}]*position:\s*sticky/s);
+  assert.match(stylesCss, /\.page-shell__footer-wrap > \.page-shell__footer\s*\{[^}]*position:\s*static/s);
 });
 
 test('timeline rows use a fixed-width time column so step names align across days', () => {
